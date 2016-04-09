@@ -4,7 +4,7 @@ QExt is meant as an add-on to Qt without external dependencies, save for option 
 ## Features
 QExt exposes and maintains functionality (classes and functions) that are "private" in Qt. The canonical example of a private class made public is QVarLengthArray. QExt implements and supports similar types of useful classes that are hidden in Qt or emulates their functionality.
 
-QExt also makes Qt-style development easier, such as the use of the d-ptr (also known as the compiler firewall), including inheriting a parent class's d-ptr. C++14 is now supported by VS, gcc, and Clang, so it is used throughout the library to speed, ease, and simplify development.
+QExt also makes Qt-style development easier, such as the use of the d-ptr (also known as the compiler firewall), including private class inheritance. C++14 is now supported by VS, gcc, and Clang, so it is used throughout the library to speed, ease, and simplify development.
 
 Optional components of QExt include a rich library of widgets (QeWidgets), a ribbon toolkit (QeRibbon), and Windows/COM integration (QeWindows).
 
