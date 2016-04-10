@@ -11,6 +11,12 @@ Optional components of QExt include a rich library of widgets (QeWidgets), a rib
 ## Status
 QExt is currently highly unstable (pre-alpha) and subject to change, including API changes and removal.
 
+### Module status
+- QeCore: d-ptr and static classes implemented
+- QeWidgets: some widgets need cleanup and polish, documentation
+- QeRibbon: incomplete
+- QeWindows: incomplete
+
 ## License
 QExt is released under the LGPLv3.
 
