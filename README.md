@@ -19,7 +19,7 @@ QExt is currently highly unstable (pre-alpha) and subject to change, including A
 - QeUniquePointer: in progress
 
 ### QeWidgets
-Some widgets need cleanup, Polish, and documentation
+Some widgets need cleanup, polish, and documentation
 
 ### QeRibbon
 - Design decisions need to be made
@@ -38,4 +38,4 @@ QExt is released under the GPLv3.
 We're not quite there yet. Let me put some code up first.
 
 ### Style
-QExt is written in the Qt development style, which is (circularly) dependant upon the KDE style.
+QExt is written in the Qt development style, which is (circularly) dependant upon the KDE style. Deviations will be noted here if/when they occur.
