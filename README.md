@@ -13,14 +13,26 @@ Optional components of QExt include a rich library of widgets (QeWidgets), a rib
 ## Status
 QExt is currently highly unstable (pre-alpha) and subject to change, including API changes and wholesale renaming/removal/replacement of classes and functions.
 
-### Module status
-- QeCore: d-ptr and static classes implemented
-- QeWidgets: some widgets need cleanup and polish, documentation
-- QeRibbon: incomplete
-- QeWindows: incomplete
+### QeCore
+- Public and private classes: done
+- D-ptr and q-ptr, `auto` semantics: done
+- QeUniquePointer: in progress
+
+### QeWidgets
+Some widgets need cleanup, Polish, and documentation
+
+### QeRibbon
+- Design decisions need to be made
+- Some basic classes complete
+- Emulation of Windows `SplitButton` control needs rewrite
+- `QeRibbonGroupLayout` needs implementation 
+
+### QeWindows
+- Numerous low-level functions done
+- COM smart pointers need to be used everywhere 
 
 ## License
-QExt is released under the LGPLv3.
+QExt is released under the GPLv3.
 
 ## Contributing
 We're not quite there yet. Let me put some code up first.
