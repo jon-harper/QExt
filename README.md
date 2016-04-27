@@ -2,17 +2,16 @@
 ## Purpose
 QExt is an add-on library for Qt developers with limited dependencies. The aims of QExt in a nutshell are:
  - Ease C++11/14 use with Qt
- - Expose useful Qt functionality that is currently private
  - Limit "rolling-your-own"
- - Extend Qt in a familiar Qt-style
+ - Extend Qt's capabilities in common scenarios
 
 ## Goals
- 1. Modularity
- 2. Minimal dependencies
- 3. Seamless integration with Qt
- 4. Sensible use of C++11/14
- 5. Reasonable speed and memory effeciency
- 6. Excellent documentation
+ - Modularity
+ - Minimal dependencies
+ - Seamless integration with Qt
+ - Sensible use of C++11/14
+ - Reasonable speed and memory effeciency
+ - Excellent documentation
 
 ## Features
 QExt exposes and maintains functionality that is "private" in Qt. The canonical example of a private class later made public is QVarLengthArray. QExt re-implements and supports similar types of useful classes that are hidden in Qt or emulates their functionality.
@@ -33,9 +32,9 @@ Optional components of QExt include a rich library of widgets (QeWidgets), a rib
 QExt is currently highly unstable (pre-alpha) and subject to change, including API changes and wholesale renaming/removal/replacement of classes and functions.
 
 ### QeCore
-- Public and private classes: done
+- Public and private base classes: done
 - D-ptr and q-ptr, `auto` semantics: done
-- `QeUniquePointer`: nearly complete
+- `QeUniquePointer`: nearly complete, needs code review
 
 ### QeWidgets
 - Some widgets need cleanup, polish, and documentation
