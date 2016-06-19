@@ -22,7 +22,8 @@ C++14 is now supported by VS, gcc, and Clang, so it is used throughout the libra
 
     void MyPublicClass::setFoo(const Foo &f)
     {
-       Q_DPTR;
+       //Q_D(MyPublicClass); <--Not needed
+       Q_DPTR; //This works instead
        d->foo = f;
     }
 
