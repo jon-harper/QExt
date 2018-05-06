@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QEDEBUGUTIL_H
-#define QEDEBUGUTIL_H
+#pragma once
 
 #include <qecore/global.h>
 
 #include <QString>
 #include <QVariant>
 
-namespace QeStringTools
+namespace qe
 {
     QString fromVariant(const QVariant &var);
 
