@@ -5,7 +5,7 @@
 #include <QScopedPointerDeleter>
 
 template <class T, class Cleanup = QScopedPointerDeleter<T>>
-class QeUniquePointer : public Pointer_Impl<T, Cleanup>
+class QeUniquePointer : public qe::detail::Pointer_Impl<T, Cleanup>
 {
 public:
    //! Default constructor.

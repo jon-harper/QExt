@@ -3,6 +3,9 @@
 
 #include <type_traits>
 
+namespace qe {
+namespace detail {
+
 template <class T, class Cleanup>
 class Pointer_Impl
 {
@@ -22,6 +25,7 @@ public:
         return ret;
     }
 
+    //! Sets the stored pointer to `nullptr` and destroys its old data.
     void reset()
     {
         auto oldD = take();
@@ -66,12 +70,16 @@ public:
     pointer release() noexcept              { return take(); }
 
 protected:
-    pointer d;
-
     //! Default construction
     Pointer_Impl() noexcept : d(nullptr) {}
     Pointer_Impl(pointer p) noexcept : d(p) {}
     ~Pointer_Impl() {}
+
+private:
+    pointer d;
 };
+
+} //namespace detail
+} //namespace qe
 
 #endif // POINTER_H

@@ -3,6 +3,7 @@ QT += core
 TARGET = qecore
 TEMPLATE = lib
 CONFIG += shared
+CONFIG += C++14
 
 DEFINES += QE_BUILD_CORE
 
