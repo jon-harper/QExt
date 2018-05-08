@@ -27,9 +27,10 @@ class Pointer_Impl
 {
 public:
     //! For STL compatibility.
+    using value_type = T;
+    //! For STL compatibility.
     using pointer = std::add_pointer_t<T>;
     //! For STL compatibility.
-    using element_type = T;
     using reference = std::add_lvalue_reference_t<T>;
     using deleter = Cleanup;
 
@@ -54,14 +55,13 @@ public:
     {
         if (data() == other)
             return;
-        auto oldD = data();
+        reset();
         this->d = other;
-        if (oldD)
-            deleter::cleanup(oldD);
+
     }
 
     //! Returns the stored interface pointer.
-    pointer data() const noexcept           { return isNull() ? nullptr : this->d; }
+    pointer data() const noexcept           { return this->d; }
 
     //! For STL compatibility. Calls \ref data.
     pointer get() const noexcept            { return data(); }
@@ -73,10 +73,10 @@ public:
     bool operator!() const noexcept         { return isNull(); }
 
     //! Dereferences the stored pointer.
-    reference operator*() const             { return *(data()); }
+    reference operator*() const             { return *(this->d); }
 
     //! Returns the stored pointer, allowing pointer-to-member semantics.
-    pointer operator->() const noexcept     { return data(); }
+    pointer operator->() const noexcept     { return this->d; }
 
     //! Returns if the stored pointer is null or not.
     bool isNull() const noexcept            { return (this->d == nullptr); }

@@ -19,13 +19,15 @@
 
 #include "pointer.h"
 #include <QScopedPointerDeleter>
+#include <cstddef>
 
 template <class T, class Cleanup = QScopedPointerDeleter<T>>
 class QeUniquePointer : public qe::detail::Pointer_Impl<T, Cleanup>
 {
 public:
-   //! Default constructor.
+    //! Default constructor.
     inline QeUniquePointer(T *p = nullptr) : Pointer_Impl(p) {}
+    //! Move constructor
     inline QeUniquePointer(QeUniquePointer && rhs)  : Pointer_Impl(rhs.take()) { }
 
     //! Move assignment operator.
@@ -66,6 +68,18 @@ inline bool operator==(const QeUniquePointer<T, Cleanup> &lhs, const QeUniquePoi
     return lhs.data() == rhs.data();
 }
 
+template<class T, class Cleanup>
+inline bool operator ==(const QeUniquePointer<T, Cleanup> &lhs, std::nullptr_t rhs)
+{
+    return lhs.data() == rhs;
+}
+
+template<class T, class Cleanup>
+inline bool operator ==(std::nullptr_t lhs, const QeUniquePointer<T, Cleanup> &rhs)
+{
+    return lhs == rhs.data();
+}
+
 /*!
   Returns true if \a lhs and \a rhs do *not* manage the same pointer.
   \relates UniquePointer
@@ -73,7 +87,19 @@ inline bool operator==(const QeUniquePointer<T, Cleanup> &lhs, const QeUniquePoi
 template <class T, class Cleanup>
 inline bool operator!=(const QeUniquePointer<T, Cleanup> &lhs, const QeUniquePointer<T, Cleanup> &rhs)
 {
-    return !(lhs == rhs);
+    return !(lhs.data() == rhs.data());
+}
+
+template <class T, class Cleanup>
+inline bool operator !=(const QeUniquePointer<T, Cleanup> &lhs, std::nullptr_t rhs)
+{
+    return !(lhs.data() == rhs);
+}
+
+template <class T, class Cleanup>
+inline bool operator !=(std::nullptr_t lhs, const QeUniquePointer<T, Cleanup> &rhs)
+{
+    return !(lhs == rhs.data());
 }
 
 namespace std {

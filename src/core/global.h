@@ -53,16 +53,18 @@
 /*!
     \brief Defines a class as static.
 
-    It is recommended that you declare `private:` ahead for clearer code.
+    Note: This macro ends with `public:`
 
     Static classes may not have non-static member functions and cannot be instantiated.
     A static class is often useful as a drop-in replacement for namespaces with
     QMetaObject support. Use in conjunction with the Q_GADGET macro to use Q_ENUM, Q_FLAG, etc.
   */
 #define QE_STATIC_CLASS(Classname) \
+    private: \
         Classname () = delete; \
         Classname (const Classname &) = delete; \
         Classname ( Classname && ) = delete; \
+    public:
 
 /*!
     \brief Shorthand for QStringLiteral.

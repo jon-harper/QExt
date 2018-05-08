@@ -150,8 +150,8 @@ QePrivateBase::~QePrivateBase()
 */
 
 //! Constructs a new object with \a dd as the source for the d-ptr.
-QePublicBase::QePublicBase(QePrivateBase *dd)
-    : qed_ptr(dd)
+QePublicBase::QePublicBase(QePrivateBase &dd)
+    : qed_ptr(&dd)
 {
 }
 

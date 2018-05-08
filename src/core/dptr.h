@@ -57,7 +57,7 @@ protected:
 class QE_CORE_EXPORT QePublicBase
 {
 public:
-    explicit QePublicBase(QePrivateBase *dd);
+    explicit QePublicBase(QePrivateBase &dd);
     virtual ~QePublicBase();
 
 protected:

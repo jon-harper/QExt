@@ -9,8 +9,6 @@ DEFINES += QE_BUILD_CORE
 
 HEADERS += \
 	$$PWD/global.h \
-	$$PWD/private.h \
-	$$PWD/laptimer.h \
 	$$PWD/debugutil.h \
 	$$PWD/uniquepointer.h \
     $$PWD/pointer.h \
