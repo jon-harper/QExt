@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef QE_CORE_DEBUGUTIL_H
+#define QE_CORE_DEBUGUTIL_H
 
 #include <qecore/global.h>
 
@@ -35,4 +36,4 @@ namespace qe
     QString toHex(const quint8 value)  { return QString::number(uint(value), 16); }
     QString toHex(const qint8 value)   { return QString::number(int(value), 16); }
 };
-#endif // QEDEBUGUTIL_H
+#endif // QE_CORE_DEBUGUTIL_H

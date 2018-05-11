@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef QE_CORE_DPTR_H
+#define QE_CORE_DPTR_H
 
 #include <QObject>
 #include <QScopedPointer>
@@ -63,3 +64,5 @@ public:
 protected:
     QScopedPointer<QePrivateBase> qed_ptr;
 };
+
+#endif //QE_CORE_DPTR_H

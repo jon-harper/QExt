@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef QE_CORE_POINTER_H
+#define QE_CORE_POINTER_H
 
 #include <type_traits>
 
@@ -98,3 +99,4 @@ private:
 } //namespace detail
 } //namespace qe
 
+#endif //QE_CORE_POINTER_H

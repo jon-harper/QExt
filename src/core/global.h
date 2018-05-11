@@ -20,7 +20,8 @@
  \ingroup module_core
  \brief Defines global macros.
 */
-#pragma once
+#ifndef QE_CORE_GLOBAL_H
+#define QE_CORE_GLOBAL_H
 
 #define QE_VERSION_STR   "0.1.1"
 #define QE_VERSION 0x000101
@@ -70,3 +71,5 @@
     \brief Shorthand for QStringLiteral.
 */
 #define QStrLit QStringLiteral
+
+#endif //QE_CORE_GLOBAL_H

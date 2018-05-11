@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#ifndef QE_CORE_UNIQUEPOINTER_H
+#define QE_CORE_UNIQUEPOINTER_H
 
 #include "pointer.h"
 #include <QScopedPointerDeleter>
@@ -113,3 +114,5 @@ namespace std {
         p1.swap(p2);
     }
 }
+
+#endif //QE_CORE_UNIQUEPOINTER_H
