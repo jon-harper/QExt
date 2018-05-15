@@ -18,21 +18,33 @@
 #ifndef QE_CORE_UNIQUEPOINTER_H
 #define QE_CORE_UNIQUEPOINTER_H
 
-#include "pointer.h"
-#include <QScopedPointerDeleter>
 #include <cstddef>
+#include <QScopedPointerDeleter>
 
-template <class T, class Cleanup = QScopedPointerDeleter<T>>
-class QeUniquePointer : public qe::detail::Pointer_Impl<T, Cleanup>
+#include "pointer.h"
+
+namespace qe {
+
+template <class T, class Cleanup = ::QScopedPointerDeleter<T>>
+class UniquePointer : public detail::Pointer_Impl<T, Cleanup>
 {
 public:
+    using parent = detail::Pointer_Impl<T, Cleanup>;
+    using pointer = typename parent::pointer;
+
     //! Default constructor.
-    inline QeUniquePointer(T *p = nullptr) : Pointer_Impl(p) {}
+    inline UniquePointer(pointer p = nullptr) : parent(p) {}
     //! Move constructor
-    inline QeUniquePointer(QeUniquePointer && rhs)  : Pointer_Impl(rhs.take()) { }
+    inline UniquePointer(UniquePointer && rhs)  : parent(rhs.take()) { }
+
+    //! Destructor. Calls `reset()`.
+    inline ~UniquePointer()
+    {
+        reset();
+    }
 
     //! Move assignment operator.
-    inline QeUniquePointer &operator=(QeUniquePointer &&rhs)
+    inline UniquePointer &operator=(UniquePointer &&rhs)
     {
         if (*this != rhs)
             reset(rhs.take());
@@ -40,45 +52,43 @@ public:
     }
 
     //! Disables copying.
-    QeUniquePointer(const QeUniquePointer &) = delete;
+    UniquePointer(const UniquePointer &) = delete;
     //! Disables copy assignment.
-    QeUniquePointer &operator=(const QeUniquePointer &) = delete;
-
-    //! The destructor checks if the stored pointer is valid, and destroys it if necessary.
-    inline ~QeUniquePointer()
-    {
-        reset();
-    }
+    UniquePointer &operator=(const UniquePointer &) = delete;
 
 };
 
 //! Uses forwarding to construct an instance of UniquePointer.
 template <class T, class... Args>
-QeUniquePointer<T> qeMakeUnique(Args &&... args)
+UniquePointer<T> makeUnique(Args &&... args)
 {
-    return new T(std::forward<Args>(args)...);
+    return UniquePointer<T>(new T(std::forward<Args>(args)...));
 }
+
+} //namespace qe
 
 /*!
   Returns true if \a lhs and \a rhs manage the same pointer.
   \relates UniquePointer
  */
 template <class T, class Cleanup>
-inline bool operator==(const QeUniquePointer<T, Cleanup> &lhs, const QeUniquePointer<T, Cleanup> &rhs)
+inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
     return lhs.data() == rhs.data();
 }
 
+//! \overload
 template<class T, class Cleanup>
-inline bool operator ==(const QeUniquePointer<T, Cleanup> &lhs, std::nullptr_t rhs)
+inline bool operator ==(const qe::UniquePointer<T, Cleanup> &lhs, std::nullptr_t) noexcept
 {
-    return lhs.data() == rhs;
+    return lhs.isNull();
 }
 
+//! \overload
 template<class T, class Cleanup>
-inline bool operator ==(std::nullptr_t lhs, const QeUniquePointer<T, Cleanup> &rhs)
+inline bool operator ==(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
-    return lhs == rhs.data();
+    return rhs.isNull();
 }
 
 /*!
@@ -86,33 +96,35 @@ inline bool operator ==(std::nullptr_t lhs, const QeUniquePointer<T, Cleanup> &r
   \relates UniquePointer
  */
 template <class T, class Cleanup>
-inline bool operator!=(const QeUniquePointer<T, Cleanup> &lhs, const QeUniquePointer<T, Cleanup> &rhs)
+inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
-    return !(lhs.data() == rhs.data());
+    return lhs.data() != rhs.data();
 }
 
+//! \overload
 template <class T, class Cleanup>
-inline bool operator !=(const QeUniquePointer<T, Cleanup> &lhs, std::nullptr_t rhs)
+inline bool operator !=(const qe::UniquePointer<T, Cleanup> &lhs, std::nullptr_t) noexcept
 {
-    return !(lhs.data() == rhs);
+    return !lhs.data();
 }
 
+//! \overload
 template <class T, class Cleanup>
-inline bool operator !=(std::nullptr_t lhs, const QeUniquePointer<T, Cleanup> &rhs)
+inline bool operator !=(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
-    return !(lhs == rhs.data());
+    return !rhs.data();
 }
+
 
 namespace std {
-/*!
-  Specialization of `std::swap` for UniquePointer.
+/*! Partial specialization of `std::swap` for UniquePointer.
   \relates UniquePointer
  */
     template <class T, class Cleanup>
-    inline void swap(QeUniquePointer<T, Cleanup> &p1, QeUniquePointer<T, Cleanup> &p2)
+    inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanup> &rhs) noexcept
     {
-        p1.swap(p2);
+        lhs.swap(rhs);
     }
-}
+} //namespace std
 
 #endif //QE_CORE_UNIQUEPOINTER_H

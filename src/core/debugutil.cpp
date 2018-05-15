@@ -7,7 +7,7 @@
 #include <QRegion>
 #include <QRect>
 
-QString QeStringTools::fromVariant(const QVariant &var)
+QString qe::fromVariant(const QVariant &var)
 {
     QString ret;
     switch(var.type()) {
@@ -67,6 +67,7 @@ QString QeStringTools::fromVariant(const QVariant &var)
     }
     case QMetaType::QUuid:
         ret = var.value<QUuid>().toString();
+        break;
     default:
         break;
     }

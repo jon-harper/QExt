@@ -27,36 +27,34 @@ template <class T, class Cleanup>
 class Pointer_Impl
 {
 public:
-    //! For STL compatibility.
+    //! For Boost/STL compatibility.
     using value_type = T;
-    //! For STL compatibility.
+    //! For Boost/STL compatibility.
     using pointer = std::add_pointer_t<T>;
-    //! For STL compatibility.
+    //! For Boost/STL compatibility.
+    using const_pointer = std::add_const_t<pointer>;
+    //! For Boost/STL compatibility.
     using reference = std::add_lvalue_reference_t<T>;
+    //! For Boost/STL compatibility.
+    using const_reference = std::add_const_t<reference>;
     using deleter = Cleanup;
 
     //! Sets the stored pointer to `nullptr` and returns its old value.
     pointer take() noexcept
     {
-        auto ret = data();
+        auto oldD = data();
         this->d = nullptr;
-        return ret;
-    }
-
-    //! Sets the stored pointer to `nullptr` and destroys its old data.
-    void reset()
-    {
-        auto oldD = take();
-        if (oldD)
-            deleter::cleanup(oldD);
+        return oldD;
     }
 
     //! Sets the stored pointer to `other` and destroys the old pointer.
-    void reset(pointer other)
+    void reset(pointer other = nullptr)
     {
         if (data() == other)
             return;
-        reset();
+        auto oldD = this->d;
+        if (oldD)
+            deleter::cleanup(oldD);
         this->d = other;
 
     }
@@ -65,32 +63,34 @@ public:
     pointer data() const noexcept           { return this->d; }
 
     //! For STL compatibility. Calls \ref data.
-    pointer get() const noexcept            { return data(); }
+    pointer get() const noexcept            { return this->d; }
 
-    //! Returns true if the stored pointer is valid.
+    //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept { return !isNull(); }
 
     //! Returns true if the stored pointer is `nullptr`.
     bool operator!() const noexcept         { return isNull(); }
 
     //! Dereferences the stored pointer.
-    reference operator*() const             { return *(this->d); }
+    reference operator*() const noexcept    { return *(this->d); }
 
     //! Returns the stored pointer, allowing pointer-to-member semantics.
     pointer operator->() const noexcept     { return this->d; }
 
     //! Returns if the stored pointer is null or not.
-    bool isNull() const noexcept            { return (this->d == nullptr); }
+    bool isNull() const noexcept            { return !(this->d); }
 
-    void swap(Pointer_Impl &other) noexcept { std::swap(this->d, other.d); }
+    void swap(Pointer_Impl<T, Cleanup> &other) noexcept { std::swap(this->d, other.d); }
     //! For STL compatibility. Equivalent to \ref take.
     pointer release() noexcept              { return take(); }
 
 protected:
-    //! Default construction
-    Pointer_Impl() noexcept : d(nullptr) {}
-    Pointer_Impl(pointer p) noexcept : d(p) {}
-    ~Pointer_Impl() {}
+    Pointer_Impl(pointer p = nullptr) noexcept : d(p) {}
+    //! The destructor checks if the stored pointer is valid, and destroys it if necessary.
+    inline ~Pointer_Impl()
+    {
+        reset(nullptr);
+    }
 
 private:
     pointer d;
