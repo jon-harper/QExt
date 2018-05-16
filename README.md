@@ -33,7 +33,7 @@ C++14 is used throughout the library to speed, ease, and simplify development. O
 	
 	}
 
-Another feature of QExt is the "moveable QScopedPointer", implemented as qe::UniquePointer. It's essentially QScopedPointer with move semantics and uses Qt's own QScopedPointerDeleter by default, like QScopedPointer. However, it was designed with modern C++ in mind and written from the ground up with both Standard Library-style and Qt-style accessors (e.g. `get()` and `data()` are synonymous).
+Another feature of QExt is the "moveable `QScopedPointer`", implemented as `qe::UniquePointer`. It's essentially `QScopedPointer` with move semantics and uses Qt's own `QScopedPointerDeleter` by default, like `QScopedPointer`. However, it was designed with modern C++ in mind and written from the ground up with both Standard Library-style and Qt-style accessors (e.g. `get()` and `data()` are synonymous).
 	
 Eventual plans for QExt include a library of useful widgets (QeWidgets) and Windows/COM tools (QeWindows).
 
