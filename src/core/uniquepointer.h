@@ -24,7 +24,8 @@
 #include "pointer.h"
 
 namespace qe {
-
+/*! A moveable version of QScopedPointer.
+  */
 template <class T, class Cleanup = ::QScopedPointerDeleter<T>>
 class UniquePointer : public detail::Pointer_Impl<T, Cleanup>
 {
@@ -69,7 +70,7 @@ UniquePointer<T> makeUnique(Args &&... args)
 
 /*!
   Returns true if \a lhs and \a rhs manage the same pointer.
-  \relates UniquePointer
+  \relates qe::UniquePointer
  */
 template <class T, class Cleanup>
 inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
@@ -93,7 +94,7 @@ inline bool operator ==(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs
 
 /*!
   Returns true if \a lhs and \a rhs do *not* manage the same pointer.
-  \relates UniquePointer
+  \relates qe::UniquePointer
  */
 template <class T, class Cleanup>
 inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
@@ -115,10 +116,9 @@ inline bool operator !=(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs
     return !rhs.data();
 }
 
-
 namespace std {
 /*! Partial specialization of `std::swap` for UniquePointer.
-  \relates UniquePointer
+  \relates qe::UniquePointer
  */
     template <class T, class Cleanup>
     inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanup> &rhs) noexcept
@@ -126,5 +126,11 @@ namespace std {
         lhs.swap(rhs);
     }
 } //namespace std
+
+#ifndef QEXT_NO_CLUTTER
+template <class T, class Cleanup = ::QScopedPointerDeleter<T>>
+using QeUniquePointer = qe::UniquePointer<T, Cleanup>;
+
+#endif
 
 #endif //QE_CORE_UNIQUEPOINTER_H

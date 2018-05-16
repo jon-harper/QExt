@@ -30,6 +30,7 @@
     <allmemberslink visible="yes"/>
     <memberdecl>
       <properties title="Properties"/>
+	  <publictypes title=""/>
 	  <constructors title="Constructors"/>
 	  <publicmethods title=""/>
 	  <publicslots title=""/>
@@ -56,7 +57,6 @@
       <privateattributes visible="no" title=""/>
       <privatestaticattributes visible="no" title=""/>
       <related title="" subtitle=""/>
-	  <publictypes title=""/>
 	  <nestedclasses visible="yes" title=""/>
       <membergroups visible="yes" title=""/>
     </memberdecl>

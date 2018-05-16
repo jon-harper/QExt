@@ -23,6 +23,13 @@
 namespace qe {
 namespace detail {
 
+/*!
+    \class qe::detail::Pointer_Impl
+    \ingroup qecore
+    \brief Implements general smart pointer functions and operators.
+
+    All QExt smart pointers derive from this base class.
+*/
 template <class T, class Cleanup>
 class Pointer_Impl
 {
@@ -50,7 +57,7 @@ public:
     //! Sets the stored pointer to `other` and destroys the old pointer.
     void reset(pointer other = nullptr)
     {
-        if (data() == other)
+        if (this->d == other)
             return;
         auto oldD = this->d;
         if (oldD)
@@ -64,6 +71,9 @@ public:
 
     //! For STL compatibility. Calls \ref data.
     pointer get() const noexcept            { return this->d; }
+
+    //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
+    inline pointer * addressOf() const noexcept { return &(this->d); }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept { return !isNull(); }
@@ -80,11 +90,14 @@ public:
     //! Returns if the stored pointer is null or not.
     bool isNull() const noexcept            { return !(this->d); }
 
+    //! Swaps two instances.
     void swap(Pointer_Impl<T, Cleanup> &other) noexcept { std::swap(this->d, other.d); }
+
     //! For STL compatibility. Equivalent to \ref take.
     pointer release() noexcept              { return take(); }
 
 protected:
+    //! The default constructor
     Pointer_Impl(pointer p = nullptr) noexcept : d(p) {}
     //! The destructor checks if the stored pointer is valid, and destroys it if necessary.
     inline ~Pointer_Impl()

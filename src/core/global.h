@@ -17,15 +17,11 @@
 
 /*!
  \headerfile global.h <qecore/global.h>
- \ingroup module_core
+ \ingroup qecore
  \brief Defines global macros.
 */
 #ifndef QE_CORE_GLOBAL_H
 #define QE_CORE_GLOBAL_H
-
-#define QE_VERSION_STR   "0.1.1"
-#define QE_VERSION 0x000101
-#define QE_VERSION_CHECK QT_VERSION_CHECK
 
 #if defined(QE_BUILD_CORE)
 #  define QE_CORE_EXPORT Q_DECL_EXPORT
@@ -53,6 +49,7 @@
 
 /*!
     \brief Defines a class as static.
+    \ingroup qecore
 
     Note: This macro ends with `public:`
 
@@ -69,6 +66,7 @@
 
 /*!
     \brief Shorthand for QStringLiteral.
+    \ingroup qecore
 */
 #define QStrLit QStringLiteral
 

@@ -14,11 +14,9 @@ QExt is an add-on library for Qt developers with limited dependencies. The aims 
  - Excellent documentation
 
 ## Features
-QExt exposes and maintains functionality that is "private" in Qt. The canonical example of a private class later made public is QVarLengthArray. QExt re-implements and supports similar types of useful classes that are hidden in Qt or emulates their functionality.
+QExt makes Qt-style development easier, such as support for the d-ptr (also known as the compiler firewall), including Private class inheritance and back links (see `qe::PublicBase` and `qe::PrivateBase` in the core module).
 
-QExt also makes Qt-style development easier, such as the use of the d-ptr (also known as the compiler firewall), including Private class inheritance and back links (see `QePublicBase` and `QePrivateBase` in QeCore).
-
-C++14 is now supported by VS, gcc, and Clang, so it is used throughout the library to speed, ease, and simplify development. One of the benefits of this are macros that replace `Q_D` and `Q_Q` without needing a class name declaration (`QE_D` and `Q_EQ`). This is legal code in QExt:
+C++14 is used throughout the library to speed, ease, and simplify development. One of the benefits of this are macros that replace `Q_D` and `Q_Q` without needing a class name declaration (`QE_D` and `QE_Q`). This is legal code in QExt:
 
     void MyPublicClass::setFoo(const Foo &f)
     {
@@ -35,27 +33,23 @@ C++14 is now supported by VS, gcc, and Clang, so it is used throughout the libra
 	
 	}
 
-Eventual plans for QExt include a library of useful widgets (QeWidgets), a ribbon toolkit (QeRibbon), and Windows/COM tools (QeWindows).
+Another feature of QExt is the "moveable QScopedPointer", implemented as qe::UniquePointer. It's essentially QScopedPointer with move semantics and uses Qt's own QScopedPointerDeleter by default, like QScopedPointer. However, it was designed with modern C++ in mind and written from the ground up with both Standard Library-style and Qt-style accessors (e.g. `get()` and `data()` are synonymous).
+	
+Eventual plans for QExt include a library of useful widgets (QeWidgets) and Windows/COM tools (QeWindows).
 
 ## Status
-QExt is currently highly unstable (pre-alpha) and subject to change, including API changes and wholesale renaming/removal/replacement of classes and functions.
+QExt is currently unstable (pre-alpha) and subject to change, including API changes and wholesale renaming/removal/replacement of classes and functions.
 
 ### QeCore
 - Public and private base classes: done
 - D-ptr and q-ptr, `auto` semantics: done
-- `QeUniquePointer`: nearly complete, needs code review
+- `qe::UniquePointer`: nearly complete, needs code review
 
 ### QeWidgets
-- Some widgets need cleanup, polish, and documentation
-
-### QeRibbon
-- Design decisions need to be made regarding the limitations of QStyle
-- Some basic classes complete
-- Emulation of Windows `SplitButton` control needs rewrite
-- `QeRibbonGroupLayout` needs implementation 
+- Widgets need cleanup, tests, and documentation
 
 ### QeWindows
-- QeUnknown Pointer: Nearly complete
+- `qe::windows::UnknownPointer`: nearly complete, needs code review
 - Numerous low-level functions done
 - COM smart pointers need to be used everywhere 
 - Need test classes
@@ -67,4 +61,6 @@ QExt is released under the GNU General Public License Version 3.
 This is a hobby project, so development is probably going to be slow. 
 
 ### Style
-QExt is written in the Qt development style, which is (circularly) dependant upon the KDE style. Deviations will be noted here if/when they occur.
+QExt is written in the Qt development style, which is (circularly) dependant upon the KDE style.
+
+Note that QExt supports namespaces, and is written within them. Qt-style type aliases are available with logical names (e.g. QeUniquePointer). Use the preprocessor defintion QEXT_NO_CLUTTER to disable type aliases.
