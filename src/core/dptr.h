@@ -55,7 +55,6 @@ namespace qe {
 
 /*!
     \class PrivateBase
-    \ingroup module_core
     \brief The PrivateBase class.
 */
 
@@ -65,42 +64,59 @@ class QE_CORE_EXPORT PrivateBase
 public:
     explicit PrivateBase(PublicBase *qq);
 
+    //! Deleted copy constructor.
+    PrivateBase(const PrivateBase &) = delete;
+
+    //! Deleted move constructor.
+    PrivateBase(PrivateBase &&) = delete;
+
+    //! Deleted default constructor.
+    PrivateBase() = delete;
+
+    //! Virtual destructor.
+    inline virtual ~PrivateBase() {}
+
+    //! Deleted copy assignment operator.
+    void operator =(const PrivateBase &) = delete;
+    //! Move constructor is deleted.
+    void operator =(PrivateBase &&) = delete;
 protected:
     PublicBase *qe_ptr;
 };
 
 /*!
-    \class PublicBase
-    \ingroup module_core
-    \brief The PublicBase class.
-*/
+    \brief The PublicBase class enables the use of pImpl, or the d-ptr.
 
+    Inherit from this class for the public face of your class. If you also inherit from QObject,
+    it must be inherited from first.
+
+    \code
+        class MyClass : public QObject, public qe::PublicBase
+        {
+            Q_OBJECT
+            ...
+        };
+    \endcode
+
+    You must also use the \ref QE_DECLARE_PUBLIC macro in the private section of your class.
+*/
 class QE_CORE_EXPORT PublicBase
 {
 public:
+    //! The only functional constructor. Note that this takes a \em reference, i.e. it cannot be null.
     explicit PublicBase(PrivateBase &dd);
 
 protected:
     QScopedPointer<PrivateBase> qed_ptr;
 };
 
-//! Constructs a new object with \a qq as the back pointer (q-ptr).
-PrivateBase::PrivateBase(PublicBase *qq)
-    : qe_ptr(qq)
-{
-}
-
-
-//! Constructs a new object with \a dd as the source for the d-ptr.
-PublicBase::PublicBase(PrivateBase &dd)
-    : qed_ptr(&dd)
-{
-}
-
 } // namespace qe
 
 #ifndef QEXT_NO_CLUTTER
-
+using QePublicBase = qe::PublicBase;
+using QePrivateBase = qe::PrivateBase;
 #endif
 
 #endif //QE_CORE_DPTR_H
+
+

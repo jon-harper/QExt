@@ -1,7 +1,23 @@
+#include "dptr.h"
+
+namespace qe {
+//! Constructs a new object with \a qq as the back pointer (q-ptr).
+QE_CORE_EXPORT PrivateBase::PrivateBase(PublicBase *qq)
+    : qe_ptr(qq)
+{
+}
+
+
+//! Constructs a new object with \a dd as the source for the d-ptr.
+QE_CORE_EXPORT PublicBase::PublicBase(PrivateBase &dd)
+    : qed_ptr(&dd)
+{
+}
+
+} // namespace qe
 
 /*!
     \def QE_DECLARE_PRIVATE(Classname)
-    \ingroup qecore
     \relates qe::PrivateBase
     \brief Enables a class to use d_func() pointers.
 
@@ -24,7 +40,6 @@
 
 /*!
     \def QE_DECLARE_PUBLIC(Classname)
-    \ingroup qecore
     \relates qe::PrivateBase
     \brief Declares a derived class of qe::PrivateBase for use with `Classname`.
 
@@ -40,7 +55,6 @@
 
 /*!
     \def QE_QPTR
-    \ingroup qecore
     \relates qe::PrivateBase
     \brief This macro retrieves the q-ptr.
 
@@ -58,7 +72,6 @@
 
 /*!
     \def QE_CONST_QPTR
-    \ingroup qecore
     \relates qe::PrivateBase
     \brief This macro retrieves the q-ptr as a `const` pointer.
 
@@ -76,7 +89,6 @@
 
 /*!
 \def QE_DPTR
-\ingroup qecore
 \relates qe::PublicBase
 \brief This macro retrieves the d-ptr for a class deriving from qe::PublicBase
 *or* a native Qt private d-ptr.
@@ -97,7 +109,6 @@ Use QE_CONST_DPTR when you need a d-ptr for a `const` function.
 
 /*!
 \def QE_CONST_DPTR
-\ingroup qecore
 \relates qe::PublicBase
 \brief This macro retrieves the a `const` d-ptr for a class deriving from qe::PublicBase
 *or* a native Qt private d-ptr.
@@ -113,8 +124,3 @@ favorably against `Q_D`:
 
 \sa QE_CONST_QPTR, QE_DPTR
 */
-
-
-
-
-

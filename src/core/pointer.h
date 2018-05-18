@@ -23,9 +23,16 @@
 namespace qe {
 namespace detail {
 
+//! Enforces a complete type. Useful for deleters to ensure the type they are to destroy is complete.
+template <class T>
+constexpr void forceCompleteType() noexcept
+{
+    using forced_complete_type = char[sizeof(T) ? 1 : -1];
+    (void)sizeof(forced_complete_type);
+}
+
 /*!
     \class qe::detail::Pointer_Impl
-    \ingroup qecore
     \brief Implements general smart pointer functions and operators.
 
     All QExt smart pointers derive from this base class.
@@ -34,22 +41,29 @@ template <class T, class Cleanup>
 class Pointer_Impl
 {
 public:
-    //! For Boost/STL compatibility.
+    //! For Boost/Standard Library compatibility.
     using value_type = T;
-    //! For Boost/STL compatibility.
+    //! For Boost/Standard Library compatibility.
     using pointer = std::add_pointer_t<T>;
-    //! For Boost/STL compatibility.
+    //! For Boost/Standard Library compatibility.
     using const_pointer = std::add_const_t<pointer>;
-    //! For Boost/STL compatibility.
+    //! For Boost/Standard Library compatibility.
     using reference = std::add_lvalue_reference_t<T>;
-    //! For Boost/STL compatibility.
+    //! For Boost/Standard Library compatibility.
     using const_reference = std::add_const_t<reference>;
+    //! This is the cleanup object alias. See \ref qe::DefaultDeleter for an example.
     using deleter = Cleanup;
+
+    //! Destroys the stored pointer and sets it to `nullptr`.
+    inline ~Pointer_Impl()
+    {
+        reset(nullptr);
+    }
 
     //! Sets the stored pointer to `nullptr` and returns its old value.
     pointer take() noexcept
     {
-        auto oldD = data();
+        auto oldD = this->d;
         this->d = nullptr;
         return oldD;
     }
@@ -66,14 +80,14 @@ public:
 
     }
 
-    //! Returns the stored interface pointer.
+    //! Returns the stored pointer. Equivalent to \ref get.
     pointer data() const noexcept           { return this->d; }
 
-    //! For STL compatibility. Calls \ref data.
+    //! For Boost/Standard Library compatibility. Equivalent to \ref data.
     pointer get() const noexcept            { return this->d; }
 
     //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
-    inline pointer * addressOf() const noexcept { return &(this->d); }
+    inline pointer * addressOf() noexcept   { return &(this->d); }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept { return !isNull(); }
@@ -93,17 +107,13 @@ public:
     //! Swaps two instances.
     void swap(Pointer_Impl<T, Cleanup> &other) noexcept { std::swap(this->d, other.d); }
 
-    //! For STL compatibility. Equivalent to \ref take.
+    //! For Boost/Standard Library compatibility. Equivalent to \ref take.
     pointer release() noexcept              { return take(); }
 
 protected:
-    //! The default constructor
+    //! \brief The default constructor.
+    //! \note Inheriting classes \em must implement all constructors and assignment operators!
     Pointer_Impl(pointer p = nullptr) noexcept : d(p) {}
-    //! The destructor checks if the stored pointer is valid, and destroys it if necessary.
-    inline ~Pointer_Impl()
-    {
-        reset(nullptr);
-    }
 
 private:
     pointer d;

@@ -7,10 +7,10 @@
 #include <QRegion>
 #include <QRect>
 
-QString qe::fromVariant(const QVariant &var)
+QString qe::toString(const QVariant &var)
 {
     QString ret;
-    switch(var.type()) {
+    switch(static_cast<QMetaType::Type>(var.type())) {
     case QMetaType::QString:
     case QMetaType::Bool:
     case QMetaType::QByteArray:
@@ -29,7 +29,7 @@ QString qe::fromVariant(const QVariant &var)
         ret = var.toString();
         break;
     case QMetaType::Float:
-        ret = QString::number(var.value<float>());
+        ret = QString::number(var.value<qreal>());
         break;
     case QMetaType::Short:
         ret = QString::number(var.value<short>());
@@ -40,12 +40,12 @@ QString qe::fromVariant(const QVariant &var)
     case QMetaType::SChar:
         ret = QString::number(var.value<signed char>());
         break;
-//    case QMetaType::QPoint:
-//    {
-//        QPoint p = var.value<QPoint>();
-//        ret = QString("(%1, %2)").arg(p.x()).arg(p.y());
-//        break;
-//    }
+    case QMetaType::QPoint:
+    {
+        QPoint p = var.value<QPoint>();
+        ret = QString("(%1, %2)").arg(p.x()).arg(p.y());
+        break;
+    }
     case QMetaType::QSize:
     {
         QSize sz = var.value<QSize>();

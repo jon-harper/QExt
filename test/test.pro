@@ -2,5 +2,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    #compointer \
-    uniquepointer
+    core \
+	windows

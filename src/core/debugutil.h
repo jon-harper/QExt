@@ -25,15 +25,15 @@
 
 namespace qe
 {
-    QString fromVariant(const QVariant &var);
+    QString toString(const QVariant &var);
 
-    QString toHex(const quint64 value) { return QString::number(value, 16); }
-    QString toHex(const qint64 value)  { return QString::number(value, 16); }
-    QString toHex(const quint32 value) { return QString::number(value, 16); }
-    QString toHex(const qint32 value)  { return QString::number(value, 16); }
-    QString toHex(const quint16 value) { return QString::number(uint(value), 16); }
-    QString toHex(const qint16 value)  { return QString::number(int(value), 16); }
-    QString toHex(const quint8 value)  { return QString::number(uint(value), 16); }
-    QString toHex(const qint8 value)   { return QString::number(int(value), 16); }
+    inline QString toHexString(const quint64 value) { return QString::number(value, 16); }
+    inline QString toHexString(const qint64 value)  { return QString::number(value, 16); }
+    inline QString toHexString(const quint32 value) { return QString::number(value, 16); }
+    inline QString toHexString(const qint32 value)  { return QString::number(value, 16); }
+    inline QString toHexString(const quint16 value) { return QString::number(uint(value), 16); }
+    inline QString toHexString(const qint16 value)  { return QString::number(int(value), 16); }
+    inline QString toHexString(const quint8 value)  { return QString::number(uint(value), 16); }
+    inline QString toHexString(const qint8 value)   { return QString::number(int(value), 16); }
 };
 #endif // QE_CORE_DEBUGUTIL_H

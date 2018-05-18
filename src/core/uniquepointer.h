@@ -18,15 +18,23 @@
 #ifndef QE_CORE_UNIQUEPOINTER_H
 #define QE_CORE_UNIQUEPOINTER_H
 
-#include <cstddef>
-#include <QScopedPointerDeleter>
-
 #include "pointer.h"
 
 namespace qe {
-/*! A moveable version of QScopedPointer.
+
+template <typename T>
+struct DefaultDeleter
+{
+    static inline void cleanup(T *pointer)
+    {
+        qe::detail::forceCompleteType<T>();
+        delete pointer;
+    }
+};
+
+/*! \brief A moveable version of `QScopedPointer`.
   */
-template <class T, class Cleanup = ::QScopedPointerDeleter<T>>
+template <class T, class Cleanup = DefaultDeleter<T>>
 class UniquePointer : public detail::Pointer_Impl<T, Cleanup>
 {
 public:
@@ -34,21 +42,15 @@ public:
     using pointer = typename parent::pointer;
 
     //! Default constructor.
-    inline UniquePointer(pointer p = nullptr) : parent(p) {}
+    inline UniquePointer(pointer p = nullptr) noexcept : parent(p) {}
     //! Move constructor
-    inline UniquePointer(UniquePointer && rhs)  : parent(rhs.take()) { }
-
-    //! Destructor. Calls `reset()`.
-    inline ~UniquePointer()
-    {
-        reset();
-    }
+    inline UniquePointer(UniquePointer && other) noexcept : parent(other.take()) { }
 
     //! Move assignment operator.
-    inline UniquePointer &operator=(UniquePointer &&rhs)
+    inline UniquePointer &operator=(UniquePointer &&other)
     {
-        if (*this != rhs)
-            reset(rhs.take());
+        if (*this != other)
+            reset(other.take());
         return *this;
     }
 
@@ -120,15 +122,34 @@ namespace std {
 /*! Partial specialization of `std::swap` for UniquePointer.
   \relates qe::UniquePointer
  */
-    template <class T, class Cleanup>
-    inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanup> &rhs) noexcept
+template <class T, class Cleanup>
+inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanup> &rhs) noexcept
+{
+    lhs.swap(rhs);
+}
+
+/*! Partial specialization of `std::hash` for UniquePointer.
+   \relates qe::UniquePointer
+ */
+template <class T, class Cleanup>
+struct hash<qe::UniquePointer<T, Cleanup>>
+{
+    using argument_type = qe::UniquePointer<T, Cleanup>;
+    using result_type = std::size_t;
+    result_type operator()(const argument_type & p) const noexcept
     {
-        lhs.swap(rhs);
+        return std::hash<T *>{}(p.data());
     }
+};
 } //namespace std
 
 #ifndef QEXT_NO_CLUTTER
-template <class T, class Cleanup = ::QScopedPointerDeleter<T>>
+//! \relates qe::DefaultDeleter
+template <class T>
+using QeDefaultDeleter = qe::DefaultDeleter<T>;
+
+//! \relates qe::UniquePointer
+template <class T, class Cleanup = qe::DefaultDeleter<T>>
 using QeUniquePointer = qe::UniquePointer<T, Cleanup>;
 
 #endif
