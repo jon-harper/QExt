@@ -215,7 +215,7 @@ struct unique_pointer_test
         EXPECT_EQ(1,    Struct1::instances);
         EXPECT_NE(pX,   xPtr.get());
 
-        // Copy-construct a new UniquePointer to the same object, transferring ownership
+        // Move-construct a new UniquePointer to the same object, transferring ownership
         UniquePointer<Struct2> yPtr = std::move(xPtr);
         xPtr.reset();
 

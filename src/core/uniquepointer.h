@@ -57,7 +57,7 @@ public:
     inline UniquePointer(UniquePointer && other) noexcept : d(other.take()) { }
 
     template <class U>
-    inline UniquePointer(UniquePointer<U, Cleanup> && other)
+    inline UniquePointer(UniquePointer<U, Cleanup> && other) noexcept(std::is_convertible_v<U, T>())
         : d(other.take())
     {
         qe::detail::assertConvertible<T, U>();
@@ -72,9 +72,9 @@ public:
 
     template <class U>
     inline UniquePointer &operator=(UniquePointer<U, Cleanup> &&other)
-        noexcept(qe::detail::assertConvertible<U, T>())
+        noexcept(std::is_convertible_v<U, T>())
     {
-        qe::detail::assertConvertible<T, U>();
+        qe::detail::assertConvertible<U, T>();
         if (*this != other)
             reset(other.take());
         return *this;
@@ -220,6 +220,8 @@ inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanu
 {
     lhs.swap(rhs);
 }
+
+//TODO: partial specialization of swap using convertible types
 
 /*! Partial specialization of `std::hash` for UniquePointer.
    \relates qe::UniquePointer
