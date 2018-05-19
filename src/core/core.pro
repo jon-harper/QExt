@@ -10,7 +10,7 @@ HEADERS += \
 	$$PWD/global.h \
 	$$PWD/debugutil.h \
 	$$PWD/uniquepointer.h \
-    $$PWD/pointer.h \
+    $$PWD/type_util.h \
 	$$PWD/dptr.h
 
 SOURCES += \

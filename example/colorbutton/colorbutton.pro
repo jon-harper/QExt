@@ -25,3 +25,6 @@ win32 {
         LIBS += -L$$OUT_PWD/../core/debug -lqecore
 	}
 }
+
+DISTFILES += \
+    readme.md

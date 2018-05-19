@@ -18,6 +18,7 @@
 #ifndef QE_CORE_DEBUGUTIL_H
 #define QE_CORE_DEBUGUTIL_H
 
+#ifndef QEXT_CORE_NO_QT
 #include <qecore/global.h>
 
 #include <QString>
@@ -36,4 +37,5 @@ namespace qe
     inline QString toHexString(const quint8 value)  { return QString::number(uint(value), 16); }
     inline QString toHexString(const qint8 value)   { return QString::number(int(value), 16); }
 };
+#endif // QEXT_CORE_NO_QT
 #endif // QE_CORE_DEBUGUTIL_H

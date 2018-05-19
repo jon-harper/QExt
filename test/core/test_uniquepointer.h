@@ -32,15 +32,15 @@
 
 using namespace qe;
 
-struct Struct2
+struct Struct1
 {
-    explicit Struct2(int aVal) :
-        value(aVal)
+    explicit Struct1(int aVal)
+        : value(aVal)
     {
         instances++;
     }
 
-    ~Struct2()
+    ~Struct1()
     {
         instances--;
     }
@@ -55,12 +55,46 @@ struct Struct2
         value--;
     }
 
-    int         value;
+    int value = 0;
     static int instances;
 };
 
-int Struct2::instances = 0;
+int Struct1::instances = 0;
 
+struct Struct2 : public Struct1
+{
+    explicit Struct2(const int aVal)
+        : Struct1(aVal)
+    {
+
+    }
+};
+
+
+struct Struct3 : public Struct1
+{
+    Struct3(const Struct2 &other)
+        : Struct1(other.value)
+    {
+    }
+    Struct3(const Struct2 &&other)
+        : Struct1(other.value)
+    {
+    }
+    Struct3 operator=(const Struct2 &other)
+    {
+        Struct3 ret(other);
+        return ret;
+
+    }
+
+    Struct3 operator=(Struct2 &&other)
+    {
+        Struct3 ret(other);
+        other.~Struct2();
+        return ret;
+    }
+};
 
 struct unique_pointer_test
 {
@@ -103,7 +137,7 @@ struct unique_pointer_test
             {
                 EXPECT_EQ(123,  xPtr->value);
                 EXPECT_EQ(1,    xPtr->instances);
-                EXPECT_EQ(1,    Struct2::instances);
+                EXPECT_EQ(1,    Struct1::instances);
 
                 // call a function
                 xPtr->incr();
@@ -123,13 +157,11 @@ struct unique_pointer_test
                 EXPECT_TRUE(yPtr);
                 EXPECT_NE(nullptr,  yPtr.get());
                 EXPECT_EQ(123,   yPtr->value);
-                EXPECT_EQ(1,     Struct2::instances);
+                EXPECT_EQ(1,     Struct1::instances);
 
                 if (yPtr)
                 {
-                    UniquePointer<Struct2> zPtr;
-                    // Assign the UniquePointer, transferring ownership
-                    zPtr = std::move(yPtr);
+                    UniquePointer<Struct2> zPtr = std::move(yPtr);
                     yPtr.reset();
 
                     EXPECT_NE(yPtr,  zPtr);
@@ -138,14 +170,14 @@ struct unique_pointer_test
                     EXPECT_TRUE(zPtr);
                     EXPECT_NE(nullptr,  zPtr.get());
                     EXPECT_EQ(123,   zPtr->value);
-                    EXPECT_EQ(1,     Struct2::instances);
+                    EXPECT_EQ(1,     Struct1::instances);
                 }
 
                 EXPECT_FALSE(xPtr);
                 EXPECT_EQ(nullptr, xPtr.get());
                 EXPECT_FALSE(yPtr);
                 EXPECT_EQ(nullptr, yPtr.get());
-                EXPECT_EQ(0, Struct2::instances);
+                EXPECT_EQ(0, Struct1::instances);
             }
             else
             {
@@ -154,10 +186,10 @@ struct unique_pointer_test
 
             EXPECT_FALSE(xPtr);
             EXPECT_EQ(nullptr, xPtr.get());
-            EXPECT_EQ(0, Struct2::instances);
+            EXPECT_EQ(0, Struct1::instances);
         }
 
-        EXPECT_EQ(0, Struct2::instances);
+        EXPECT_EQ(0, Struct1::instances);
     }
 
     static void reset_pointer_test()
@@ -171,7 +203,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123,  xPtr->value);
-        EXPECT_EQ(1,    Struct2::instances);
+        EXPECT_EQ(1,    Struct1::instances);
         Struct2* pX  = xPtr.get();
 
         // Reset it with another new pointer
@@ -180,7 +212,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(234,  xPtr->value);
-        EXPECT_EQ(1,    Struct2::instances);
+        EXPECT_EQ(1,    Struct1::instances);
         EXPECT_NE(pX,   xPtr.get());
 
         // Copy-construct a new UniquePointer to the same object, transferring ownership
@@ -193,7 +225,7 @@ struct unique_pointer_test
         EXPECT_TRUE( yPtr);
         EXPECT_NE(nullptr,  yPtr.get());
         EXPECT_EQ(234,   yPtr->value);
-        EXPECT_EQ(1,     Struct2::instances);
+        EXPECT_EQ(1,     Struct1::instances);
 
         // Reset to nullptr
         yPtr.reset();
@@ -201,7 +233,7 @@ struct unique_pointer_test
         EXPECT_EQ(nullptr,  yPtr.get());
         EXPECT_FALSE(xPtr);
         EXPECT_EQ(nullptr,  xPtr.get());
-        EXPECT_EQ(0, Struct2::instances);
+        EXPECT_EQ(0, Struct1::instances);
     }
 
     static void compare_pointer_test()
@@ -212,7 +244,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123,xPtr->value);
-        EXPECT_EQ(1, Struct2::instances);
+        EXPECT_EQ(1, Struct1::instances);
         Struct2* pX = xPtr.get();
 
         // Create another UniquePointer
@@ -221,7 +253,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123,xPtr->value);
-        EXPECT_EQ(2, Struct2::instances);
+        EXPECT_EQ(2, Struct1::instances);
 
         EXPECT_TRUE(yPtr);
         EXPECT_NE(nullptr, yPtr.get());
@@ -241,7 +273,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123,xPtr->value);
-        EXPECT_EQ(1, Struct2::instances);
+        EXPECT_EQ(1, Struct1::instances);
 
         // Create another UniquePointer
         UniquePointer<Struct2> yPtr(new Struct2(234));
@@ -249,7 +281,7 @@ struct unique_pointer_test
         EXPECT_TRUE(yPtr);
         EXPECT_NE(nullptr, yPtr.get());
         EXPECT_EQ(234, yPtr->value);
-        EXPECT_EQ(2, Struct2::instances);
+        EXPECT_EQ(2, Struct1::instances);
 
         EXPECT_LT(xPtr->value, yPtr->value);
         xPtr.swap(yPtr);
@@ -266,7 +298,7 @@ struct unique_pointer_test
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123, xPtr->value);
-        EXPECT_EQ(1, Struct2::instances);
+        EXPECT_EQ(1, Struct1::instances);
         Struct2* pX = xPtr.get();
 
         {
@@ -278,11 +310,11 @@ struct unique_pointer_test
             EXPECT_FALSE(xPtr);
             EXPECT_TRUE( PtrList.back());
             EXPECT_EQ(pX,PtrList.back().get());
-            EXPECT_EQ(1, Struct2::instances);
+            EXPECT_EQ(1, Struct1::instances);
 
         } // Destructor of the vector releases the last pointer thus destroying the object
 
-        EXPECT_EQ(0, Struct2::instances);
+        EXPECT_EQ(0, Struct1::instances);
     }
 
 };

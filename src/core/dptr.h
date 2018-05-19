@@ -18,7 +18,7 @@
 #ifndef QE_CORE_DPTR_H
 #define QE_CORE_DPTR_H
 
-#include <QScopedPointer>
+#include "uniquepointer.h"
 
 #include <qecore/global.h>
 
@@ -46,10 +46,13 @@
 #define QE_Q    QE_AUTO_D
 #define QE_CQ   QE_CONST_QPTR
 
+#ifndef QEXT_CORE_NO_QT
+#include <qglobal.h>
 #define Q_DPTR          auto d = d_func()
 #define Q_CONST_DPTR    const auto d = d_func()
 #define Q_QPTR          auto q = q_func()
 #define Q_CONST_QPTR    const auto q = q_func()
+#endif
 
 namespace qe {
 
@@ -107,7 +110,7 @@ public:
     explicit PublicBase(PrivateBase &dd);
 
 protected:
-    QScopedPointer<PrivateBase> qed_ptr;
+    UniquePointer<PrivateBase> qed_ptr;
 };
 
 } // namespace qe

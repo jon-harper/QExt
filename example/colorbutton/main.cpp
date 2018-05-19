@@ -20,32 +20,25 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QColorDialog>
 #include "colorbutton.h"
 
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+
     QDialog dlg;
     dlg.setWindowTitle(QStrLit("Color Button Test"));
 
     QHBoxLayout layout(&dlg);
 
     QeColorButton colorButton(Qt::red);
-    QObject::connect(&colorButton, &QeColorButton::clicked, [&colorButton]()
-    {
-        QColorDialog dlg(colorButton.color());
-        dlg.exec();
-        colorButton.setColor(dlg.currentColor());
-    }
-    );
     layout.addWidget(&colorButton);
 
     QPushButton closeButton(QStrLit("&Close"));
-    QObject::connect(&closeButton, &QPushButton::clicked, &dlg, &QDialog::close);
     layout.addWidget(&closeButton);
 
-    dlg.show();
+    QObject::connect(&closeButton, &QPushButton::clicked, &dlg, &QDialog::close);
 
+    dlg.show();
     return app.exec();
 }

@@ -34,8 +34,8 @@ class QeColorButton : public QToolButton, public qe::PublicBase
     Q_PROPERTY(QString textFormat READ textFormat WRITE setTextFormat)
 
 public:
-    QeColorButton(QColor color, const QString &textFormat, QWidget *parent = nullptr);
-    QeColorButton(QColor color, QWidget *parent = nullptr);
+    QeColorButton(const QColor &color, QString textFormat, QWidget *parent = nullptr);
+    QeColorButton(const QColor &color, QWidget *parent = nullptr);
     explicit QeColorButton(QWidget *parent = nullptr);
     ~QeColorButton();
 
@@ -47,12 +47,14 @@ public:
 public Q_SLOTS:
     void setColor(const QColor &c);
     void setFrameVisible(bool b);
+    void showColorDialog();
 
 Q_SIGNALS:
     void colorChanged(QColor);
 
 protected:
     QeColorButton(QeColorButtonPrivate &dd, QWidget *parent = nullptr);
+
 private:
     Q_DISABLE_COPY(QeColorButton)
     QE_DECLARE_PRIVATE(QeColorButton)

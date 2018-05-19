@@ -19,6 +19,7 @@
 #include "colorbutton.h"
 #include "colorbutton_p.h"
 #include <QPainter>
+#include <QtWidgets/QColorDialog>
 
 //! \brief Initializes the object.
 //! \note This method is necessary because it is called from the public classes's constructor,
@@ -28,7 +29,7 @@ void QeColorButtonPrivate::init()
 {
     QE_QPTR;
     q->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-
+    QObject::connect(q, &QAbstractButton::clicked, q, &QeColorButton::showColorDialog);
     updateIcon();
     updateText();
 }
@@ -76,7 +77,7 @@ void QeColorButtonPrivate::updateText()
 }
 
 //! Constructs a new QeColorButton with the color \a col, text format, \a txt and \a parent.
-QeColorButton::QeColorButton(const QColor &color, const QString &textFormat, QWidget *parent)
+QeColorButton::QeColorButton(const QColor &color, QString textFormat, QWidget *parent)
     : QeColorButton(*new QeColorButtonPrivate(this), parent)
 {
     setTextFormat(textFormat);
@@ -90,12 +91,11 @@ QeColorButton::QeColorButton(const QColor &color, QWidget *parent)
     setColor(color);
 }
 
-/*!
-   Sets something.
- */
+//! The default constructor, with \arg parent as the parent widget.
 QeColorButton::QeColorButton(QWidget *parent)
     : QeColorButton(*new QeColorButtonPrivate(this), parent)
 {
+
 }
 //! The destructor.
 QeColorButton::~QeColorButton()
@@ -133,9 +133,7 @@ void QeColorButton::setTextFormat(QString format)
     d->updateText();
 }
 
-/*!
-   \brief Setter for the `color` property.
- */
+//! \brief Setter for the `color` property.
 void QeColorButton::setColor(const QColor &c)
 {
     QE_DPTR;
@@ -161,6 +159,20 @@ QeColorButton::QeColorButton(QeColorButtonPrivate &dd, QWidget *parent)
 {
     QE_DPTR;
     d->init();
+}
+
+//! Shows a color selection dialog and changes the current `color` property, if appropriate.
+//! This will emit the `colorChanged(QColor)` signal.
+void QeColorButton::showColorDialog()
+{
+    QColorDialog dlg(color());
+    dlg.exec();
+
+    auto newColor = dlg.currentColor();
+    if (newColor != color()) {
+        setColor(newColor);
+        emit colorChanged(newColor);
+    }
 }
 
 /*!
