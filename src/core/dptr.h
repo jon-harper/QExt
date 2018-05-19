@@ -41,9 +41,9 @@
 #define QE_QPTR         auto q = qe_q_func()
 #define QE_CONST_QPTR   const auto q = qe_cq_func()
 
-#define QE_D    QE_AUTO_D
+#define QE_D    QE_DPTR
 #define QE_CD   QE_CONST_DPTR
-#define QE_Q    QE_AUTO_D
+#define QE_Q    QE_QPTR
 #define QE_CQ   QE_CONST_QPTR
 
 #ifndef QEXT_CORE_NO_QT

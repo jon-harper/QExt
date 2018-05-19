@@ -16,9 +16,8 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
 *******************************************************************************/
 
-#include "colorbutton.h"
 #include "colorbutton_p.h"
-#include <QPainter>
+#include <QtGui/QPainter>
 #include <QtWidgets/QColorDialog>
 
 //! \brief Initializes the object.
@@ -97,6 +96,14 @@ QeColorButton::QeColorButton(QWidget *parent)
 {
 
 }
+
+QeColorButton::QeColorButton(QeColorButtonPrivate &dd, QWidget *parent)
+    : QToolButton(parent), qe::PublicBase(dd)
+{
+    QE_DPTR;
+    d->init();
+}
+
 //! The destructor.
 QeColorButton::~QeColorButton()
 {
@@ -119,14 +126,14 @@ bool QeColorButton::isFrameVisible() const
 //! \brief Returns the current `textFormat`.
 QString QeColorButton::textFormat() const
 {
-    QE_CD;
+    QE_CONST_DPTR;
     return d->format;
 }
 
 //! \brief Setter for the `textFormat` property.
 void QeColorButton::setTextFormat(QString format)
 {
-    QE_DPTR;
+    QE_D;
     if (d->format == format)
         return;
     d->format = format;
@@ -154,12 +161,7 @@ void QeColorButton::setFrameVisible(bool b)
     d->updateIcon();
 }
 
-QeColorButton::QeColorButton(QeColorButtonPrivate &dd, QWidget *parent)
-    : QToolButton(parent), qe::PublicBase(dd)
-{
-    QE_DPTR;
-    d->init();
-}
+
 
 //! Shows a color selection dialog and changes the current `color` property, if appropriate.
 //! This will emit the `colorChanged(QColor)` signal.
@@ -181,5 +183,5 @@ void QeColorButton::showColorDialog()
 
   This class is specifically meant for use in settings dialogs and toolbars
   for setting and displaying a color selection (e.g., window background
-  color or text color). Refer to the test file for an example of its usage.
- */
+  color or text color).
+*/
