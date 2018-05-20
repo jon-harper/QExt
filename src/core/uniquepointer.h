@@ -72,7 +72,7 @@ public:
 
     template <class U>
     inline UniquePointer &operator=(UniquePointer<U, Cleanup> &&other)
-        noexcept(std::is_convertible_v<U, T>())
+        noexcept(std::is_convertible_v<U, T>)
     {
         qe::detail::assertConvertible<U, T>();
         if (*this != other)
@@ -140,7 +140,7 @@ public:
     //! Swaps two convertible instances.
     template <class U>
     void swap(UniquePointer<U, Cleanup> &other)
-        noexcept(qe::detail::assertConvertible<U, T>() && qe::detail::assertConvertible<T, U>())
+        noexcept(std::is_convertible_v<U, T> && std::is_convertible_v<T, U>)
     {
         qe::detail::assertConvertible<U, T>();
         qe::detail::assertConvertible<T, U>();

@@ -7,15 +7,15 @@ framework, which is based on Qt's. If you already inherit from Qt's private
 classes in your own projects, there are macros for Qt that are equivalent to
 the `auto`-using macros that QExt has (see core/dptr.h).
 
-QeColorButton displays a color via a swatch and configurable text (by default,
+`QeColorButton` displays a color via a swatch and configurable text (by default,
 it displays the RGB values of the color). Clicking on the button opens a
-QColorDialog. Selecting a different color then updates the button. It's a very
-simple class to demonstrate how to inherit from and use qe::PublicBase and
-qe::PrivateBase in your own projects.
+`QColorDialog`. Selecting a different color then updates the button. It's a very
+simple class to demonstrate how to inherit from and use `qe::PublicBase` and
+`qe::PrivateBase` in your own projects.
 
 ## colorbutton.h
 
-QeColorButton *looks* like a basic developer's Qt-widget-inheriting class
+`QeColorButton` *looks* like a basic developer's Qt-widget-inheriting class
 definition, with a few changes, making the header file look more like a
 Qt header file than that of a user.
 
@@ -61,10 +61,10 @@ functions virtual. This is a take on "protected virtual" functions.
 
 ### The init() function
 
-During construction of a public class (QeColorButton), an unknown number of
+During construction of a public class (`QeColorButton`), an unknown number of
 constructors may be called and a simiarly unknown number of member variables
 may be initialized. At the time of its construction, the private class
-(QeColorButtonPrivate) receives a pointer *to an incompletely constructed class*.
+(`QeColorButtonPrivate`) receives a pointer *to an incompletely constructed class*.
 It is therefore necessary to defer any initialization that will directly or
 indirectly call the public class; thus, we defer some of our initialization to
 the `init()` function. Our constructor can then, after other initialization is
@@ -81,6 +81,10 @@ that also accesses the d-ptr (inherits from QeColorButtonPrivate, etc.) will
 *have* to call this constructor to pass, making it an excellent funnel for
 our constructors towards calling `d->init()`.
 
+Also important: after calling `new`, the pointer to our private base class is
+dereferenced to pass to constructor. This ensures our protected constructor
+(and therefore the base class, as well) never receive a `nullptr`.
+
 ### The public getters and setters
 
 These serve mostly to illustrate using the auto d-ptr in practice. There is a
@@ -92,3 +96,9 @@ as `const`)
 There are equivalent macros for getting the q-ptr, as well: `QE_QPTR`, `QE_Q`,
 `QE_CONST_QPTR` and `QE_CQ`. They work similarly to the d-ptr versions, but
 are used in the private class implementation.
+
+## Conclusion
+
+Hopefully this example illustrates how to use the Qt-style private class and
+d-ptr in your own libraries with QExt. See the implementation (core/dptr.h)
+and documentation for more details.
