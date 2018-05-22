@@ -17,9 +17,9 @@
 #ifndef QE_WINDOWS_UNKNOWNPOINTER_H
 #define QE_WINDOWS_UNKNOWNPOINTER_H
 
+#include <utility>
 #include <type_traits>
 #include <combaseapi.h>
-#include <qecore/type_util.h>
 #include <qewindows/global.h>
 
 namespace qe {
@@ -43,53 +43,52 @@ public:
     using reference = std::add_lvalue_reference_t<IUnknownType>;
     //! For Boost/Standard Library compatibility.
     using const_reference = std::add_const_t<reference>;
-    //! Shorthand for the specific template type.
-    using this_type = UnknownPointer<IUnknownType>;
 
     //! Constructor using CoCreateInstance.
-    explicit inline UnknownPointer(const IID &clsid, IUnknown *outer = nullptr, DWORD context = CLSCTX_INPROC)
+    explicit UnknownPointer(const IID &clsid, IUnknown *outer = nullptr, DWORD context = CLSCTX_INPROC)
         : d(nullptr)
     {
         CoCreateInstance(clsid, outer, context, __uuidof(*this), ppVoid());
     }
 
     //! Default constructor. `AddRef()` is not called because ownership of the pointer is taken.
-    inline UnknownPointer(pointer p = nullptr) noexcept
+    UnknownPointer(pointer p = nullptr) noexcept
         : d(p)
     {
     }
 
     //! Copy constructor. This calls `AddRef()`.
-    inline UnknownPointer(const this_type &rhs)
+    UnknownPointer(const UnknownPointer &rhs)
         : d(rhs.data())
     {
-        if (!isNull()) {
-            data()->AddRef();
+        if (d) {
+            d->AddRef();
         }
     }
 
     //! Move constructor. `AddRef()` is not called because ownership of the pointer is taken.
-    inline UnknownPointer(this_type &&rhs) noexcept
+    UnknownPointer(UnknownPointer &&rhs) noexcept
         : d(rhs.take())
     {
     }
 
     //! Destroys the stored pointer and sets it to `nullptr`.
-    inline ~UnknownPointer()
+    ~UnknownPointer()
     {
-        reset(nullptr);
+        reset();
     }
 
     //! Copy assignment operator
-    inline this_type &operator=(const this_type &rhs) noexcept
+    UnknownPointer &operator=(const UnknownPointer &rhs) noexcept
     {
-        this_type copy(rhs);
-        swap(copy);
+        d = rhs.d;
+        if (d)
+            d->AddRef();
         return *this;
     }
 
     //! Move assignment operator
-    inline this_type &operator=(this_type &&rhs) noexcept
+    UnknownPointer &operator=(UnknownPointer &&rhs) noexcept
     {
         swap(std::move(rhs));
         return *this;
@@ -98,68 +97,65 @@ public:
     //! Sets the stored pointer to `nullptr` and returns its old value.
     pointer take() noexcept
     {
-        auto oldD = this->d;
-        this->d = nullptr;
-        return oldD;
+        return std::exchange(d, nullptr);
     }
 
     //! Sets the stored pointer to `other` and destroys the old pointer.
     void reset(pointer other = nullptr)
     {
-        if (this->d == other)
+        if (d == other)
             return;
-        auto oldD = this->d;
-        this->d = other;
+        auto oldD = std::exchange(d, other);
         if (oldD) {
-            qe::detail::assertCompleteType<IUnknownType>();
+            static_assert(sizeof(IUnknownType) > 0, "Type must be complete at destruction.");
             oldD->Release();
         }
     }
 
     //! Returns the stored pointer. Equivalent to \ref get.
-    pointer data() const noexcept           { return this->d; }
+    pointer data() const noexcept           { return d; }
 
     //! For Boost/Standard Library compatibility. Equivalent to \ref data.
-    pointer get() const noexcept            { return this->d; }
+    pointer get() const noexcept            { return d; }
 
     //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
-    inline pointer * addressOf() noexcept   { return &(this->d); }
+    pointer * addressOf() noexcept          { return &d; }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
-    explicit operator bool() const noexcept { return !isNull(); }
+    explicit operator bool() const noexcept { return d; }
 
     //! Returns true if the stored pointer is `nullptr`.
-    bool operator!() const noexcept         { return isNull(); }
+    bool operator!() const noexcept         { return !d; }
 
     //! Dereferences the stored pointer.
-    reference operator*() const noexcept    { return *(this->d); }
+    reference operator*() const noexcept    { return *d; }
 
     //! Returns the stored pointer, allowing pointer-to-member semantics.
-    pointer operator->() const noexcept     { return this->d; }
+    pointer operator->() const noexcept     { return d; }
 
     //! Returns if the stored pointer is null or not.
-    bool isNull() const noexcept            { return !(this->d); }
+    bool isNull() const noexcept            { return !d; }
 
     //! Swaps two instances.
-    void swap(this_type &other) noexcept { std::swap(this->d, other.d); }
+    void swap(UnknownPointer &other) noexcept { std::swap(d, other.d); }
 
     //! For Boost/Standard Library compatibility. Equivalent to \ref take.
     pointer release() noexcept              { return take(); }
 
     //! Returns the address of the stored pointer, cast as pointer-to-pointer-to-void.
-    inline void ** ppVoid()
+    void ** ppVoid()
     {
         return reinterpret_cast<void **>(addressOf());
     }
 
     //! Returns the data as a pointer-to-void.
-    inline void * pVoid()
+    void * pVoid()
     {
-        return reinterpret_cast<void *>(data());
+        return static_cast<void *>(data());
     }
 
     template <class Other>
-    inline UnknownPointer<Other> queryInterface()
+    UnknownPointer<Other> queryInterface()
     {
         UnknownPointer<Other> ret;
         auto hr = data()->QueryInterface(__uuidof(*ret), ret.ppVoid());
@@ -237,14 +233,6 @@ inline bool operator !=(std::nullptr_t, const qe::windows::UnknownPointer<T> &rh
 }
 
 namespace std {
-
-//! \relates qe::windows::UnknownPointer
-//! Partial specialization of `std::swap` for \ref qe::windows::UnknownPointer.
-template <class T>
-inline void swap(qe::windows::UnknownPointer<T> &lhs, qe::windows::UnknownPointer<T> &rhs)
-{
-    lhs.swap(rhs);
-}
 
 /*! \relates qe::windows::UnknownPointer
     Partial specialization of `std::hash` for \ref qe::windows::UnknownPointer.

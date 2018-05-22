@@ -18,65 +18,76 @@
 #ifndef QE_CORE_UNIQUEPOINTER_H
 #define QE_CORE_UNIQUEPOINTER_H
 
+#include <utility>
 #include "type_util.h"
 
 namespace qe {
 
+//! The default deleter used with \ref qe::UniquePointer.
+//! Unless you are using something other than `new` to construct your data,
+//! this works fine.
 template <typename T>
 struct DefaultDeleter
 {
     static inline void cleanup(T *pointer)
     {
-        qe::detail::assertCompleteType<T>();
+        static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
         delete pointer;
     }
 };
 
 /*! \brief A moveable version of `QScopedPointer`.
+
+  UniquePointer is a low-level wrapper around a raw pointer. It cannot be
+  copied but can be moved, including to convertible types. It was motivated
+  by a desire to create a version of `QScopedPointer` that can be moved like
+  `std::unique_pointer`, while maintaining compatibility with both.
+
+  The second template argument is the deleter, called `Cleanup`. It must
+  be a struct with a static function named `cleanup` that accepts a pointer
+  as an argument and destroys it. By default, this is \ref qe::DefaultDeleter,
+  which uses `delete`. This deleter is compatible with the existing deleters
+  available for `QScopedPointer`. If you are, for instance, using `malloc()`,
+  you can pass `QScopedPointerPodDeleter` as the `Cleanup` template argument.
+
+  \warning UniquePointer does **not** support basic arrays. Use std::array
+  instead.
   */
 template <class T, class Cleanup = DefaultDeleter<T>>
 class UniquePointer
 {
 public:
-    //! For Boost/Standard Library compatibility.
-    using value_type = T;
-    //! For Boost/Standard Library compatibility.
+    //! Shorthand for the template specialization in use
+    using element_type = T;
     using pointer = std::add_pointer_t<T>;
-    //! For Boost/Standard Library compatibility.
     using const_pointer = std::add_const_t<pointer>;
-    //! For Boost/Standard Library compatibility.
     using reference = std::add_lvalue_reference_t<T>;
-    //! For Boost/Standard Library compatibility.
     using const_reference = std::add_const_t<reference>;
     //! This is the cleanup object alias. See \ref qe::DefaultDeleter for an example.
-    using deleter = Cleanup;
+    using deleter_type = Cleanup;
 
-    //! Default constructor.
-    inline UniquePointer(pointer p = nullptr) noexcept : d(p) {}
-    //! Move constructor
-    inline UniquePointer(UniquePointer && other) noexcept : d(other.take()) { }
+    //! Default constructor accepting a (possibly null) pointer.
+    UniquePointer(pointer p = nullptr) noexcept : d(p) {}
+    //! Move constructor for UniquePointers managing the same types.
+    UniquePointer(UniquePointer && other) noexcept : d(other.release()) { }
 
-    template <class U>
-    inline UniquePointer(UniquePointer<U, Cleanup> && other) noexcept(std::is_convertible_v<U, T>())
-        : d(other.take())
+    template<class U, class CleanupU, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
+    UniquePointer(UniquePointer<U, CleanupU> && other) noexcept
+        : d(static_cast<pointer>(other.release()))
     {
-        qe::detail::assertConvertible<T, U>();
     }
+
     //! Move assignment operator.
-    inline UniquePointer &operator=(UniquePointer &&other)
+    UniquePointer &operator=(UniquePointer &&other)
     {
-        if (*this != other)
-            reset(other.take());
+        d = std::exchange(other.d, nullptr);
         return *this;
     }
 
-    template <class U>
-    inline UniquePointer &operator=(UniquePointer<U, Cleanup> &&other)
-        noexcept(std::is_convertible_v<U, T>)
+    template<class U, class CleanupU, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
+    UniquePointer &operator=(UniquePointer<U, CleanupU> &&other) noexcept
     {
-        qe::detail::assertConvertible<U, T>();
-        if (*this != other)
-            reset(other.take());
+        d = std::exchange(static_cast<pointer>(other.d), nullptr);
         return *this;
     }
 
@@ -86,143 +97,114 @@ public:
     UniquePointer &operator=(const UniquePointer &) = delete;
 
     //! Destroys the stored pointer and sets it to `nullptr`.
-    inline ~UniquePointer()
+    ~UniquePointer()
     {
-        reset(nullptr);
+        reset();
     }
 
     //! Sets the stored pointer to `nullptr` and returns its old value.
-    pointer take() noexcept
+    //! For Boost/Standard Library compatibility. Equivalent to \ref take.
+    pointer release() noexcept
     {
-        auto oldD = this->d;
-        this->d = nullptr;
-        return oldD;
+        return std::exchange(d, nullptr);
     }
+
+    //! Sets the stored pointer to `nullptr` and returns its old value.
+    //! For Qt compatibility. Equivalent to \ref release.
+    pointer take() noexcept              { return release(); }
 
     //! Sets the stored pointer to `other` and destroys the old pointer.
     void reset(pointer other = nullptr)
     {
-        if (this->d == other)
+        if (d == other)
             return;
-        auto oldD = this->d;
-        if (oldD)
-            deleter::cleanup(oldD);
-        this->d = other;
-
+        deleter_type::cleanup(std::exchange(d, other));
     }
 
     //! Returns the stored pointer. Equivalent to \ref get.
-    pointer data() const noexcept           { return this->d; }
+    pointer data() const noexcept            { return d; }
 
     //! For Boost/Standard Library compatibility. Equivalent to \ref data.
-    pointer get() const noexcept            { return this->d; }
+    pointer get() const noexcept             { return d; }
 
     //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
-    inline pointer * addressOf() noexcept   { return &(this->d); }
+    pointer* addressOf() noexcept            { return &d; }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
-    explicit operator bool() const noexcept { return !isNull(); }
+    explicit operator bool() const noexcept  { return d; }
 
     //! Returns true if the stored pointer is `nullptr`.
-    bool operator!() const noexcept         { return isNull(); }
+    bool operator!() const noexcept          { return !d; }
 
     //! Dereferences the stored pointer.
-    reference operator*() const noexcept    { return *(this->d); }
+    reference operator*() const noexcept     { return *d; }
 
     //! Returns the stored pointer, allowing pointer-to-member semantics.
-    pointer operator->() const noexcept     { return this->d; }
+    pointer operator->() const noexcept      { return d; }
 
     //! Returns if the stored pointer is null or not.
-    bool isNull() const noexcept            { return !(this->d); }
+    bool isNull() const noexcept             { return !d; }
 
-    void swap(UniquePointer &other) noexcept{ std::swap(this->d, other.d); }
-
-    //! Swaps two convertible instances.
-    template <class U>
-    void swap(UniquePointer<U, Cleanup> &other)
-        noexcept(std::is_convertible_v<U, T> && std::is_convertible_v<T, U>)
-    {
-        qe::detail::assertConvertible<U, T>();
-        qe::detail::assertConvertible<T, U>();
-        std::swap(this->d, other.d);
-    }
-
-    //! For Boost/Standard Library compatibility. Equivalent to \ref take.
-    pointer release() noexcept              { return take(); }
+    //! Swaps two instances.
+    void swap(UniquePointer &other) noexcept { std::swap(d, other.d); }
 
 private:
     pointer d;
 };
 
-//! Uses forwarding to construct an instance of UniquePointer.
+//! Uses `std::forward` and `new` to construct an instance of UniquePointer.
+//! \relates qe::UniquePointer
 template <class T, class... Args>
-UniquePointer<T> makeUnique(Args && ...args)
+inline UniquePointer<T> makeUnique(Args && ...args)
 {
     return UniquePointer<T>(new T(std::forward<Args>(args)...));
 }
 
 } //namespace qe
 
-/*!
-  Returns true if \a lhs and \a rhs manage the same pointer.
-  \relates qe::UniquePointer
- */
-template <class T, class Cleanup>
-inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
+//! \brief Returns true if \a lhs and \a rhs are equal.
+//! \a rhs may be a pointer, nullptr, or even another `UniquePointer`.
+//! \relates qe::UniquePointer
+template <class T, class Cleanup, class U>
+inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
 {
-    return lhs.data() == rhs.data();
+    return lhs.data() == rhs;
 }
 
-//! \overload
-template<class T, class Cleanup>
-inline bool operator ==(const qe::UniquePointer<T, Cleanup> &lhs, std::nullptr_t) noexcept
+//! \brief Returns true if \a lhs and \a rhs are equal.
+//! The `enable_if_t` eliminates this version from selection when `U` is another `UniquePointer`.
+//! \relates qe::UniquePointer
+template<class T, class Cleanup, class U,
+         class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
+inline bool operator ==(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
-    return lhs.isNull();
-}
-
-//! \overload
-template<class T, class Cleanup>
-inline bool operator ==(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
-{
-    return rhs.isNull();
+    return rhs.data() == lhs;
 }
 
 /*!
-  Returns true if \a lhs and \a rhs do *not* manage the same pointer.
+  \brief Returns true if \a lhs and \a rhs are not equal.
+  \a rhs may be a pointer, `nullptr`, or even another `qe::UniquePointer`.
   \relates qe::UniquePointer
  */
-template <class T, class Cleanup>
-inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
+template <class T, class Cleanup, class U>
+inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
 {
-    return lhs.data() != rhs.data();
+    return !(lhs == rhs);
 }
 
-//! \overload
-template <class T, class Cleanup>
-inline bool operator !=(const qe::UniquePointer<T, Cleanup> &lhs, std::nullptr_t) noexcept
+/*!
+  \brief Returns true if \a lhs and \a rhs are not equal.
+  The `enable_if_t` eliminates this template from selection when `U` is also a UniquePointer of some type.
+  \relates qe::UniquePointer
+ */
+template <class T, class Cleanup, class U,
+          class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
+inline bool operator!=(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
-    return !lhs.data();
-}
-
-//! \overload
-template <class T, class Cleanup>
-inline bool operator !=(std::nullptr_t, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
-{
-    return !rhs.data();
+    return !(lhs == rhs);
 }
 
 namespace std {
-/*! Partial specialization of `std::swap` for UniquePointer.
-  \relates qe::UniquePointer
- */
-template <class T, class Cleanup>
-inline void swap(qe::UniquePointer<T, Cleanup> &lhs, qe::UniquePointer<T, Cleanup> &rhs) noexcept
-{
-    lhs.swap(rhs);
-}
-
-//TODO: partial specialization of swap using convertible types
-
 /*! Partial specialization of `std::hash` for UniquePointer.
    \relates qe::UniquePointer
  */
@@ -231,7 +213,7 @@ struct hash<qe::UniquePointer<T, Cleanup>>
 {
     using argument_type = qe::UniquePointer<T, Cleanup>;
     using result_type = std::size_t;
-    result_type operator()(const argument_type & p) const noexcept
+    inline result_type operator()(const argument_type & p) const noexcept
     {
         return std::hash<T *>{}(p.data());
     }

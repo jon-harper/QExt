@@ -19,25 +19,33 @@
 #define QE_CORE_TYPE_UTIL_H
 
 #include <type_traits>
+#include <utility>
 
 namespace qe {
 namespace detail {
 
-//! Enforces a complete type. Useful for deleters to ensure the type they are to destroy is complete.
-template <class T>
-constexpr void assertCompleteType() noexcept
+template <class Base, class Derived>
+struct is_safely_castable
+        : std::bool_constant<std::is_base_of<Base, Derived>() && std::has_virtual_destructor<Base>()>
 {
-    using forced_complete_type = char[sizeof(T) ? 1 : -1];
-    (void)sizeof(forced_complete_type);
-}
+};
 
-//! Forces a compile error if `T` is not convertible to `U`;
-template <class T, class U>
-void assertConvertible()
+template <class Base, class Derived>
+using is_pointer_safely_castable_v = typename is_safely_castable<Base, Derived>::value;
+
+
+template <class From, class To, typename = void>
+struct is_pointer_static_castable : std::false_type
 {
-    using convertible = char[sizeof(std::is_convertible<T, U>()) ? 1 : -1];
-    (void)sizeof(convertible);
-}
+};
+
+template <class From, class To>
+struct is_pointer_static_castable<From, To,
+                           std::void_t<decltype(static_cast<To>(std::declval<From>()))>>
+    : std::true_type
+{
+    static constexpr bool value = true;
+};
 
 } //namespace detail
 } //namespace qe

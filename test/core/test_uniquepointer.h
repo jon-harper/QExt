@@ -40,10 +40,16 @@ struct Struct1
         instances++;
     }
 
+    Struct1(const Struct1 &) = default;
+    Struct1(Struct1 &&) = default;
+
     ~Struct1()
     {
         instances--;
     }
+
+    Struct1 &operator =(const Struct1 &) = default;
+    Struct1 &operator =(Struct1 &&) = default;
 
     void incr()
     {
@@ -71,29 +77,27 @@ struct Struct2 : public Struct1
 };
 
 
-struct Struct3 : public Struct1
+struct Struct3 : public Struct2
 {
-    Struct3(const Struct2 &other)
-        : Struct1(other.value)
-    {
-    }
-    Struct3(const Struct2 &&other)
-        : Struct1(other.value)
-    {
-    }
-    Struct3 operator=(const Struct2 &other)
-    {
-        Struct3 ret(other);
-        return ret;
+//    Struct3(const Struct2 &other)
+//        : Struct1(other.value)
+//    {
+//    }
+//    Struct3(const Struct2 &&other)
+//        : Struct1(other.value)
+//    {
+//    }
+//    Struct3 &operator=(const Struct2 &other)
+//    {
+//        *this = Struct3(other);
+//        return *this;
+//    }
 
-    }
-
-    Struct3 operator=(Struct2 &&other)
-    {
-        Struct3 ret(other);
-        other.~Struct2();
-        return ret;
-    }
+//    Struct3 operator=(Struct2 &&other)
+//    {
+//        *this = Struct3(std::move(other));
+//        return *this;
+//    }
 };
 
 struct unique_pointer_test
