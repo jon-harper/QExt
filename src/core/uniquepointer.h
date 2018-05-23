@@ -29,7 +29,7 @@ namespace qe {
 template <typename T>
 struct DefaultDeleter
 {
-    static inline void cleanup(T *pointer)
+    static void cleanup(T *pointer)
     {
         static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
         delete pointer;
@@ -102,18 +102,19 @@ public:
         reset();
     }
 
-    //! Sets the stored pointer to `nullptr` and returns its old value.
-    //! For Boost/Standard Library compatibility. Equivalent to \ref take.
+    //! [std] Sets the stored pointer to `nullptr` and returns its old value.
+    //! Equivalent to \ref take.
     pointer release() noexcept
     {
         return std::exchange(d, nullptr);
     }
 
-    //! Sets the stored pointer to `nullptr` and returns its old value.
-    //! For Qt compatibility. Equivalent to \ref release.
+    //! [Qt] Sets the stored pointer to `nullptr` and returns its old value.
+    //! Equivalent to \ref release.
     pointer take() noexcept              { return release(); }
 
-    //! Sets the stored pointer to `other` and destroys the old pointer.
+    //! [std/Qt] Sets the stored pointer to `other` and destroys the old pointer.
+    //! Equivalent to \ref take.
     void reset(pointer other = nullptr)
     {
         if (d == other)
@@ -121,14 +122,14 @@ public:
         deleter_type::cleanup(std::exchange(d, other));
     }
 
-    //! Returns the stored pointer. Equivalent to \ref get.
+    //! [Qt] Returns the stored pointer. Equivalent to `get`.
     pointer data() const noexcept            { return d; }
 
-    //! For Boost/Standard Library compatibility. Equivalent to \ref data.
+    //! [std] Equivalent to \ref data.
     pointer get() const noexcept             { return d; }
 
     //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
-    pointer* addressOf() noexcept            { return &d; }
+    pointer* addressOf() const noexcept      { return &d; }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept  { return d; }
@@ -145,7 +146,7 @@ public:
     //! Returns if the stored pointer is null or not.
     bool isNull() const noexcept             { return !d; }
 
-    //! Swaps two instances.
+    //! [std/Qt] Swaps two instances.
     void swap(UniquePointer &other) noexcept { std::swap(d, other.d); }
 
 private:
@@ -155,7 +156,7 @@ private:
 //! Uses `std::forward` and `new` to construct an instance of UniquePointer.
 //! \relates qe::UniquePointer
 template <class T, class... Args>
-inline UniquePointer<T> makeUnique(Args && ...args)
+UniquePointer<T> makeUnique(Args && ...args)
 {
     return UniquePointer<T>(new T(std::forward<Args>(args)...));
 }
@@ -166,7 +167,7 @@ inline UniquePointer<T> makeUnique(Args && ...args)
 //! \a rhs may be a pointer, nullptr, or even another `UniquePointer`.
 //! \relates qe::UniquePointer
 template <class T, class Cleanup, class U>
-inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
+bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
 {
     return lhs.data() == rhs;
 }
@@ -176,7 +177,7 @@ inline bool operator==(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) n
 //! \relates qe::UniquePointer
 template<class T, class Cleanup, class U,
          class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
-inline bool operator ==(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
+bool operator ==(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
     return rhs.data() == lhs;
 }
@@ -187,7 +188,7 @@ inline bool operator ==(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) 
   \relates qe::UniquePointer
  */
 template <class T, class Cleanup, class U>
-inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
+bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) noexcept
 {
     return !(lhs == rhs);
 }
@@ -199,7 +200,7 @@ inline bool operator!=(const qe::UniquePointer<T, Cleanup> &lhs, const U &rhs) n
  */
 template <class T, class Cleanup, class U,
           class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
-inline bool operator!=(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
+bool operator!=(const U &lhs, const qe::UniquePointer<T, Cleanup> &rhs) noexcept
 {
     return !(lhs == rhs);
 }
@@ -213,7 +214,7 @@ struct hash<qe::UniquePointer<T, Cleanup>>
 {
     using argument_type = qe::UniquePointer<T, Cleanup>;
     using result_type = std::size_t;
-    inline result_type operator()(const argument_type & p) const noexcept
+    result_type operator()(const argument_type & p) const noexcept
     {
         return std::hash<T *>{}(p.data());
     }

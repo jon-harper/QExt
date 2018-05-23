@@ -8,34 +8,32 @@
 namespace qe {
 namespace windows {
 
-/*!
-    \brief Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
- */
+//! Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
 template <class T>
 struct ComDeleter {
-    static inline void cleanup(T *pointer) {
+    static void cleanup(T *pointer) {
         if (pointer)
-            CoTaskMemFree(reinterpret_cast<void *>(pointer));
+            CoTaskMemFree(static_cast<void *>(pointer));
     }
 };
 
-//!\brief  Specialization of \ref qe::UniquePointer that uses `CoTaskMemFree()` during destruction.
- template <class T>
-using ComPointer = qe::UniquePointer<T, ComDeleter<T>>;
-
-//! \brief Deleter struct for \ref BStrPointer using `SysFreeString`.
+//! Deleter struct for \ref BStrPointer using `SysFreeString`.
 struct BStrDeleter {
-    static inline void cleanup(BSTR pointer)
+    static void cleanup(BSTR pointer)
     {
         if (pointer)
             SysFreeString(pointer);
     }
 };
 
-//! \brief  Specialization of \ref qe::UniquePointer for BSTRs using \ref BStrDeleter.
+//! Specialization of \ref qe::UniquePointer that uses `CoTaskMemFree()` during destruction.
+template <class T>
+using ComPointer = qe::UniquePointer<T, ComDeleter<T>>;
+
+//! Specialization of \ref qe::UniquePointer for BSTRs using \ref BStrDeleter.
 using BStrPointer = qe::UniquePointer<OLECHAR, BStrDeleter>;
 
-//! \brief  Specialization of \ref qe::UniquePointer for BSTRs using \ref ComDeleter.
+//! Specialization of \ref qe::UniquePointer for BSTRs using \ref ComDeleter.
 using WCharPointer = qe::UniquePointer<WCHAR, ComDeleter<WCHAR>>;
 
 } // namespace windows

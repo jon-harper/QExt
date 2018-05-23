@@ -94,13 +94,7 @@ public:
         return *this;
     }
 
-    //! Sets the stored pointer to `nullptr` and returns its old value.
-    pointer take() noexcept
-    {
-        return std::exchange(d, nullptr);
-    }
-
-    //! Sets the stored pointer to `other` and destroys the old pointer.
+    //! [std/Qt] Sets the stored pointer to `other` and destroys the old pointer.
     void reset(pointer other = nullptr)
     {
         if (d == other)
@@ -112,16 +106,22 @@ public:
         }
     }
 
-    //! Returns the stored pointer. Equivalent to \ref get.
+    //! [std] Equivalent to \ref take.
+    pointer release() noexcept              { return std::exchange(d, nullptr); }
+
+    //! [std] Sets the stored pointer to `nullptr` and returns its old value.
+    pointer take() noexcept                 { return release(); }
+
+    //! [Qt] Returns a copy of the stored pointer. Equivalent to `get`.
     pointer data() const noexcept           { return d; }
 
-    //! For Boost/Standard Library compatibility. Equivalent to \ref data.
+    //! [std] Returns a copy of the stored pointer. Equivalent to `data`.
     pointer get() const noexcept            { return d; }
 
-    //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
+    //! Returns a pointer-to-pointer of `T`, that is, the address of the stored pointer.
     pointer * addressOf() noexcept          { return &d; }
 
-    //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
+    //! Returns true if the stored pointer is not null. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept { return d; }
 
     //! Returns true if the stored pointer is `nullptr`.
@@ -139,20 +139,11 @@ public:
     //! Swaps two instances.
     void swap(UnknownPointer &other) noexcept { std::swap(d, other.d); }
 
-    //! For Boost/Standard Library compatibility. Equivalent to \ref take.
-    pointer release() noexcept              { return take(); }
-
     //! Returns the address of the stored pointer, cast as pointer-to-pointer-to-void.
-    void ** ppVoid()
-    {
-        return reinterpret_cast<void **>(addressOf());
-    }
+    void ** ppVoid() noexcept               { return reinterpret_cast<void **>(addressOf()); }
 
     //! Returns the data as a pointer-to-void.
-    void * pVoid()
-    {
-        return static_cast<void *>(data());
-    }
+    void * pVoid() const noexcept           { return static_cast<void *>(data()); }
 
     template <class Other>
     UnknownPointer<Other> queryInterface()
@@ -186,50 +177,36 @@ UnknownPointer<T> makeUnknown(Args ...args)
 
 //! Equality operator for \ref qe::windows::UnknownPointer.
 //! \relates qe::windows::UnknownPointer
-template <class T>
-inline bool operator ==(const qe::windows::UnknownPointer<T> &lhs, const qe::windows::UnknownPointer<T> &rhs)
+template <class T, class U>
+bool operator ==(const qe::windows::UnknownPointer<T> &lhs, const U &rhs) noexcept
 {
-    return lhs.data() == rhs.data();
+    return lhs.data() == rhs;
 }
 
 //! \relates qe::windows::UnknownPointer
 //! \overload
-template<class T>
-inline bool operator ==(const qe::windows::UnknownPointer<T> &lhs, std::nullptr_t)
+template <class T, class U,
+          class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
+bool operator ==(const U &lhs, const qe::windows::UnknownPointer<T> &rhs)
 {
-    return lhs.isNull();
-}
-
-//! \relates qe::windows::UnknownPointer
-//! \overload
-template<class T>
-inline bool operator ==(std::nullptr_t, const qe::windows::UnknownPointer<T> &rhs)
-{
-    return rhs.isNull();
+    return rhs.data() = lhs;
 }
 
 //! \relates qe::windows::UnknownPointer
 //! Inequality operator for \ref qe::windows::UnknownPointer.
-template <class T>
-inline bool operator !=(const qe::windows::UnknownPointer<T> &lhs, const qe::windows::UnknownPointer<T> &rhs)
+template <class T, class U>
+bool operator !=(const qe::windows::UnknownPointer<T> &lhs, const U &rhs)
 {
     return !(lhs == rhs);
 }
 
 //! \relates qe::windows::UnknownPointer
 //! \overload
-template <class T>
-inline bool operator !=(const qe::windows::UnknownPointer<T> &lhs, std::nullptr_t)
+template <class T, class U,
+          class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
+bool operator !=(const U & lhs, const qe::windows::UnknownPointer<T> &rhs)
 {
-    return !(lhs.isNull());
-}
-
-//! \relates qe::windows::UnknownPointer
-//! \overload
-template <class T>
-inline bool operator !=(std::nullptr_t, const qe::windows::UnknownPointer<T> &rhs)
-{
-    return !(rhs.isNull());
+    return !(lhs == rhs);
 }
 
 namespace std {
