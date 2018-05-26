@@ -65,6 +65,7 @@ class PublicBase;
 class QE_CORE_EXPORT PrivateBase
 {
 public:
+    //! Constructs a new `PrivateBase` instance with \a qq as the back-pointer.
     explicit PrivateBase(PublicBase *qq);
 
     //! Deleted copy constructor.
@@ -76,7 +77,7 @@ public:
     //! Deleted default constructor.
     PrivateBase() = delete;
 
-    //! Virtual destructor.
+    //! Virtual destructor to prevent slicing.
     inline virtual ~PrivateBase() {}
 
     //! Deleted copy assignment operator.

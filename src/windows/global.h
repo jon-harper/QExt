@@ -26,9 +26,9 @@
 #include <qecore/global.h>
 
 #if defined(QE_BUILD_WINDOWS)
-#  define QE_WINDOWS_EXPORT Q_DECL_EXPORT
+#  define QE_WINDOWS_EXPORT __declspec(dllexport)
 #else
-#  define QE_WINDOWS_EXPORT Q_DECL_IMPORT
+#  define QE_WINDOWS_EXPORT __declspec(dllimport)
 #endif
 
 #endif //QE_WINDOWS_GLOBAL_H

@@ -2,6 +2,7 @@
 #define QE_WINDOWS_COMPOINTER_H
 
 #include <combaseapi.h>
+#include <shtypes.h>
 #include <qecore/uniquepointer.h>
 #include <qewindows/global.h>
 
@@ -10,7 +11,8 @@ namespace windows {
 
 //! Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
 template <class T>
-struct ComDeleter {
+struct ComDeleter
+{
     static void cleanup(T *pointer) {
         if (pointer)
             CoTaskMemFree(static_cast<void *>(pointer));
@@ -19,8 +21,7 @@ struct ComDeleter {
 
 //! Deleter struct for \ref BStrPointer using `SysFreeString`.
 struct BStrDeleter {
-    static void cleanup(BSTR pointer)
-    {
+    static void cleanup(BSTR pointer) {
         if (pointer)
             SysFreeString(pointer);
     }
@@ -36,6 +37,8 @@ using BStrPointer = qe::UniquePointer<OLECHAR, BStrDeleter>;
 //! Specialization of \ref qe::UniquePointer for BSTRs using \ref ComDeleter.
 using WCharPointer = qe::UniquePointer<WCHAR, ComDeleter<WCHAR>>;
 
+using IdListPointer = qe::UniquePointer<ITEMIDLIST_ABSOLUTE, ComDeleter<ITEMIDLIST_ABSOLUTE>>;
+
 } // namespace windows
 } // namespace qe
 
@@ -48,6 +51,7 @@ using QeComDeleter = qe::windows::ComDeleter<T>;
 
 using QeBStrPointer = qe::windows::BStrPointer;
 using QeWCharPointer = qe::windows::WCharPointer;
+using QeIdListPointer = qe::windows::IdListPointer;
 #endif
 
 #endif // QE_WINDOWS_COMPOINTER_H

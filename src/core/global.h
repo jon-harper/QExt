@@ -23,22 +23,17 @@
 #ifndef QE_CORE_GLOBAL_H
 #define QE_CORE_GLOBAL_H
 
+
 #if defined(QE_BUILD_CORE)
-#  define QE_CORE_EXPORT Q_DECL_EXPORT
+#  define QE_CORE_EXPORT __declspec(dllexport)
 #else
-#  define QE_CORE_EXPORT Q_DECL_IMPORT
+#  define QE_CORE_EXPORT __declspec(dllimport)
 #endif
 
 #if defined(QE_BUILD_WIDGETS)
-#  define QE_WIDGETS_EXPORT Q_DECL_EXPORT
+#  define QE_WIDGETS_EXPORT __declspec(dllexport)
 #else
-#  define QE_WIDGETS_EXPORT Q_DECL_IMPORT
-#endif
-
-#if defined(QE_BUILD_WINDOWS)
-#  define QE_WINDOWS_EXPORT Q_DECL_EXPORT
-#else
-#  define QE_WINDOWS_EXPORT Q_DECL_IMPORT
+#  define QE_WIDGETS_EXPORT __declspec(dllimport)
 #endif
 
 /*!

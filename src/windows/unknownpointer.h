@@ -143,7 +143,9 @@ public:
     void ** ppVoid() noexcept               { return reinterpret_cast<void **>(addressOf()); }
 
     //! Returns the data as a pointer-to-void.
-    void * pVoid() const noexcept           { return static_cast<void *>(data()); }
+    void * pVoid() const noexcept           { return static_cast<void *>(d); }
+
+    IUnknown *asUnknown() const noexcept    { return reinterpret_cast<IUnknown *>(d); }
 
     template <class Other>
     UnknownPointer<Other> queryInterface()
@@ -161,6 +163,13 @@ public:
 private:
     pointer d;
 };
+//! Alias of UnknownPointer for IUnknown
+//! \relates UnknownPointer
+using UnknownBasePointer = UnknownPointer<IUnknown>;
+
+//! Alias of UnknownPointer for IDispatch
+//! \relates UnknownPointer
+using DispatchPointer = UnknownPointer<IDispatch>;
 
 /*!
   \brief Returns an \ref UnknownPointer created by forwarding \a args to the \ref UnknownPointer constructor.
