@@ -37,6 +37,8 @@ using BStrPointer = qe::UniquePointer<OLECHAR, BStrDeleter>;
 //! Specialization of \ref qe::UniquePointer for BSTRs using \ref ComDeleter.
 using WCharPointer = qe::UniquePointer<WCHAR, ComDeleter<WCHAR>>;
 
+//! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
+//! ILFree is not necessary since Win2k or so.
 using IdListPointer = qe::UniquePointer<ITEMIDLIST_ABSOLUTE, ComDeleter<ITEMIDLIST_ABSOLUTE>>;
 
 } // namespace windows

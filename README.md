@@ -43,15 +43,14 @@ QExt is currently unstable (pre-alpha) and subject to change, including API chan
 ### QeCore
 - Public and private base classes: done
 - D-ptr and q-ptr, `auto` semantics: done
-- `qe::UniquePointer`: nearly complete, needs code review
+- `qe::UniquePointer`: done
 
 ### QeWidgets
 - Widgets need cleanup, tests, and documentation
 
 ### QeWindows
-- `qe::windows::UnknownPointer`: nearly complete, needs code review
+- `qe::windows::UnknownPointer`: needs more thorough unit test
 - Numerous low-level functions done
-- COM smart pointers need to be used everywhere 
 - Need test classes
 
 ## License

@@ -20,6 +20,7 @@
 #include <utility>
 #include <type_traits>
 #include <combaseapi.h>
+#include <QtCore/QMetaType>
 #include <qewindows/global.h>
 
 namespace qe {
@@ -90,7 +91,7 @@ public:
     //! Move assignment operator
     UnknownPointer &operator=(UnknownPointer &&rhs) noexcept
     {
-        swap(std::move(rhs));
+        d = std::exchange(rhs.d, nullptr);
         return *this;
     }
 
@@ -163,6 +164,7 @@ public:
 private:
     pointer d;
 };
+
 //! Alias of UnknownPointer for IUnknown
 //! \relates UnknownPointer
 using UnknownBasePointer = UnknownPointer<IUnknown>;
@@ -234,6 +236,10 @@ struct hash<qe::windows::UnknownPointer<T>>
     }
 };
 } //namespace std
+
+Q_DECLARE_SMART_POINTER_METATYPE(qe::windows::UnknownPointer);
+Q_DECLARE_METATYPE(qe::windows::UnknownBasePointer);
+Q_DECLARE_METATYPE(qe::windows::DispatchPointer);
 
 #ifndef QEXT_NO_CLUTTER
 //! \relates qe::windows::UnknownPointer

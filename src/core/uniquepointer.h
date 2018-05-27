@@ -221,6 +221,11 @@ struct hash<qe::UniquePointer<T, Cleanup>>
 };
 } //namespace std
 
+#ifndef QEXT_CORE_NO_QT
+#include <QtCore/QMetaType>
+Q_DECLARE_SMART_POINTER_METATYPE(qe::UniquePointer);
+#endif
+
 #ifndef QEXT_NO_CLUTTER
 //! \relates qe::DefaultDeleter
 template <class T>
