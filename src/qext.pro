@@ -1,6 +1,2 @@
-include (doc/doc.pri)
-
 TEMPLATE = subdirs
-SUBDIRS += \
-    core \
-    windows
+SUBDIRS = core windows

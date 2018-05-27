@@ -427,7 +427,7 @@ __pycache__/
 # End of https://www.gitignore.io/api/qt,c++,linux,windows,qtcreator,visualstudio
 
 ### Doxygen output
-doc/html/*
+docs/html/*
 
 ### Local code sandbox
 sandbox/*
