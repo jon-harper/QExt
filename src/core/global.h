@@ -23,18 +23,17 @@
 #ifndef QE_CORE_GLOBAL_H
 #define QE_CORE_GLOBAL_H
 
-
 #if defined(QE_BUILD_CORE)
 #  define QE_CORE_EXPORT __declspec(dllexport)
 #else
 #  define QE_CORE_EXPORT __declspec(dllimport)
 #endif
 
-#if defined(QE_BUILD_WIDGETS)
-#  define QE_WIDGETS_EXPORT __declspec(dllexport)
-#else
-#  define QE_WIDGETS_EXPORT __declspec(dllimport)
-#endif
+//#if defined(QE_BUILD_WIDGETS)
+//#  define QE_WIDGETS_EXPORT __declspec(dllexport)
+//#else
+//#  define QE_WIDGETS_EXPORT __declspec(dllimport)
+//#endif
 
 /*!
     \brief Defines a class as static.

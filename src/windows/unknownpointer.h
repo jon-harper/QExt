@@ -200,7 +200,7 @@ template <class T, class U,
           class = std::enable_if_t<std::is_pointer<U>::value || std::is_null_pointer<U>::value>>
 bool operator ==(const U &lhs, const qe::windows::UnknownPointer<T> &rhs)
 {
-    return rhs.data() = lhs;
+    return rhs.data() == lhs;
 }
 
 //! \relates qe::windows::UnknownPointer

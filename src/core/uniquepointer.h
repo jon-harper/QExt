@@ -153,12 +153,22 @@ private:
     pointer d;
 };
 
-//! Uses `std::forward` and `new` to construct an instance of UniquePointer.
+//! Constructs an instance of UniquePointer<T> using parentheses to invoke `T`'s constructor.
 //! \relates qe::UniquePointer
+//! \sa makeUniqueBraced
 template <class T, class... Args>
 UniquePointer<T> makeUnique(Args && ...args)
 {
-    return UniquePointer<T>(new T(std::forward<Args>(args)...));
+    return new T(std::forward<Args>(args)...);
+}
+
+//! Constructs an instance of `UniquePointer<T>` using braced construction for `T`
+//! \relates qe::UniquePointer
+//! \sa makeUnique
+template <class T, class... Args>
+UniquePointer<T> makeUniqueBraced(Args && ...args)
+{
+    return new T{std::forward<Args>(args)...};
 }
 
 } //namespace qe
