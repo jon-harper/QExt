@@ -1,3 +1,7 @@
+#nav-tree {
+	font: 'Open Sans', sans serif;
+}
+
 #nav-tree .children_ul {
   margin:0;
   padding:4px;

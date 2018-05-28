@@ -1,4 +1,7 @@
+
+
 .tabs, .tabs2, .tabs3 {
+	font: 'Open Sans', sans serif;
     background-image: none;
     width: 100%;
     z-index: 101;
