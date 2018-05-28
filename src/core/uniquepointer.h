@@ -20,21 +20,9 @@
 
 #include <utility>
 #include "type_util.h"
+#include "pointer_deleters.h"
 
 namespace qe {
-
-//! The default deleter used with \ref qe::UniquePointer.
-//! Unless you are using something other than `new` to construct your data,
-//! this works fine.
-template <typename T>
-struct DefaultDeleter
-{
-    static void cleanup(T *pointer)
-    {
-        static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
-        delete pointer;
-    }
-};
 
 /*! \brief A moveable version of `QScopedPointer`.
 
@@ -57,7 +45,6 @@ template <class T, class Cleanup = DefaultDeleter<T>>
 class UniquePointer
 {
 public:
-    //! Shorthand for the template specialization in use
     using element_type = T;
     using pointer = std::add_pointer_t<T>;
     using const_pointer = std::add_const_t<pointer>;
@@ -129,7 +116,7 @@ public:
     pointer get() const noexcept             { return d; }
 
     //! Returns a pointer-to-pointer of T, that is, the address of the stored pointer.
-    pointer* addressOf() const noexcept      { return &d; }
+    pointer* addressOf() noexcept            { return &d; }
 
     //! Returns true if the stored pointer is valid. Allows `if (ptr)` to work.
     explicit operator bool() const noexcept  { return d; }

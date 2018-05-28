@@ -12,4 +12,5 @@ SOURCES += \
 
 HEADERS += \
     $$PWD/test_uniquepointer.h \
-    $$PWD/test.h
+    $$PWD/test.h \
+    $$PWD/test_managedpointer.h

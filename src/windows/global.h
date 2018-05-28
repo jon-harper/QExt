@@ -31,4 +31,6 @@
 #  define QE_WINDOWS_EXPORT __declspec(dllimport)
 #endif
 
+#define STRICT_TYPED_ITEMIDS
+
 #endif //QE_WINDOWS_GLOBAL_H

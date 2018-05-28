@@ -3,7 +3,7 @@
 
 #include <combaseapi.h>
 #include <shtypes.h>
-#include <qecore/uniquepointer.h>
+#include <qecore/managedpointer.h>
 #include <qewindows/global.h>
 
 namespace qe {
@@ -37,10 +37,6 @@ using BStrPointer = qe::UniquePointer<OLECHAR, BStrDeleter>;
 //! Specialization of \ref qe::UniquePointer for BSTRs using \ref ComDeleter.
 using WCharPointer = qe::UniquePointer<WCHAR, ComDeleter<WCHAR>>;
 
-//! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
-//! ILFree is not necessary since Win2k or so.
-using IdListPointer = qe::UniquePointer<ITEMIDLIST_ABSOLUTE, ComDeleter<ITEMIDLIST_ABSOLUTE>>;
-
 } // namespace windows
 } // namespace qe
 
@@ -53,7 +49,6 @@ using QeComDeleter = qe::windows::ComDeleter<T>;
 
 using QeBStrPointer = qe::windows::BStrPointer;
 using QeWCharPointer = qe::windows::WCharPointer;
-using QeIdListPointer = qe::windows::IdListPointer;
 #endif
 
 #endif // QE_WINDOWS_COMPOINTER_H

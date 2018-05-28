@@ -40,7 +40,11 @@ struct Struct1
         instances++;
     }
 
-    Struct1(const Struct1 &) = default;
+    Struct1(const Struct1 &other)
+    {
+        instances++;
+        value = other.value;
+    }
     Struct1(Struct1 &&) = default;
 
     ~Struct1()
@@ -48,7 +52,12 @@ struct Struct1
         instances--;
     }
 
-    Struct1 &operator =(const Struct1 &) = default;
+    Struct1 &operator =(const Struct1 &other)
+    {
+        instances++;
+        value = other.value;
+        return *this;
+    }
     Struct1 &operator =(Struct1 &&) = default;
 
     void incr()
@@ -79,25 +88,6 @@ struct Struct2 : public Struct1
 
 struct Struct3 : public Struct2
 {
-//    Struct3(const Struct2 &other)
-//        : Struct1(other.value)
-//    {
-//    }
-//    Struct3(const Struct2 &&other)
-//        : Struct1(other.value)
-//    {
-//    }
-//    Struct3 &operator=(const Struct2 &other)
-//    {
-//        *this = Struct3(other);
-//        return *this;
-//    }
-
-//    Struct3 operator=(Struct2 &&other)
-//    {
-//        *this = Struct3(std::move(other));
-//        return *this;
-//    }
 };
 
 struct unique_pointer_test
@@ -115,8 +105,8 @@ struct unique_pointer_test
 
     static void empty_pointer_test()
     {
-        // Create an empty (ie. nullptr) UniquePointer
-        UniquePointer<Struct2> xPtr = nullptr;
+        // Default construction
+        UniquePointer<Struct2> xPtr;
 
         EXPECT_FALSE(xPtr);
         EXPECT_EQ(nullptr, xPtr.get());
@@ -125,13 +115,12 @@ struct unique_pointer_test
         xPtr.reset();
 
         EXPECT_FALSE(xPtr);
-        EXPECT_EQ(nullptr,  xPtr.get());
     }
 
     static void basic_pointer_test()
     {
         {
-            // Create a UniquePointer
+            // Initialization with a pointer
             UniquePointer<Struct2> xPtr(new Struct2(123));
 
             EXPECT_TRUE(xPtr);
@@ -151,36 +140,30 @@ struct unique_pointer_test
                 xPtr->decr();
                 xPtr->decr();
 
-                // Copy construct the UniquePointer, transferring ownership
+                // Move construct, transferring ownership
                 UniquePointer<Struct2> yPtr(std::move(xPtr));
                 xPtr.reset();
 
                 EXPECT_NE(xPtr, yPtr);
                 EXPECT_FALSE(xPtr);
-                EXPECT_EQ(nullptr,  xPtr.get());
                 EXPECT_TRUE(yPtr);
-                EXPECT_NE(nullptr,  yPtr.get());
                 EXPECT_EQ(123,   yPtr->value);
                 EXPECT_EQ(1,     Struct1::instances);
 
-                if (yPtr)
                 {
+                    //move initialization
                     UniquePointer<Struct2> zPtr = std::move(yPtr);
                     yPtr.reset();
 
                     EXPECT_NE(yPtr,  zPtr);
                     EXPECT_FALSE(yPtr);
-                    EXPECT_EQ(nullptr, yPtr.get());
                     EXPECT_TRUE(zPtr);
-                    EXPECT_NE(nullptr,  zPtr.get());
                     EXPECT_EQ(123,   zPtr->value);
                     EXPECT_EQ(1,     Struct1::instances);
                 }
 
                 EXPECT_FALSE(xPtr);
-                EXPECT_EQ(nullptr, xPtr.get());
                 EXPECT_FALSE(yPtr);
-                EXPECT_EQ(nullptr, yPtr.get());
                 EXPECT_EQ(0, Struct1::instances);
             }
             else
@@ -189,7 +172,6 @@ struct unique_pointer_test
             }
 
             EXPECT_FALSE(xPtr);
-            EXPECT_EQ(nullptr, xPtr.get());
             EXPECT_EQ(0, Struct1::instances);
         }
 
@@ -206,37 +188,32 @@ struct unique_pointer_test
 
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
-        EXPECT_EQ(123,  xPtr->value);
-        EXPECT_EQ(1,    Struct1::instances);
+        EXPECT_EQ(123, xPtr->value);
+        EXPECT_EQ(1, Struct1::instances);
         Struct2* pX  = xPtr.get();
 
         // Reset it with another new pointer
         xPtr.reset(new Struct2(234));
 
         EXPECT_TRUE(xPtr);
-        EXPECT_NE(nullptr, xPtr.get());
-        EXPECT_EQ(234,  xPtr->value);
-        EXPECT_EQ(1,    Struct1::instances);
-        EXPECT_NE(pX,   xPtr.get());
+        EXPECT_EQ(234, xPtr->value);
+        EXPECT_EQ(1,  Struct1::instances);
+        EXPECT_NE(pX, xPtr.get());
 
         // Move-construct a new UniquePointer to the same object, transferring ownership
         UniquePointer<Struct2> yPtr = std::move(xPtr);
         xPtr.reset();
 
         EXPECT_NE(xPtr, yPtr);
-        EXPECT_FALSE( xPtr);
-        EXPECT_EQ(nullptr,  xPtr.get());
-        EXPECT_TRUE( yPtr);
-        EXPECT_NE(nullptr,  yPtr.get());
-        EXPECT_EQ(234,   yPtr->value);
-        EXPECT_EQ(1,     Struct1::instances);
+        EXPECT_FALSE(xPtr);
+        EXPECT_TRUE(yPtr);
+        EXPECT_EQ(234, yPtr->value);
+        EXPECT_EQ(1, Struct1::instances);
 
         // Reset to nullptr
         yPtr.reset();
 
-        EXPECT_EQ(nullptr,  yPtr.get());
         EXPECT_FALSE(xPtr);
-        EXPECT_EQ(nullptr,  xPtr.get());
         EXPECT_EQ(0, Struct1::instances);
     }
 
@@ -255,15 +232,12 @@ struct unique_pointer_test
         UniquePointer<Struct2> yPtr(new Struct2(234));
 
         EXPECT_TRUE(xPtr);
-        EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123,xPtr->value);
         EXPECT_EQ(2, Struct1::instances);
 
         EXPECT_TRUE(yPtr);
-        EXPECT_NE(nullptr, yPtr.get());
         EXPECT_EQ(234, yPtr->value);
         Struct2* pY = yPtr.get();
-
 
         EXPECT_NE(xPtr, yPtr);
         EXPECT_NE(pY->value, pX->value);
@@ -283,7 +257,6 @@ struct unique_pointer_test
         UniquePointer<Struct2> yPtr(new Struct2(234));
 
         EXPECT_TRUE(yPtr);
-        EXPECT_NE(nullptr, yPtr.get());
         EXPECT_EQ(234, yPtr->value);
         EXPECT_EQ(2, Struct1::instances);
 
@@ -300,7 +273,6 @@ struct unique_pointer_test
         UniquePointer<Struct2> xPtr(new Struct2(123));
 
         EXPECT_TRUE(xPtr);
-        EXPECT_NE(nullptr, xPtr.get());
         EXPECT_EQ(123, xPtr->value);
         EXPECT_EQ(1, Struct1::instances);
         Struct2* pX = xPtr.get();

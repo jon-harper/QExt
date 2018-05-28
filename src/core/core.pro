@@ -11,7 +11,9 @@ HEADERS += \
 	$$PWD/debugutil.h \
 	$$PWD/uniquepointer.h \
     $$PWD/type_util.h \
-	$$PWD/dptr.h
+	$$PWD/dptr.h \
+    $$PWD/managedpointer.h \
+    $$PWD/pointer_deleters.h
 
 SOURCES += \
     $$PWD/dptr.cpp \

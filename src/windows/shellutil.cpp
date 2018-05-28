@@ -9,18 +9,17 @@ ShellItemPointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id)
 {
     if (!id)
         return nullptr;
-    IShellItem2 * ret = nullptr;
-    if (SHCreateItemFromIDList(id, IID_PPV_ARGS(&ret)) == S_OK)
-        return ret;
-    return nullptr;
+    ShellItemPointer ret;
+    SHCreateItemFromIDList(id, IID_PPV_ARGS(ret.addressOf()));
+    return ret;
 }
 
-IdListPointer idListFromItem(UnknownPointer<IShellItem2> item)
+IdListPointer idListFromItem(ShellItemPointer item)
 {
     if (!item)
         return nullptr;
-    ITEMIDLIST_ABSOLUTE *ret = nullptr;
-    SHGetIDListFromObject(item.asUnknown(), &ret);
+    IdListPointer ret;
+    SHGetIDListFromObject(item.asUnknown(), ret.addressOf());
     return ret;
 }
 
@@ -29,6 +28,15 @@ UnknownPointer<IShellFolder2> desktopFolder()
     UnknownPointer<IShellFolder> desktopSf;
     SHGetDesktopFolder(desktopSf.addressOf());
     return desktopSf.queryInterface<IShellFolder2>();
+}
+
+ShellItemPointer desktopItem()
+{
+    ShellItemPointer ret;
+    auto desktopSf = desktopFolder();
+    auto hr = SHGetItemFromObject(desktopSf.asUnknown(), IID_PPV_ARGS(ret.addressOf()));
+    Q_ASSERT(hr == S_OK && ret);
+    return ret;
 }
 
 } // namespace util

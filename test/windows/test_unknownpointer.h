@@ -19,13 +19,16 @@
 #define QE_TEST_UNKNOWNPOINTER_H
 
 #include <ShlObj.h>
-
+#include <QVariant>
 #include <qewindows/unknownpointer.h>
 #include "../core/test.h"
 
+
 struct FakeUnknown
 {
-    HRESULT QueryInterface(REFIID riid, void **ppvObject);
+    HRESULT QueryInterface(REFIID riid, void **ppvObject) {
+        (void)riid; (void)ppvObject; return S_FALSE;
+    }
     ULONG AddRef() { count++; return count; }
     ULONG STDMETHODCALLTYPE Release() { count--; return count; }
 
@@ -34,6 +37,7 @@ struct FakeUnknown
     ULONG count;
     int value;
 };
+Q_DECLARE_METATYPE(qe::windows::UnknownPointer<FakeUnknown>);
 
 using namespace qe::windows;
 
@@ -84,36 +88,41 @@ struct unknown_pointer_test
             EXPECT_EQ(123,  xPtr->value);
             EXPECT_EQ(1,    xPtr->count);
 
-            // Copy construct the UniquePointer, transferring ownership
+            // Move the UniquePointer, transferring ownership
             UnknownPointer<FakeUnknown> yPtr(std::move(xPtr));
             xPtr.reset();
 
             EXPECT_NE(xPtr, yPtr);
             EXPECT_FALSE(xPtr);
-            EXPECT_EQ(nullptr,  xPtr.get());
             EXPECT_TRUE(yPtr);
-            EXPECT_NE(nullptr,  yPtr.get());
             EXPECT_EQ(123,   yPtr->value);
             EXPECT_EQ(1,     yPtr->count);
 
             if (yPtr)
             {
+                //Test move operator
                 UnknownPointer<FakeUnknown> zPtr = std::move(yPtr);
                 yPtr.reset();
 
-                EXPECT_NE(yPtr,  zPtr);
+                EXPECT_NE(yPtr, zPtr);
                 EXPECT_FALSE(yPtr);
-                EXPECT_EQ(nullptr, yPtr.get());
                 EXPECT_TRUE(zPtr);
-                EXPECT_NE(nullptr,  zPtr.get());
                 EXPECT_EQ(123,   zPtr->value);
                 EXPECT_EQ(1,     zPtr->count);
             }
 
+            if (yPtr)
+            {
+                //Test copy operator
+                UnknownPointer<FakeUnknown> zPtr = yPtr;
+
+                EXPECT_EQ(yPtr, zPtr);
+                EXPECT_EQ(123,   zPtr->value);
+                EXPECT_EQ(2,     zPtr->count);
+            }
+
             EXPECT_FALSE(xPtr);
-            EXPECT_EQ(nullptr, xPtr.get());
             EXPECT_FALSE(yPtr);
-            EXPECT_EQ(nullptr, yPtr.get());
         }
         else
         {
@@ -121,8 +130,23 @@ struct unknown_pointer_test
         }
 
         EXPECT_FALSE(xPtr);
-        EXPECT_EQ(nullptr, xPtr.get());
+    }
 
+    static void test_qt()
+    {
+        using pointer = qe::windows::UnknownPointer<FakeUnknown>;
+        FakeUnknown unk(2);
+        auto ptr = pointer(&unk);
+
+        EXPECT_TRUE(ptr);
+
+        QVariant var = QVariant::fromValue<pointer>(ptr);
+
+        EXPECT_TRUE(var.isValid());
+
+        ptr = var.value<pointer>();
+
+        EXPECT_TRUE(ptr);
     }
 
     static void run()
@@ -130,6 +154,7 @@ struct unknown_pointer_test
         empty_pointer();
         basic_pointer_test();
         test_desktop();
+        test_qt();
     }
 };
 
