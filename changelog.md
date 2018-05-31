@@ -2,9 +2,11 @@
 
 ### 2018-05-31
 * Blocked off the windows module from qext.pro with a `win32` include condition.
+* Created shell branch
 
 ### 2018-05-30
 * Added some basic functions to `ShellNodeInfo`.
+* qewindows/shellnodedata: fleshed out `refresh()`
 
 ### 2018-05-29
 * Moved qe::windows::util to qe::windows::shell
