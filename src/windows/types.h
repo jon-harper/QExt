@@ -21,40 +21,39 @@
 
 #include <ShlObj.h>
 #include <QMetaType>
-
 #include <qewindows/unknownpointer.h>
 #include <qewindows/compointer.h>
-#include <qecore/managedpointer.h>
 
 namespace qe {
 namespace windows {
 
-//! Manager struct for ITEMIDLIST_ABSOLUTE
+//! \brief Manager struct for ITEMIDLIST_ABSOLUTE.
+//! Uses the standard COM deleter. ILFree is not necessary since Win2k or so.
 struct IdListManager : ComDeleter<ITEMIDLIST_ABSOLUTE>
 {
+    //! Copies the provided pointer using `ILCloneFull()`. May return `nullptr`.
     static ITEMIDLIST_ABSOLUTE *copy(ITEMIDLIST_ABSOLUTE *ptr) {
-        if (ptr)
-            return ILCloneFull(ptr);
-        else
-            return nullptr;
+        return ptr ? ILCloneFull(ptr) : nullptr;
     }
 };
 
 //! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
-//! ILFree is not necessary since Win2k or so.
-using IdListPointer = qe::ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
+using IdListPointer = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
+//! Predefined type for `IShellItem2` pointers.
 using ShellItemPointer = UnknownPointer<IShellItem2>;
+//! Predefined type for `IStream` pointers.
 using StreamPointer = UnknownPointer<IStream>;
+//! Predefined type for `IStorage` pointers.
 using StoragePointer = UnknownPointer<IStorage>;
-
 
 } // namespace windows
 } // namespace qe
 
+// Metatype declarations for QVariant support
 Q_DECLARE_METATYPE(qe::windows::ShellItemPointer);
 Q_DECLARE_METATYPE(qe::windows::StreamPointer);
 Q_DECLARE_METATYPE(qe::windows::StoragePointer);
-Q_DECLARE_METATYPE(GUID)
+Q_DECLARE_METATYPE(GUID) //Allows returning CLSID values from PROPVARIANTs
 
 #ifndef QEXT_NO_CLUTTER
 using QeShellIdListManager = qe::windows::IdListManager;

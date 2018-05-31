@@ -1,2 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS = core windows
+SUBDIRS = core
+
+win32 {
+SUBDIRS += windows
+}

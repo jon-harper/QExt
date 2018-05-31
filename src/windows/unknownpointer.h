@@ -82,9 +82,8 @@ public:
     //! Copy assignment operator
     UnknownPointer &operator=(const UnknownPointer &rhs) noexcept
     {
-        d = rhs.d;
-        if (d)
-            d->AddRef();
+        UnknownPointer tmp(rhs);
+        swap(tmp);
         return *this;
     }
 
