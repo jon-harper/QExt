@@ -1,4 +1,5 @@
 #include "shell.h"
+#define STRICT_TYPED_ITEMIDS
 #include <ShlObj.h>
 
 namespace qe {
@@ -109,7 +110,14 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     return ret;
 }
 
-} // namespace detail
+}
+
+unsigned int idListHash(ITEMIDLIST_ABSOLUTE *id)
+{
+    return qHashBits(static_cast<const void *>(id), ILGetSize(id));
+}
+
+// namespace detail
 } // namespace shell
 } // namespace windows
 } // namespace qe

@@ -21,9 +21,11 @@
 
 namespace qe {
 
+//! \brief A trivial example of a pointer manager.
 template <class T>
 struct DefaultManager : DefaultDeleter<T>
 {
+    //! Returns `new T(*pointer)` if `pointer` is not null.
     static T * copy(T *pointer)
     {
         if (pointer)
@@ -49,40 +51,34 @@ template <class T, class Manager>
 class ManagedPointer : public UniquePointer<T, Manager>
 {
 public:
+    //! Alias for the `Manager` template argument. This is used during copy construction.
     using copier_type = Manager;
-    using pointer = std::add_pointer_t<T>;
+    //! Introduces `pointer` as a valid return and argument type.
+    using pointer = typename UniquePointer<T, Manager>::pointer;
 
+    //! Default constructor. Takes ownership of \arg p.
     ManagedPointer(pointer p = nullptr) noexcept : UniquePointer<T, Manager>(p) {}
 
+    //! Creates a copy of \arg other.
     ManagedPointer(const ManagedPointer &other)
         : UniquePointer<T, Manager>(copier_type::copy(other.data()))
     {
     }
 
+    //! Move constructs from \arg other.
     ManagedPointer(ManagedPointer &&other)
         : UniquePointer<T, Manager>(other.release())
     {
     }
 
-    template<class U, class M, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
-    ManagedPointer(ManagedPointer<U, M> && other) noexcept
-        : UniquePointer<T, Manager>(std::move(other))
-    {
-    }
-
+    //! Move assignement operator
     ManagedPointer &operator=(ManagedPointer &&other)
     {
         reset(other.release());
         return *this;
     }
 
-    template<class U, class M, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
-    ManagedPointer &operator=(ManagedPointer<U, M> &&other) noexcept
-    {
-        swap(static_cast<pointer>(other));
-        return *this;
-    }
-
+    //! Copies \arg other and returns a reference to `this`.
     ManagedPointer &operator=(const ManagedPointer &other)
     {
         reset(copier_type::copy(other.data()));
@@ -91,5 +87,38 @@ public:
 };
 
 } // namespace qe
+
+namespace std {
+/*! Partial specialization of `std::hash` for `ManagedPointer`.
+   \relates qe::ManagedPointer
+ */
+template <class T, class Manager>
+struct hash<qe::ManagedPointer<T, Manager>>
+{
+    using argument_type = qe::ManagedPointer<T, Manager>;
+    using result_type = std::size_t;
+    result_type operator()(const argument_type & p) const noexcept
+    {
+        return std::hash<T *>{}(p.data());
+    }
+};
+} //namespace std
+
+//Q_DECLARE_SMART_POINTER_METATYPE does not take arguments with more than one template parameter.
+//#ifndef QEXT_CORE_NO_QT
+//#include <QtCore/QMetaType>
+//Q_DECLARE_SMART_POINTER_METATYPE(qe::ManagedPointer);
+//#endif
+
+#ifndef QEXT_NO_CLUTTER
+//! \relates qe::DefaultManager
+template <class T>
+using QeDefaultManager = qe::DefaultManager<T>;
+
+//! \relates qe::ManagedPointer
+template <class T, class Manager>
+using QeManagedPointer = qe::ManagedPointer<T, Manager>;
+
+#endif
 
 #endif // QE_CORE_MANAGEDPOINTER_H

@@ -18,7 +18,9 @@ QE_WINDOWS_EXPORT ShellItemPointer desktopItem();
 
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
 
-enum class NodeFlag : unsigned int {
+QE_WINDOWS_EXPORT unsigned int idListHash(ITEMIDLIST_ABSOLUTE *id);
+
+enum class NodeFlag : quint32 {
     NoFlags         = 0x00000000,
     Folder          = 0x00000001,   //SFGAO_FOLDER  - Binds IID_IShellFolder
     FileSystem      = 0x00000002,   //SFGAO_FILESYSTEM
@@ -61,7 +63,7 @@ Q_FLAG_NS(NodeFlag);
 
 namespace detail {
 
-static QString longPathPrefix()
+QString longPathPrefix()
 {
     return QStringLiteral("\\\\?\\");
 }
