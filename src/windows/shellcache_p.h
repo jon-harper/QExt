@@ -14,35 +14,41 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QE_WINDOWS_WINUTIL_H
-#define QE_WINDOWS_WINUTIL_H
+#ifndef QE_WINDOWS_SHELLCACHE_P_H
+#define QE_WINDOWS_SHELLCACHE_P_H
 
-#include <wtypes.h>
-#include <QtCore/QString>
-#include <QtCore/QRect>
-#include <QtCore/QDateTime>
-#include <QtGui/QColor>
-#include <QtCore/QVariant>
-#include <qewindows/global.h>
+#include <qewindows/shellcache.h>
+#include <qewindows/types.h>
+#include <qewindows/shellnode.h>
+#include <QHash>
 
 namespace qe {
 namespace windows {
-namespace util {
 
-QE_WINDOWS_EXPORT QString hresultToString(HRESULT err);
-QE_WINDOWS_EXPORT QString win32ErrorToString(DWORD err);
+class QE_WINDOWS_EXPORT ShellCachePrivate : public PrivateBase
+{
+public:
+    ShellCachePrivate(ShellCache *qq);
+    Q_DISABLE_COPY(ShellCachePrivate)
 
-QE_WINDOWS_EXPORT QRect fromRECT(const RECT &r);
-QE_WINDOWS_EXPORT QString fromBSTR(BSTR str);
-QE_WINDOWS_EXPORT QDateTime fromFILETIME(const FILETIME &ft);
-QE_WINDOWS_EXPORT QColor fromCOLORREF(const COLORREF &ref);
-QE_WINDOWS_EXPORT COLORREF toCOLORREF(const QColor &color);
+    virtual void init();
 
-QE_WINDOWS_EXPORT QVariant fromVARIANT(VARIANT &v);
-QE_WINDOWS_EXPORT QVariant fromPROPVARIANT(PROPVARIANT &v);
+    ShellNodePointer desktop;
+    ShellNodeContainer libraries;
+    ShellNodeContainer drives;
 
-} // namespace util
+    QHash<unsigned int, ShellNodePointer> nodes;
+
+private:
+    QE_DECLARE_PUBLIC(ShellCache)
+};
+
+QE_WINDOWS_EXPORT unsigned int idListHash(const ITEMIDLIST_ABSOLUTE *id)
+{
+    return qHashBits(static_cast<const void *>(id), ILGetSize(id));
+}
+
 } // namespace windows
 } // namespace qe
 
-#endif // QE_WINDOWS_WINUTIL_H
+#endif // QE_WINDOWS_SHELLCACHE_H

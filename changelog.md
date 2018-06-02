@@ -1,5 +1,18 @@
 # Changelog
 
+### 2018-06-02
+* Major doxygen fixes, particularly with font faces
+* qecore/managedpointer: Documented and cleaned up.
+* qewindows/compointer: BStrPointer and WCharPointer are now template types of
+ManagedPointer and can thus be copied.
+* Implemented the skeletons of ShellCache and ShellNode
+
+### 2018-06-01
+* Began work on qewindows/shellcache
+* Cleaned up some pointer issues
+* qewindows/compointer: BStrPointer and WCharPointer are copyable now and inherit
+from qe::ManagedPointer. They are also declared as metatypes.
+
 ### 2018-05-31
 * Blocked off the windows module from qext.pro with a `win32` include condition.
 * Created shell branch
@@ -17,7 +30,7 @@
 * qewindows/shellnodedata: flags populate on `refresh()` now.
 
 ### 2018-05-28
-* qecore/managedpointer:Merged ManagedPointer
+* qecore/managedpointer: Merged ManagedPointer
 * Adapted Qt's QScopedPointer*Deleter types
 * qecore/pointer_deleters: Broke deleters off into separate header
 * Updated test files, added one for `ManagedPointer`

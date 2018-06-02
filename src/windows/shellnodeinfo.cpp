@@ -65,7 +65,7 @@ QString ShellNodeInfo::filesystemPathName() const
     if (!d)
         return {};
     WCharPointer ret;
-    d->iface->GetDisplayName(SIGDN_FILESYSPATH, ret.addressOf());
+    d->item->GetDisplayName(SIGDN_FILESYSPATH, ret.addressOf());
     return QString::fromWCharArray(ret.get());
 }
 
@@ -74,7 +74,7 @@ QVariant ShellNodeInfo::propertyValue(const PROPERTYKEY &pkey)
     QVariant ret;
     PROPVARIANT var;
     PropVariantInit(&var);
-    if (d->iface->GetProperty(pkey, &var) == S_OK)
+    if (d->item->GetProperty(pkey, &var) == S_OK)
         ret = util::fromPROPVARIANT(var);
     PropVariantClear(&var);
     return ret;

@@ -1,3 +1,19 @@
+/*  QExt: Extensions to Qt
+ *  Copyright (C) 2016  Jonathan Harper
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef QE_WINDOWS_COMPOINTER_H
 #define QE_WINDOWS_COMPOINTER_H
 
@@ -13,28 +29,28 @@ namespace windows {
 
 namespace detail {
 
-std::size_t stringLen(wchar_t * str)
+inline std::size_t stringLen(wchar_t * str)
 {
     std::size_t len = 0;
     ::StringCchLengthW(str, STRSAFE_MAX_CCH, &len);
     return len;
 }
 
-std::size_t stringSize(wchar_t *str)
+inline std::size_t stringSize(wchar_t *str)
 {
     std::size_t len = 0;
     ::StringCbLengthW(str, STRSAFE_MAX_CCH * sizeof(wchar_t), &len);
     return len;
 }
 
-wchar_t *stringCopy(wchar_t *str)
+inline wchar_t *stringCopy(wchar_t *str)
 {
     auto ret = static_cast<wchar_t *>(CoTaskMemAlloc(stringSize(str)));
     ::StringCchCopyW(ret, STRSAFE_MAX_CCH, str);
     return ret;
 }
 
-}
+} // namespace detail
 
 //! Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
 template <class T>
@@ -42,7 +58,7 @@ struct ComDeleter
 {
     static void cleanup(T *pointer) {
         if (pointer)
-            CoTaskMemFree(static_cast<void *>(pointer));
+            ::CoTaskMemFree(static_cast<void *>(pointer));
     }
 };
 

@@ -18,8 +18,6 @@ QE_WINDOWS_EXPORT ShellItemPointer desktopItem();
 
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
 
-QE_WINDOWS_EXPORT unsigned int idListHash(ITEMIDLIST_ABSOLUTE *id);
-
 enum class NodeFlag : quint32 {
     NoFlags         = 0x00000000,
     Folder          = 0x00000001,   //SFGAO_FOLDER  - Binds IID_IShellFolder
@@ -30,7 +28,7 @@ enum class NodeFlag : quint32 {
     ReparsePoint    = 0x00000020,   //FILE_ATTRIBUTE_REPARSE_POINT
     Virtual         = 0x00000040,
 
-    ObjectTypeMask  = 0x0000007F,   //Browseable, Folder, FileSystem, StorageObject & Stream
+    ObjectTypeMask  = 0x000000FF,   //Browseable, Folder, FileSystem, StorageObject & Stream
 
     MountPoint      = 0x00000100,   //FILE_ATTRIBUTE_REPARSE_POINT
     HardLink        = 0x00000200,
@@ -61,19 +59,10 @@ enum class NodeFlag : quint32 {
 Q_DECLARE_FLAGS(NodeFlags, NodeFlag);
 Q_FLAG_NS(NodeFlag);
 
-namespace detail {
-
-QString longPathPrefix()
-{
-    return QStringLiteral("\\\\?\\");
-}
-
+NodeFlags fileAttributeToNodeFlags(DWORD flags);
 SFGAOF nodeFlagsToSfgao(NodeFlags flags);
 NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags);
 
-NodeFlags fileAttributeToNodeFlags(DWORD flags);
-
-} // namespace detail
 } // namespace shell
 } // namespace windows
 } // namespace qe

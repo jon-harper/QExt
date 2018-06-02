@@ -30,7 +30,7 @@ struct FakeUnknown
         (void)riid; (void)ppvObject; return S_FALSE;
     }
     ULONG AddRef() { count++; return count; }
-    ULONG STDMETHODCALLTYPE Release() { count--; return count; }
+    ULONG Release() { count--; return count; }
 
     explicit FakeUnknown(int aVal) : count(1), value(aVal) {}
 
@@ -55,7 +55,6 @@ struct unknown_pointer_test
         xPtr.reset();
 
         EXPECT_FALSE(xPtr);
-        EXPECT_EQ(nullptr,  xPtr.get());
     }
 
     static void test_desktop()
@@ -63,15 +62,15 @@ struct unknown_pointer_test
         UnknownPointer<IShellFolder> xPtr;
         EXPECT_EQ(S_OK, SHGetDesktopFolder(xPtr.addressOf()));
 
-        EXPECT_NE(nullptr, xPtr);
+        EXPECT_TRUE(xPtr);
 
         auto yPtr = xPtr.queryInterface<IShellFolder2>();
 
-        EXPECT_NE(nullptr, yPtr);
+        EXPECT_TRUE(yPtr);
 
 //TODO: Create test case for CoCreateInstance
 
-//        EXPECT_NE(nullptr, zPtr);
+//        EXPECT_TRUE(zPtr);
     }
 
     static void basic_pointer_test()

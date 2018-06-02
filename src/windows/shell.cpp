@@ -47,8 +47,6 @@ QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id)
     return QString::fromWCharArray(path.get());
 }
 
-namespace detail {
-
 SFGAOF nodeFlagsToSfgao(NodeFlags flags)
 {
     SFGAOF ret = 0x0;
@@ -110,14 +108,6 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     return ret;
 }
 
-}
-
-unsigned int idListHash(ITEMIDLIST_ABSOLUTE *id)
-{
-    return qHashBits(static_cast<const void *>(id), ILGetSize(id));
-}
-
-// namespace detail
 } // namespace shell
 } // namespace windows
 } // namespace qe
