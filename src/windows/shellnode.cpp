@@ -23,5 +23,36 @@ ShellNodePointer ShellNode::parent() const noexcept
     return d.parent ? d.parent : nullptr;
 }
 
+bool ShellNode::hasChildren() const
+{
+    if (!isValid())
+        return false;
+    if (!isEnumerated())
+        return d.data->flags & shell::NodeFlag::MayHaveChildren;
+    return !d.children.isEmpty();
+}
+
+QVector<ShellNodePointer> ShellNode::children()
+{
+    if (!isValid())
+        return {};
+    if (d.enumerated)
+        return d.children;
+    enumerate();
+    return d.children;
+}
+
+void ShellNode::enumerate()
+{
+    if (!isValid())
+        return;
+    if (!(d.data->flags & shell::NodeFlag::MayHaveChildren)) {
+        d.enumerated = true;
+        return;
+    }
+    auto sf = d.data->item.queryInterface<IShellFolder>();
+
+}
+
 } // namespace windows
 } // namespace qe

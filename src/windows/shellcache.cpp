@@ -54,11 +54,20 @@ bool ShellCache::contains(ShellCache::key_type key) const noexcept
     return d->nodes.contains(key);
 }
 
+//! Returns the value for \arg key if the cache contains it, otherwise an empty pointer.
+ShellNodePointer ShellCache::get(ShellCache::key_type key) const
+{
+    QE_CD;
+    if (!d->nodes.contains(key))
+        return ShellNodePointer();
+    return d->nodes.value(key);
+}
+
 //! Computes and returns the hash key for \arg item.
 ShellCache::key_type ShellCache::keyFor(IShellItem2 *item) const
 {
     IdListPointer id;
-    ::SHGetIDListFromObject(reinterpret_cast<IUnknown *>(item), id.addressOf());
+    ::SHGetIDListFromObject(static_cast<IUnknown *>(item), id.addressOf());
     if (!id)
         return 0;
     return keyFor(id.get());
@@ -70,13 +79,19 @@ ShellCache::key_type ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id) const
     return idListHash(id);
 }
 
-//! Returns the value for \arg key if the cache contains it, otherwise an empty pointer.
-ShellNodePointer ShellCache::retrieve(ShellCache::key_type key) const
+//! Attempts to parse the display name for an id list to hash.
+ShellCache::key_type ShellCache::keyFor(const wchar_t *parsingPath) const
 {
-    QE_CD;
-    if (!d->nodes.contains(key))
-        return ShellNodePointer();
-    return d->nodes.value(key);
+    IdListPointer id;
+    UnknownPointer<IBindCtx> ctx;
+    if (!::CreateBindCtx(0, ctx.addressOf()))
+        return 0;
+
+    ::SHParseDisplayName(parsingPath, ctx.get(), id.addressOf(), 0, nullptr);
+    if (!id)
+        return 0;
+    return keyFor(id.get());
+
 }
 
 //! Removes a key/value pair from the cache for the given \arg key, returning false on failure.

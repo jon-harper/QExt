@@ -40,6 +40,8 @@ struct QE_WINDOWS_EXPORT ShellNodeData
     //pointer_type create(const QString &filepath);
     //pointer_type create(const QFile &file);
     //pointer_type create(const QFileInfo &fileinfo);
+    void clear();
+
     static pointer_type create(const IdListPointer &ptr);
     static pointer_type create(ShellItemPointer ptr);
 

@@ -42,13 +42,15 @@ public:
 
     void swap(ShellNode &&other) noexcept               { std::swap(d, other.d); }
 
-    bool isValid() const noexcept             { return d.data; }
+    bool isValid() const noexcept                       { return d.data; }
+    bool isDesktop() const noexcept                     { return !d.parent; }
+    bool isEnumerated() const noexcept                  { return d.enumerated; }
 
     ShellNodePointer parent() const noexcept;
-    bool isDesktop() const noexcept                     { return !d.parent; }
+    bool hasChildren() const;
+    QVector<ShellNodePointer> children();
 
-    QVector<ShellNodePointer> children() const noexcept { return d.children; }
-    constexpr bool isEnumerated() const noexcept        { return d.enumerated; }
+    void enumerate();
 
 private:
     struct LocalData {

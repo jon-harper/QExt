@@ -23,7 +23,6 @@
 #include <qecore/dptr.h>
 #include <qewindows/shell.h>
 
-
 namespace qe {
 namespace windows {
 
@@ -44,18 +43,17 @@ public:
     ~ShellCache();
 
     ShellCache *globalInstance() const;
+
     bool contains(key_type key) const noexcept;
+    ShellNodePointer get(key_type key) const;
 
     ShellNodePointer insert(ShellItemPointer item);
     ShellNodePointer insert(const IdListPointer &id);
 
     key_type keyFor(IShellItem2 *item) const;
-    key_type keyFor(const ITEMIDLIST_ABSOLUTE *id) const;
+    inline key_type keyFor(const ITEMIDLIST_ABSOLUTE *id) const;
+    key_type keyFor(const wchar_t *parsingPath) const;
 
-    //template <class UnknownType, std::enable_if_t<std::result_of<decltype ()>>>
-    //bool keyFor(UnknownType *unk);
-
-    ShellNodePointer retrieve(key_type key) const;
     bool remove(key_type key);
 
 protected:

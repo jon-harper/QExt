@@ -22,23 +22,20 @@
 #include <utility>
 
 namespace qe {
-namespace detail {
 
+//! Tests if `Derived` inherits from `Base` and a virtual destructor is available.
 template <class Base, class Derived>
-struct is_safely_castable
+struct is_derived_pointer_safely_castable
         : std::bool_constant<std::is_base_of<Base, Derived>() && std::has_virtual_destructor<Base>()>
 {
 };
 
-template <class Base, class Derived>
-using is_pointer_safely_castable_v = typename is_safely_castable<Base, Derived>::value;
-
-
-template <class From, class To, typename = void>
+template <class From, class To, class = void>
 struct is_pointer_static_castable : std::false_type
 {
 };
 
+//! Evaluates to true if \arg From will `static_cast` \arg To without returning `nullptr`.
 template <class From, class To>
 struct is_pointer_static_castable<From, To,
                            std::void_t<decltype(static_cast<To>(std::declval<From>()))>>
@@ -47,7 +44,6 @@ struct is_pointer_static_castable<From, To,
     static constexpr bool value = true;
 };
 
-} //namespace detail
 } //namespace qe
 
 #endif //QE_CORE_TYPE_UTIL_H

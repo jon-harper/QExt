@@ -1,6 +1,7 @@
 #include "shellnodedata.h"
 #include <propkey.h>
 #include <shell.h>
+#include <shellcache.h>
 
 namespace qe {
 namespace windows {
@@ -25,10 +26,19 @@ ShellNodeDataPointer ShellNodeData::create(ShellItemPointer ptr)
     return ShellNodeData::pointer_type(ret);
 }
 
+void ShellNodeData::clear()
+{
+    invalid = true;
+    item.reset();
+    id.reset();
+    hash = 0;
+    flags = shell::NodeFlag::NoFlags;
+}
+
 void ShellNodeData::refresh()
 {
     if (!id || !item) {
-        invalid = true;
+        clear();
         return;
     }
     {
@@ -52,25 +62,26 @@ void ShellNodeData::refresh()
         parsingName.clear();
 
     SFGAOF outFlags;
-    shell::NodeFlags inFlags = shell::NodeFlag::ObjectTypeMask;
-    inFlags |= shell::NodeFlag::AccessFlagMask;
-    inFlags |= shell::NodeFlag::LinkMask;
+    shell::NodeFlags inFlags = shell::NodeFlag::AllFlags;
     item->GetAttributes(shell::nodeFlagsToSfgao(inFlags), &outFlags);
     flags = shell::sfgaoFlagsToNodeFlags(outFlags);
 
+    //For filesystem nodes, we grab the WIN32_FIND_DATA struct
     if (flags & shell::NodeFlag::FileSystem) {
         PROPVARIANT var;
         PropVariantInit(&var);
         item->GetProperty(PKEY_FindData, &var);
         if (var.caui.pElems) {
             auto data = reinterpret_cast<WIN32_FIND_DATA *>(var.caui.pElems);
+            Q_ASSERT(data);
             flags |= shell::fileAttributeToNodeFlags(data->dwFileAttributes);
 
             if (data->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+                flags |= shell::NodeFlag::ReparsePoint;
                 if (data->dwReserved0 & IO_REPARSE_TAG_SYMLINK)
                     flags |= shell::NodeFlag::SymLink;
             }   else if (data->dwReserved0 & IO_REPARSE_TAG_MOUNT_POINT) {
-                //TODO: check for junctions and mount points
+                    flags |= shell::NodeFlag::Junction;
             }
         }
     }

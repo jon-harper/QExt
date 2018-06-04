@@ -1,5 +1,16 @@
 # Changelog
 
+### 2018-06-04
+* qewindows/shellcache: added `keyFor` for parsing pathnames.
+* qewindows/shellnodedata: added `clear` function. This may be at the wrong level.
+
+### 2018-06-03
+* qecore/type_util: cleaned up and removed everything from the ::detail namespace.
+* qewindows/shell: added idListFromUnknown free function
+* qewindows/shell: added MayHaveChildren flag
+* qewindows/shellnodedata: updated for MayHaveChildren flag
+* qewindows/shell: NodeFlag has proper doxygen comments now
+
 ### 2018-06-02
 * Major doxygen fixes, particularly with font faces
 * qecore/managedpointer: Documented and cleaned up.

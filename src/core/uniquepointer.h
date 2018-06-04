@@ -58,7 +58,7 @@ public:
     //! Move constructor for UniquePointers managing the same types.
     UniquePointer(UniquePointer && other) noexcept : d(other.release()) { }
 
-    template<class U, class CleanupU, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
+    template<class U, class CleanupU, class = std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
     UniquePointer(UniquePointer<U, CleanupU> && other) noexcept
         : d(static_cast<pointer>(other.release()))
     {
@@ -71,7 +71,7 @@ public:
         return *this;
     }
 
-    template<class U, class CleanupU, class = std::enable_if_t<detail::is_pointer_static_castable<U*,pointer>::value>>
+    template<class U, class CleanupU, class = std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
     UniquePointer &operator=(UniquePointer<U, CleanupU> &&other) noexcept
     {
         d = std::exchange(static_cast<pointer>(other.d), nullptr);

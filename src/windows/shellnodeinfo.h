@@ -32,6 +32,7 @@ public:
     ShellNodeInfo() = default;
     ShellNodeInfo(QString filepath);
     //ShellNodeInfo(const QFileInfo &fi);
+    ShellNodeInfo(ShellNodeDataPointer data) noexcept : d(data) {}
     ShellNodeInfo(const ShellNodeInfo &other) noexcept : d(other.d) { }
     ShellNodeInfo(ShellNodeInfo &&other) noexcept { swap(other); }
     ~ShellNodeInfo() = default;
@@ -72,7 +73,6 @@ public:
     QVariant propertyValue(const PROPERTYKEY &pkey);
 private:
     ShellNodeDataPointer d;
-
 };
 } // namespace windows
 } // namespace qe

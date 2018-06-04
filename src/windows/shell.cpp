@@ -69,6 +69,7 @@ SFGAOF nodeFlagsToSfgao(NodeFlags flags)
     if (flags & NodeFlag::Removable)        ret |= SFGAO_REMOVABLE;
     if (flags & NodeFlag::Compressed)       ret |= SFGAO_COMPRESSED;
     if (flags & NodeFlag::Encrypted)        ret |= SFGAO_ENCRYPTED;
+    if (flags & NodeFlag::MayHaveChildren)  ret |= SFGAO_HASSUBFOLDER;
     return ret;
 }
 NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags)
@@ -93,6 +94,7 @@ NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags)
     if (flags & SFGAO_REMOVABLE)    ret |= NodeFlag::Removable;
     if (flags & SFGAO_COMPRESSED)   ret |= NodeFlag::Compressed;
     if (flags & SFGAO_ENCRYPTED)    ret |= NodeFlag::Encrypted;
+    if (flags & SFGAO_HASSUBFOLDER) ret |= NodeFlag::MayHaveChildren;
     return ret;
 }
 
@@ -105,6 +107,14 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     if (flags & FILE_ATTRIBUTE_DIRECTORY)   ret |= NodeFlag::Folder;
     if (flags & FILE_ATTRIBUTE_COMPRESSED)  ret |= NodeFlag::Compressed;
     if (flags & FILE_ATTRIBUTE_ENCRYPTED)   ret |= NodeFlag::Encrypted;
+    return ret;
+}
+
+//! Returns an IDListPointer, given any IUnknown that is compatible with `SHGetIDListFromObject`.
+IdListPointer idListFromUnknown(IUnknown *unk)
+{
+    IdListPointer ret;
+    ::SHGetIDListFromObject(unk, ret.addressOf());
     return ret;
 }
 
