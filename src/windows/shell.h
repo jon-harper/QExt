@@ -17,6 +17,7 @@ QE_WINDOWS_EXPORT IdListPointer idListFromItem(ShellItemPointer item);
 QE_WINDOWS_EXPORT IdListPointer idListFromUnknown(IUnknown *unk);
 QE_WINDOWS_EXPORT ShellItemPointer desktopItem();
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
+QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
 
 //! Flags with information about a node's type and capabilities.
 enum class NodeFlag : quint32 {

@@ -17,10 +17,10 @@
 #ifndef QE_WINDOWS_TYPES_H
 #define QE_WINDOWS_TYPES_H
 
-#include <qewindows/global.h>
-
+#define STRICT_TYPED_ITEMIDS
 #include <ShlObj.h>
 #include <QMetaType>
+#include <qewindows/global.h>
 #include <qewindows/unknownpointer.h>
 #include <qewindows/compointer.h>
 

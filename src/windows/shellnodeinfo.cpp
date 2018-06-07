@@ -41,7 +41,9 @@ bool ShellNodeInfo::setNode(QString filepath)
         return false;
     }
 
+    //Actually copy the string
     Q_ASSERT(filepath.toWCharArray(converted) > 0);
+
     auto item = ShellItemPointer();
     SHCreateItemFromParsingName(converted, nullptr, IID_PPV_ARGS(item.addressOf()));
     if (!item) {

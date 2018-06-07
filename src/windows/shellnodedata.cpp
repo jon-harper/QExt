@@ -31,7 +31,6 @@ void ShellNodeData::clear()
     invalid = true;
     item.reset();
     id.reset();
-    hash = 0;
     flags = shell::NodeFlag::NoFlags;
 }
 
@@ -41,11 +40,8 @@ void ShellNodeData::refresh()
         clear();
         return;
     }
-    {
-        UnknownPointer<IBindCtx> ctx;
-        CreateBindCtx(0, ctx.addressOf());
-        item->Update(ctx.get());
-    }
+    //Update the item's cached data first
+    item->Update(shell::createBindContext().get());
 
     WCharPointer name;
     item->GetDisplayName(SIGDN_NORMALDISPLAY, name.addressOf());

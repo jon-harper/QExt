@@ -17,10 +17,11 @@
 #ifndef QE_WINDOWS_SHELLCACHE_P_H
 #define QE_WINDOWS_SHELLCACHE_P_H
 
+#include <QMap>
 #include <qewindows/shellcache.h>
 #include <qewindows/types.h>
 #include <qewindows/shellnode.h>
-#include <QHash>
+#include <qewindows/shellcache.h>
 
 namespace qe {
 namespace windows {
@@ -31,22 +32,17 @@ public:
     ShellCachePrivate(ShellCache *qq);
     Q_DISABLE_COPY(ShellCachePrivate)
 
-    virtual void init();
+    void init();
 
     ShellNodePointer desktop;
     ShellNodeContainer libraries;
     ShellNodeContainer drives;
 
-    QHash<unsigned int, ShellNodePointer> nodes;
+    QMap<ShellCache::KeyType, ShellNodePointer> nodes;
 
 private:
     QE_DECLARE_PUBLIC(ShellCache)
 };
-
-QE_WINDOWS_EXPORT unsigned int idListHash(const ITEMIDLIST_ABSOLUTE *id)
-{
-    return qHashBits(static_cast<const void *>(id), ILGetSize(id));
-}
 
 } // namespace windows
 } // namespace qe

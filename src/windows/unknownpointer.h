@@ -19,6 +19,7 @@
 
 #include <utility>
 #include <type_traits>
+#define STRICT_TYPED_ITEMIDS
 #include <combaseapi.h>
 #include <QtCore/QMetaType>
 #include <qewindows/global.h>

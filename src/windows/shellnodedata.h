@@ -17,8 +17,7 @@
 #ifndef QE_WINDOWS_SHELLNODEDATA_H
 #define QE_WINDOWS_SHELLNODEDATA_H
 
-#include <qewindows/global.h>
-
+#define STRICT_TYPED_ITEMIDS
 #include <wtypes.h>
 #include <ShlObj.h>
 #include <QtCore/QString>
@@ -26,7 +25,6 @@
 #include <QtCore/QVariant>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QVector>
-
 #include <qewindows/shell.h>
 
 namespace qe {
@@ -49,7 +47,7 @@ struct QE_WINDOWS_EXPORT ShellNodeData
 
     ShellItemPointer item;
     IdListPointer id;
-    uint hash = 0;
+
     bool invalid = true;
 
     QString displayName;
@@ -63,7 +61,7 @@ struct QE_WINDOWS_EXPORT ShellNodeData
 };
 
 using ShellNodeDataPointer = ShellNodeData::pointer_type;
-using ShellNodeDataContainer = QVector<ShellNodeDataPointer>;
+using ShellNodeDataContainer = ShellNodeData::container_type;
 
 } // namespace windows
 } // namespace qe

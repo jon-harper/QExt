@@ -17,23 +17,22 @@
 #ifndef QE_WINDOWS_SHELLNODE_H
 #define QE_WINDOWS_SHELLNODE_H
 
-#include <qewindows/global.h>
 #include <QtCore/QVector>
+#include <QtCore/QSharedPointer>
+#include <qewindows/types.h>
 #include <qewindows/shellnodedata.h>
 
 namespace qe {
 namespace windows {
 
-class ShellNode;
-//! The preferred pointer type for `ShellNode`s.
-//! \relates ShellNode
-using ShellNodePointer = QSharedPointer<ShellNode>;
+class ShellCache;
 
 class QE_WINDOWS_EXPORT ShellNode
 {
 public:
-    ShellNode(ShellItemPointer item, ShellNodePointer parent);
-    ShellNode(const IdListPointer &id, ShellNodePointer parent);
+    using pointer_type = QSharedPointer<ShellNode>;
+
+    ShellNode() {}
     ShellNode(const ShellNode &) = delete;
     ShellNode(ShellNode &&other) noexcept : d(std::move(other.d)) { }
     ShellNode &operator=(const ShellNode &) = delete;
@@ -46,23 +45,38 @@ public:
     bool isDesktop() const noexcept                     { return !d.parent; }
     bool isEnumerated() const noexcept                  { return d.enumerated; }
 
-    ShellNodePointer parent() const noexcept;
-    bool hasChildren() const;
-    QVector<ShellNodePointer> children();
+    pointer_type parent() const noexcept                { return d.parent ? d.parent : nullptr; }
+    bool hasChildren() const noexcept;
+    QVector<pointer_type> children(); //NOT const
 
     void enumerate();
 
+    const ShellNodeDataPointer data() const noexcept    { return d.data; }
+    QByteArray key() const noexcept                     { return d.key; }
+protected:
+    ShellNode(ShellItemPointer item, pointer_type parent, ShellCache *cache = nullptr);
+    ShellNode(const IdListPointer &id, pointer_type parent, ShellCache *cache = nullptr);
+
+    void initFrom(ShellItemPointer item, const IdListPointer &id, pointer_type parent, ShellCache *cache);
+
 private:
     struct LocalData {
-        ShellNodePointer parent;
+        QByteArray key;
+        pointer_type parent;
         ShellNodeDataPointer data;
-        QVector<ShellNodePointer> children;
+        QVector<pointer_type> children;
         bool enumerated = false;
+        ShellCache *cache = nullptr;
     };
 
     LocalData d;
+
+    friend class ShellCache;
 };
 
+//! The preferred pointer type for `ShellNode`s.
+//! \relates ShellNode
+using ShellNodePointer = ShellNode::pointer_type;
 //! The preferred container type for ShellNodes
 //! \relates ShellNode
 using ShellNodeContainer = QVector<ShellNodePointer>;

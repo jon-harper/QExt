@@ -17,49 +17,48 @@
 #ifndef QE_WINDOWS_SHELLCACHE_H
 #define QE_WINDOWS_SHELLCACHE_H
 
-#include <qewindows/global.h>
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QByteArray>
 #include <qecore/dptr.h>
 #include <qewindows/shell.h>
+#include <qewindows/shellnode.h>
 
 namespace qe {
 namespace windows {
-
-class ShellNode;
-using ShellNodePointer = QSharedPointer<ShellNode>;
 
 class ShellCachePrivate;
 class QE_WINDOWS_EXPORT ShellCache : public ::QObject, public qe::PublicBase
 {
     Q_OBJECT
 public:
+    using KeyType = QByteArray;
+    using ValueType = ShellNodePointer;
 
-    using key_type = unsigned int;
-    using value_type = ShellNode;
-
-    ShellCache(QObject *parent);
+    ShellCache(QObject *parent = nullptr);
     Q_DISABLE_COPY(ShellCache)
     ~ShellCache();
 
-    ShellCache *globalInstance() const;
+    static ShellCache *globalInstance();
 
-    bool contains(key_type key) const noexcept;
-    ShellNodePointer get(key_type key) const;
+    bool contains(KeyType key) const noexcept;
 
-    ShellNodePointer insert(ShellItemPointer item);
-    ShellNodePointer insert(const IdListPointer &id);
+    ShellNodePointer insert(ShellNodePointer node);
+    ShellNodePointer insert(IUnknown *unk);
 
-    key_type keyFor(IShellItem2 *item) const;
-    inline key_type keyFor(const ITEMIDLIST_ABSOLUTE *id) const;
-    key_type keyFor(const wchar_t *parsingPath) const;
+    static KeyType keyFor(IUnknown *item);
+    static KeyType keyFor(const ITEMIDLIST_ABSOLUTE *id);
+    static KeyType keyFor(const wchar_t *parsingPath);
+    static KeyType keyFor(const ShellNodePointer &pointer);
 
-    bool remove(key_type key);
+    bool remove(KeyType key);
 
+    ShellNodePointer value(KeyType key) const;
 protected:
     ShellCache(ShellCachePrivate &dd, QObject *parent);
 
-    bool insert(key_type, ShellNodePointer &object);
+    ShellNodePointer createNode(const IdListPointer &id);
+
     void clear();
 
 private:

@@ -118,6 +118,13 @@ IdListPointer idListFromUnknown(IUnknown *unk)
     return ret;
 }
 
+UnknownPointer<IBindCtx> createBindContext()
+{
+    UnknownPointer<IBindCtx> ctx;
+    CreateBindCtx(0, ctx.addressOf());
+    return ctx;
+}
+
 } // namespace shell
 } // namespace windows
 } // namespace qe

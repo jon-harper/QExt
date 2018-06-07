@@ -17,13 +17,12 @@
 #ifndef QE_WINDOWS_COMPOINTER_H
 #define QE_WINDOWS_COMPOINTER_H
 
-#include <qewindows/global.h>
+#define STRICT_TYPED_ITEMIDS
 #include <combaseapi.h>
 #include <shtypes.h>
 #include <strsafe.h>
 #include <QtCore/QMetaType>
 #include <qecore/managedpointer.h>
-
 namespace qe {
 namespace windows {
 
