@@ -44,7 +44,7 @@ bool ShellNodeInfo::setNode(QString filepath)
     //Actually copy the string
     Q_ASSERT(filepath.toWCharArray(converted) > 0);
 
-    auto item = ShellItemPointer();
+    auto item = ShellItem2Pointer();
     SHCreateItemFromParsingName(converted, nullptr, IID_PPV_ARGS(item.addressOf()));
     if (!item) {
         qDebug() << "Failed to create NodeInfo from path: " << filepath;

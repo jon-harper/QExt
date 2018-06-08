@@ -39,8 +39,14 @@ struct IdListManager : ComDeleter<ITEMIDLIST_ABSOLUTE>
 
 //! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
 using IdListPointer = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
+//! Predefined type for `IShellItem` pointers.
+using ShellItemPointer = UnknownPointer<IShellItem>;
 //! Predefined type for `IShellItem2` pointers.
-using ShellItemPointer = UnknownPointer<IShellItem2>;
+using ShellItem2Pointer = UnknownPointer<IShellItem2>;
+//! Predefined type for `IShellFolder` pointers.
+using ShellFolderPointer = UnknownPointer<IShellFolder>;
+//! Predefined type for `IShellFolder2` pointers.
+using ShellFolder2Pointer = UnknownPointer<IShellFolder2>;
 //! Predefined type for `IStream` pointers.
 using StreamPointer = UnknownPointer<IStream>;
 //! Predefined type for `IStorage` pointers.
@@ -50,7 +56,7 @@ using StoragePointer = UnknownPointer<IStorage>;
 } // namespace qe
 
 // Metatype declarations for QVariant support
-Q_DECLARE_METATYPE(qe::windows::ShellItemPointer);
+Q_DECLARE_METATYPE(qe::windows::ShellItem2Pointer);
 Q_DECLARE_METATYPE(qe::windows::StreamPointer);
 Q_DECLARE_METATYPE(qe::windows::StoragePointer);
 Q_DECLARE_METATYPE(GUID) //Allows returning CLSID values from PROPVARIANTs
@@ -59,6 +65,9 @@ Q_DECLARE_METATYPE(GUID) //Allows returning CLSID values from PROPVARIANTs
 using QeShellIdListManager = qe::windows::IdListManager;
 using QeShellIdListPointer = qe::windows::IdListPointer;
 using QeShellItemPointer = qe::windows::ShellItemPointer;
+using QeShellItem2Pointer = qe::windows::ShellItem2Pointer;
+using QeShellFolderPointer = qe::windows::ShellFolderPointer;
+using QeShellFolder2Pointer = qe::windows::ShellFolder2Pointer;
 using QeStreamPointer = qe::windows::StreamPointer;
 using QeStoragePointer = qe::windows::StoragePointer;
 #endif

@@ -30,9 +30,9 @@ class ShellCache;
 class QE_WINDOWS_EXPORT ShellNode
 {
 public:
-    using pointer_type = QSharedPointer<ShellNode>;
+    using PointerType = QSharedPointer<ShellNode>;
 
-    ShellNode() {}
+    ShellNode() = delete;
     ShellNode(const ShellNode &) = delete;
     ShellNode(ShellNode &&other) noexcept : d(std::move(other.d)) { }
     ShellNode &operator=(const ShellNode &) = delete;
@@ -45,28 +45,26 @@ public:
     bool isDesktop() const noexcept                     { return !d.parent; }
     bool isEnumerated() const noexcept                  { return d.enumerated; }
 
-    pointer_type parent() const noexcept                { return d.parent ? d.parent : nullptr; }
+    PointerType parent() const noexcept                 { return d.parent ? d.parent : nullptr; }
     bool hasChildren() const noexcept;
-    QVector<pointer_type> children(); //NOT const
+    QVector<PointerType> children(); //NOT const, may enumerate
 
     void enumerate();
 
     const ShellNodeDataPointer data() const noexcept    { return d.data; }
     QByteArray key() const noexcept                     { return d.key; }
-protected:
-    ShellNode(ShellItemPointer item, pointer_type parent, ShellCache *cache = nullptr);
-    ShellNode(const IdListPointer &id, pointer_type parent, ShellCache *cache = nullptr);
 
-    void initFrom(ShellItemPointer item, const IdListPointer &id, pointer_type parent, ShellCache *cache);
+protected:
+    ShellNode(ShellItem2Pointer item, PointerType parent, QByteArray key);
 
 private:
     struct LocalData {
-        QByteArray key;
-        pointer_type parent;
-        ShellNodeDataPointer data;
-        QVector<pointer_type> children;
-        bool enumerated = false;
         ShellCache *cache = nullptr;
+        PointerType parent;
+        ShellNodeDataPointer data;
+        QByteArray key;
+        QVector<PointerType> children;
+        bool enumerated = false;
     };
 
     LocalData d;
@@ -76,7 +74,7 @@ private:
 
 //! The preferred pointer type for `ShellNode`s.
 //! \relates ShellNode
-using ShellNodePointer = ShellNode::pointer_type;
+using ShellNodePointer = ShellNode::PointerType;
 //! The preferred container type for ShellNodes
 //! \relates ShellNode
 using ShellNodeContainer = QVector<ShellNodePointer>;

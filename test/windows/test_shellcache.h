@@ -18,12 +18,14 @@ struct shell_cache_test
 
     static void test_construction()
     {
-        ShellCache cache;
+        ShellCache *cache = ShellCache::globalInstance();
+
+        EXPECT_TRUE(cache);
     }
 
     static void test_key_for()
     {
-        auto item = ShellItemPointer();
+        auto item = ShellItem2Pointer();
         auto hr = ::SHCreateItemFromParsingName(L"C:",
                                                 shell::createBindContext().get(),
                                                 IID_PPV_ARGS(item.addressOf()));

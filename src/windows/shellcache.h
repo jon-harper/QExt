@@ -32,36 +32,35 @@ class QE_WINDOWS_EXPORT ShellCache : public ::QObject, public qe::PublicBase
 {
     Q_OBJECT
 public:
+    //! The type used as a key in the internal `QMap`.
     using KeyType = QByteArray;
+    //! The type used for values in the internal `QMap`.
     using ValueType = ShellNodePointer;
 
-    ShellCache(QObject *parent = nullptr);
-    Q_DISABLE_COPY(ShellCache)
-    ~ShellCache();
+    ~ShellCache() { }
 
     static ShellCache *globalInstance();
-
-    bool contains(KeyType key) const noexcept;
-
-    ShellNodePointer insert(ShellNodePointer node);
-    ShellNodePointer insert(IUnknown *unk);
-
     static KeyType keyFor(IUnknown *item);
     static KeyType keyFor(const ITEMIDLIST_ABSOLUTE *id);
     static KeyType keyFor(const wchar_t *parsingPath);
     static KeyType keyFor(const ShellNodePointer &pointer);
 
-    bool remove(KeyType key);
+    bool contains(KeyType key) const noexcept;
+    bool insert(ShellNodePointer node);
+    bool insert(IUnknown *unk, ShellNodePointer &outPtr);
+    bool find(const KeyType &key, ShellNodePointer &outPtr) noexcept;
+    ShellNodePointer find(const KeyType &key) const noexcept;
 
-    ShellNodePointer value(KeyType key) const;
 protected:
+    ShellCache();
     ShellCache(ShellCachePrivate &dd, QObject *parent);
 
     ShellNodePointer createNode(const IdListPointer &id);
 
     void clear();
-
+    bool remove(KeyType key);
 private:
+    Q_DISABLE_COPY(ShellCache)
     QE_DECLARE_PRIVATE(ShellCache)
 };
 

@@ -13,17 +13,17 @@ ShellNodeDataPointer ShellNodeData::create(const IdListPointer &ptr)
     ret->item = shell::itemFromIdList(ret->id.get());
     if (ret->id && ret->item)
         ret->invalid = false;
-    return ShellNodeData::pointer_type(ret);
+    return ShellNodeData::PointerType(ret);
 }
 
-ShellNodeDataPointer ShellNodeData::create(ShellItemPointer ptr)
+ShellNodeDataPointer ShellNodeData::create(ShellItem2Pointer ptr)
 {
     ShellNodeData *ret = new ShellNodeData;
     ret->item = ptr;
     ret->id = shell::idListFromItem(ret->item);
     if (ret->id && ret->item)
         ret->invalid = false;
-    return ShellNodeData::pointer_type(ret);
+    return ShellNodeData::PointerType(ret);
 }
 
 void ShellNodeData::clear()

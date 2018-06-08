@@ -11,11 +11,11 @@ namespace windows {
 namespace shell {
 Q_NAMESPACE;
 
-QE_WINDOWS_EXPORT ShellItemPointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id);
-QE_WINDOWS_EXPORT UnknownPointer<IShellFolder2> desktopFolder();
-QE_WINDOWS_EXPORT IdListPointer idListFromItem(ShellItemPointer item);
+QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id);
+QE_WINDOWS_EXPORT IdListPointer idListFromItem(ShellItem2Pointer item);
 QE_WINDOWS_EXPORT IdListPointer idListFromUnknown(IUnknown *unk);
-QE_WINDOWS_EXPORT ShellItemPointer desktopItem();
+QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
+QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
 

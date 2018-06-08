@@ -32,20 +32,20 @@ namespace windows {
 
 struct QE_WINDOWS_EXPORT ShellNodeData
 {
-    using pointer_type = QSharedPointer<ShellNodeData>;
-    using container_type = QVector<pointer_type>;
+    using PointerType = QSharedPointer<ShellNodeData>;
+    using ContainerType = QVector<PointerType>;
 
     //pointer_type create(const QString &filepath);
     //pointer_type create(const QFile &file);
     //pointer_type create(const QFileInfo &fileinfo);
     void clear();
 
-    static pointer_type create(const IdListPointer &ptr);
-    static pointer_type create(ShellItemPointer ptr);
+    static PointerType create(const IdListPointer &ptr);
+    static PointerType create(ShellItem2Pointer ptr);
 
     void refresh();
 
-    ShellItemPointer item;
+    ShellItem2Pointer item;
     IdListPointer id;
 
     bool invalid = true;
@@ -60,8 +60,8 @@ struct QE_WINDOWS_EXPORT ShellNodeData
     shell::NodeFlags flags = shell::NodeFlag::NoFlags;
 };
 
-using ShellNodeDataPointer = ShellNodeData::pointer_type;
-using ShellNodeDataContainer = ShellNodeData::container_type;
+using ShellNodeDataPointer = ShellNodeData::PointerType;
+using ShellNodeDataContainer = ShellNodeData::ContainerType;
 
 } // namespace windows
 } // namespace qe

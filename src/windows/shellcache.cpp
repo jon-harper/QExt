@@ -22,17 +22,14 @@ void ShellCachePrivate::init()
 }
 
 //! Constructs a new, separate instance of the cache with a parent object.
-ShellCache::ShellCache(QObject *parent)
-    : ShellCache(*new ShellCachePrivate(this), parent)
+ShellCache::ShellCache()
+    : ShellCache(*new ShellCachePrivate(this), qApp)
 {
 
 }
 
 //! Virtual destructor; does nothing.
-ShellCache::~ShellCache()
-{
 
-}
 
 //! Returns the global instance of the shell cache, which is created on first call.
 //! \note There must be a constructed instance of `Q*Application` to call this.
@@ -42,7 +39,7 @@ ShellCache *ShellCache::globalInstance() //static
         return detail::globalInstance;
     }
     Q_ASSERT(qApp); //ShellCache requires a QApplication instance
-    detail::globalInstance = new ShellCache(qApp);
+    detail::globalInstance = new ShellCache;
     return detail::globalInstance;
 }
 
@@ -54,25 +51,33 @@ bool ShellCache::contains(ShellCache::KeyType key) const noexcept
 }
 
 //! Returns the value for \arg key if the cache contains it, otherwise an empty pointer.
-ShellNodePointer ShellCache::value(ShellCache::KeyType key) const
+bool ShellCache::find(const ShellCache::KeyType &key, ShellNodePointer &outPtr) noexcept
+{
+    QE_D;
+    if (!d->nodes.contains(key))
+        return false;
+    outPtr = d->nodes.value(key);
+    return true;
+}
+
+ShellNodePointer ShellCache::find(const ShellCache::KeyType &key) const noexcept
 {
     QE_CD;
     if (!d->nodes.contains(key))
-        return ShellNodePointer();
+        return {};
     return d->nodes.value(key);
 }
 
-ShellNodePointer ShellCache::insert(ShellNodePointer node)
+bool ShellCache::insert(ShellNodePointer node)
 {
     QE_D;
-    Q_ASSERT(node->isValid());
-    Q_ASSERT(!d->nodes.contains(node->key()));
-
-    auto iter = d->nodes.insert(node->key(), node);
-    return *iter;
+    if (!node->isValid() || !d->nodes.contains(node->key()))
+        return false;
+    d->nodes.insert(node->key(), node);
+    return true;
 }
 
-ShellNodePointer ShellCache::insert(IUnknown *unk)
+bool ShellCache::insert(IUnknown *unk, ShellNodePointer &outPtr)
 {
     Q_UNIMPLEMENTED();
     return {};
@@ -91,14 +96,11 @@ ShellCache::KeyType ShellCache::keyFor(IUnknown *item)
 //! Computes and returns the hash key of \arg id.
 ShellCache::KeyType ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id)
 {
+    //This causes overflow, but it's just a key, so we don't care.
     return QByteArray(reinterpret_cast<const char *>(id));
 }
-//ShellCache::key_type ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id) const
-//{
-//    return idListHash(id);
-//}
 
-//! Attempts to parse the display name for an id list to hash.
+//! Calls `SHParseDisplayName()` to obtain the key value.
 ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath)
 {
     IdListPointer id;
@@ -143,31 +145,31 @@ ShellNodePointer ShellCache::createNode(const IdListPointer &id)
     Q_ASSERT(!key.isNull());
     Q_ASSERT(item);
 
-    auto ret = ShellNodePointer();
-    ret->d.key = ShellCache::keyFor(id.get());
-    ret->d.data = ShellNodeData::create(id);
+    auto parentNode = ShellNodePointer();
+    bool needInsert = true;
 
-    auto parent = UnknownPointer<IShellItem>();
+    auto parent = ShellItemPointer();
     item->GetParent(parent.addressOf());
     if (parent) {
         auto parentKey = ShellCache::keyFor(parent.asUnknown());
         //check if the cache contains the parent node
         if (contains(parentKey)) {
-            auto parentNode = value(parentKey);
-            ret->d.parent = parentNode;
-
+            parentNode = find(parentKey);
             //find out if the parent contains the new node as a child
-            bool needInsert = true;
-            for (const auto &iter : parentNode->d.children) {
-                if ((*iter).key() == key)
+            for (auto &iter : parentNode->d.children) {
+                if (iter->key() == key) {
                     needInsert = false;
+                    return iter;
+
+                }
             }
-            if (needInsert)
-                parentNode->d.children.append(ret);
         }
     }
     QE_D;
+    auto ret = ShellNodePointer(new ShellNode(item, parentNode, key));
     d->nodes.insert(key, ret);
+    if (needInsert)
+        parentNode->d.children.append(ret);
     return ret;
 }
 

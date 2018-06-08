@@ -1,21 +1,22 @@
 #include "shell.h"
-#define STRICT_TYPED_ITEMIDS
-#include <ShlObj.h>
 
 namespace qe {
 namespace windows {
 namespace shell {
 
-ShellItemPointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id)
+
+//! Retrieves a `ShellItemPointer` for the given absolute id.
+ShellItem2Pointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id)
 {
     if (!id)
         return nullptr;
-    ShellItemPointer ret;
+    ShellItem2Pointer ret;
     ::SHCreateItemFromIDList(id, IID_PPV_ARGS(ret.addressOf()));
     return ret;
 }
 
-IdListPointer idListFromItem(ShellItemPointer item)
+//! Retrieves the id list for a given `ShellItemPointer`.
+IdListPointer idListFromItem(ShellItem2Pointer item)
 {
     if (!item)
         return nullptr;
@@ -24,22 +25,25 @@ IdListPointer idListFromItem(ShellItemPointer item)
     return ret;
 }
 
-UnknownPointer<IShellFolder2> desktopFolder()
+//! Returns a pointer to the IShellFolder2 interface for the desktop.
+ShellFolder2Pointer desktopFolder()
 {
     UnknownPointer<IShellFolder> desktopSf;
     ::SHGetDesktopFolder(desktopSf.addressOf());
     return desktopSf.queryInterface<IShellFolder2>();
 }
 
-ShellItemPointer desktopItem()
+//! Retrieves a `ShellItemPointer` for the desktop.
+ShellItem2Pointer desktopItem()
 {
-    ShellItemPointer ret;
+    ShellItem2Pointer ret;
     auto desktopSf = desktopFolder();
     auto hr = ::SHGetItemFromObject(desktopSf.asUnknown(), IID_PPV_ARGS(ret.addressOf()));
     Q_ASSERT(hr == S_OK && ret);
     return ret;
 }
 
+//! Calls `SHGetPathFromIdListEx` to get the parsing path for a given \arg id.
 QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id)
 {
     WCharPointer path;
@@ -47,6 +51,7 @@ QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id)
     return QString::fromWCharArray(path.get());
 }
 
+//! Helper function to translate to native format.
 SFGAOF nodeFlagsToSfgao(NodeFlags flags)
 {
     SFGAOF ret = 0x0;
@@ -72,6 +77,8 @@ SFGAOF nodeFlagsToSfgao(NodeFlags flags)
     if (flags & NodeFlag::MayHaveChildren)  ret |= SFGAO_HASSUBFOLDER;
     return ret;
 }
+
+//! Helper function to translate native flags to NodeFlags.
 NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags)
 {
     NodeFlags ret = NodeFlag::NoFlags;
@@ -98,6 +105,7 @@ NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags)
     return ret;
 }
 
+//! Helper function to translate FILE_ATTRIBUTE_* flags to NodeFlags.
 NodeFlags fileAttributeToNodeFlags(DWORD flags)
 {
     NodeFlags ret = NodeFlag::NoFlags;
@@ -118,6 +126,7 @@ IdListPointer idListFromUnknown(IUnknown *unk)
     return ret;
 }
 
+//! Convenience function that creates a new binding context.
 UnknownPointer<IBindCtx> createBindContext()
 {
     UnknownPointer<IBindCtx> ctx;

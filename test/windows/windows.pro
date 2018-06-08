@@ -26,7 +26,7 @@ CONFIG(debug, debug|release) {
     LIBS += -L$$OUT_PWD/../windows/debug -lqewin
     LIBS += -L$$OUT_PWD/../../build/windows/debug -lqewin
 }
-}
+} #win32
 
 HEADERS += \
     test_shellcache.h

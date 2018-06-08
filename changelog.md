@@ -4,7 +4,13 @@
 * qewindows/shell: added `createBindContext()`
 * Created test_shellcache.h in the test project.
 * Lots of fixes.
-* Still working at auto-populating the cache on ShellNode creation.
+* Still working at auto-populating the cache on `ShellNode` creation.
+* qewindows/types: renamed `ShellItemPointer` to `ShellItem2Pointer` to reflect
+the obvious.
+* A lot of work narrowing construction points (and thus insertions) for `ShellNode`.
+* qewindows/shellcache: Worked on parent/child relationship during node construction
+* qewindows/shellnode: some refactoring
+* Documented some things in need of documenting.
 
 ### 2018-06-05
 * qewindows/shellcache: worked on storing data as a `QMap` instead of a `QHash`.

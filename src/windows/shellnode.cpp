@@ -6,6 +6,11 @@
 namespace qe {
 namespace windows {
 
+//! Returns whether or not the node has children. This should be considered advisory until the node
+//! is enumerated.
+//! If the node is \em not enumerated and the \ref shell::NodeFlag::MayHaveChildren flag is set,
+//! this will return true.
+//! If the node is not valid, this function returns false.
 bool ShellNode::hasChildren() const noexcept
 {
     if (!isValid())
@@ -15,6 +20,7 @@ bool ShellNode::hasChildren() const noexcept
     return !d.children.isEmpty();
 }
 
+//! Gets a copy of the enumerated children of the node.
 QVector<ShellNodePointer> ShellNode::children()
 {
     if (!isValid())
@@ -25,6 +31,7 @@ QVector<ShellNodePointer> ShellNode::children()
     return d.children;
 }
 
+//! Forces the node to enumerate its children. If the data is remote, this may be costly.
 void ShellNode::enumerate()
 {
     if (!isValid())
@@ -33,31 +40,18 @@ void ShellNode::enumerate()
         d.enumerated = true;
         return;
     }
-    auto sf = d.data->item.queryInterface<IShellFolder>();
-
+    Q_UNIMPLEMENTED();
+    return;
 }
 
 //! \brief Constructs a new instance from a `ShellItemPointer` and its parent node.
 //! Node that `parent` may be nullptr, indicating this is the desktop (root) node.
-ShellNode::ShellNode(ShellItemPointer item, ShellNodePointer parent, ShellCache *cache)
+ShellNode::ShellNode(ShellItem2Pointer item, ShellNodePointer parent, QByteArray key)
 {
-    Q_ASSERT(item);
-    if (!cache)
-        d.cache = cache;
-    else
-        d.cache = ShellCache::globalInstance();
-    d.key = ShellCache::keyFor(item.get());
-    Q_ASSERT(!d.key.isNull());
-    Q_ASSERT(!cache->contains(d.key));
+    d.cache = ShellCache::globalInstance();
+    d.key = key;
     d.data = ShellNodeData::create(item);
     d.parent = parent;
-    d.cache->insert(ShellNodePointer(this));
-}
-
-ShellNode::ShellNode(const IdListPointer &id, ShellNodePointer parent, ShellCache *cache)
-{
-    d.parent = parent;
-    d.data = ShellNodeData::create(id);
 }
 
 } // namespace windows
