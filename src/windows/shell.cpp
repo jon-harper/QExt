@@ -4,9 +4,8 @@ namespace qe {
 namespace windows {
 namespace shell {
 
-
 //! Retrieves a `ShellItemPointer` for the given absolute id.
-ShellItem2Pointer itemFromIdList(ITEMIDLIST_ABSOLUTE *id)
+ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id)
 {
     if (!id)
         return nullptr;
@@ -28,9 +27,9 @@ IdListPointer idListFromItem(ShellItem2Pointer item)
 //! Returns a pointer to the IShellFolder2 interface for the desktop.
 ShellFolder2Pointer desktopFolder()
 {
-    UnknownPointer<IShellFolder> desktopSf;
-    ::SHGetDesktopFolder(desktopSf.addressOf());
-    return desktopSf.queryInterface<IShellFolder2>();
+    UnknownPointer<IShellFolder> ret;
+    ::SHGetDesktopFolder(ret.addressOf());
+    return ret.queryInterface<IShellFolder2>();
 }
 
 //! Retrieves a `ShellItemPointer` for the desktop.
@@ -38,7 +37,7 @@ ShellItem2Pointer desktopItem()
 {
     ShellItem2Pointer ret;
     auto desktopSf = desktopFolder();
-    auto hr = ::SHGetItemFromObject(desktopSf.asUnknown(), IID_PPV_ARGS(ret.addressOf()));
+    auto hr = ::SHGetItemFromObject(desktopSf.asUnknown(), IID_IShellItem2, ret.ppVoid());
     Q_ASSERT(hr == S_OK && ret);
     return ret;
 }
@@ -46,9 +45,9 @@ ShellItem2Pointer desktopItem()
 //! Calls `SHGetPathFromIdListEx` to get the parsing path for a given \arg id.
 QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id)
 {
-    WCharPointer path;
-    ::SHGetPathFromIDListEx(id, path.get(), 0, GPFIDL_DEFAULT);
-    return QString::fromWCharArray(path.get());
+    WCharPointer ret;
+    ::SHGetPathFromIDListEx(id, ret.get(), 0, GPFIDL_DEFAULT);
+    return QString::fromWCharArray(ret.get());
 }
 
 //! Helper function to translate to native format.

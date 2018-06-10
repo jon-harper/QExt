@@ -48,7 +48,6 @@ void ShellNode::enumerate()
 //! Node that `parent` may be nullptr, indicating this is the desktop (root) node.
 ShellNode::ShellNode(ShellItem2Pointer item, ShellNodePointer parent, QByteArray key)
 {
-    d.cache = ShellCache::globalInstance();
     d.key = key;
     d.data = ShellNodeData::create(item);
     d.parent = parent;

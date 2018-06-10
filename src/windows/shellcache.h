@@ -21,6 +21,7 @@
 #include <QtCore/QSharedPointer>
 #include <QtCore/QByteArray>
 #include <qecore/dptr.h>
+#include <qewindows/global.h>
 #include <qewindows/shell.h>
 #include <qewindows/shellnode.h>
 
@@ -37,7 +38,7 @@ public:
     //! The type used for values in the internal `QMap`.
     using ValueType = ShellNodePointer;
 
-    ~ShellCache() { }
+    ~ShellCache();
 
     static ShellCache *globalInstance();
     static KeyType keyFor(IUnknown *item);
@@ -63,7 +64,6 @@ private:
     Q_DISABLE_COPY(ShellCache)
     QE_DECLARE_PRIVATE(ShellCache)
 };
-
 
 } // namespace windows
 } // namespace qe

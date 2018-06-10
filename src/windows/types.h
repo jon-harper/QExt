@@ -38,25 +38,28 @@ struct IdListManager : ComDeleter<ITEMIDLIST_ABSOLUTE>
 };
 
 //! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
-using IdListPointer = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
+using IdListPointer         = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
 //! Predefined type for `IShellItem` pointers.
-using ShellItemPointer = UnknownPointer<IShellItem>;
+using ShellItemPointer      = UnknownPointer<IShellItem>;
 //! Predefined type for `IShellItem2` pointers.
-using ShellItem2Pointer = UnknownPointer<IShellItem2>;
+using ShellItem2Pointer     = UnknownPointer<IShellItem2>;
 //! Predefined type for `IShellFolder` pointers.
-using ShellFolderPointer = UnknownPointer<IShellFolder>;
+using ShellFolderPointer    = UnknownPointer<IShellFolder>;
 //! Predefined type for `IShellFolder2` pointers.
-using ShellFolder2Pointer = UnknownPointer<IShellFolder2>;
+using ShellFolder2Pointer   = UnknownPointer<IShellFolder2>;
 //! Predefined type for `IStream` pointers.
-using StreamPointer = UnknownPointer<IStream>;
+using StreamPointer         = UnknownPointer<IStream>;
 //! Predefined type for `IStorage` pointers.
-using StoragePointer = UnknownPointer<IStorage>;
+using StoragePointer        = UnknownPointer<IStorage>;
 
 } // namespace windows
 } // namespace qe
 
 // Metatype declarations for QVariant support
+Q_DECLARE_METATYPE(qe::windows::ShellItemPointer);
 Q_DECLARE_METATYPE(qe::windows::ShellItem2Pointer);
+Q_DECLARE_METATYPE(qe::windows::ShellFolderPointer);
+Q_DECLARE_METATYPE(qe::windows::ShellFolder2Pointer);
 Q_DECLARE_METATYPE(qe::windows::StreamPointer);
 Q_DECLARE_METATYPE(qe::windows::StoragePointer);
 Q_DECLARE_METATYPE(GUID) //Allows returning CLSID values from PROPVARIANTs

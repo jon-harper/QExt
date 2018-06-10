@@ -23,33 +23,37 @@
 #include <strsafe.h>
 #include <QtCore/QMetaType>
 #include <qecore/managedpointer.h>
+#include <qewindows/global.h>
 namespace qe {
 namespace windows {
 
-namespace detail {
+//namespace detail {
 
-inline std::size_t stringLen(wchar_t * str)
-{
-    std::size_t len = 0;
-    ::StringCchLengthW(str, STRSAFE_MAX_CCH, &len);
-    return len;
-}
+////! Computes the length of a null-terminted WSTR using `StringCchLengthW`.
+//std::size_t stringLen(wchar_t * str)
+//{
+//    std::size_t len = 0;
+//    ::StringCchLengthW(str, STRSAFE_MAX_CCH, &len);
+//    return len;
+//}
+//
+////! Computes the size in bytes of a WSTR using `StringCbLengthW`.
+//std::size_t stringSize(wchar_t *str)
+//{
+//    std::size_t len = 0;
+//    ::StringCbLengthW(str, STRSAFE_MAX_CCH * sizeof(wchar_t), &len);
+//    return len;
+//}
 
-inline std::size_t stringSize(wchar_t *str)
-{
-    std::size_t len = 0;
-    ::StringCbLengthW(str, STRSAFE_MAX_CCH * sizeof(wchar_t), &len);
-    return len;
-}
+////! Copies the given str using `StringCchCopyW`.
+//wchar_t *stringCopy(wchar_t *str)
+//{
+//    auto ret = static_cast<wchar_t *>(CoTaskMemAlloc(stringSize(str)));
+//    ::StringCchCopyW(ret, STRSAFE_MAX_CCH, str);
+//    return ret;
+//}
 
-inline wchar_t *stringCopy(wchar_t *str)
-{
-    auto ret = static_cast<wchar_t *>(CoTaskMemAlloc(stringSize(str)));
-    ::StringCchCopyW(ret, STRSAFE_MAX_CCH, str);
-    return ret;
-}
-
-} // namespace detail
+//} // namespace detail
 
 //! Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
 template <class T>
@@ -61,13 +65,19 @@ struct ComDeleter
     }
 };
 
+//! Manager for WCharPointer using `StringCchCopy`.
+//! \relates WCharPointer
 struct WCharManager : ComDeleter<wchar_t>
 {
     static wchar_t *copy(wchar_t *pointer)
     {
-        if (pointer)
-            return detail::stringCopy(pointer);
-        return nullptr;
+        if (!pointer)
+            return nullptr;
+        std::size_t len = 0;
+        ::StringCbLengthW(pointer, STRSAFE_MAX_CCH * sizeof(wchar_t), &len);
+        auto ret = static_cast<wchar_t *>(CoTaskMemAlloc(len));
+        ::StringCchCopyW(ret, STRSAFE_MAX_CCH, pointer);
+        return ret;
     }
 };
 
@@ -91,10 +101,10 @@ struct BStrManager {
 template <class T>
 using ComPointer = qe::UniquePointer<T, ComDeleter<T>>;
 
-//! Specialization of \ref qe::ManagedPointer for BSTRs using \ref BStrDeleter.
+//! Specialization of \ref qe::ManagedPointer for BSTRs using BStrManager.
 using BStrPointer = qe::ManagedPointer<OLECHAR, BStrManager>;
 
-//! Specialization of \ref qe::ManagedPointer for BSTRs using \ref WCharManager.
+//! Specialization of \ref qe::ManagedPointer for BSTRs using WCharManager.
 using WCharPointer = qe::ManagedPointer<WCHAR, WCharManager>;
 
 } // namespace windows

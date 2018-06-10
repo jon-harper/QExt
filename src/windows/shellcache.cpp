@@ -21,7 +21,7 @@ void ShellCachePrivate::init()
 
 }
 
-//! Constructs a new, separate instance of the cache with a parent object.
+//! Constructs a new, separate instance of the cache. Requires an instance of `Q*Application`.
 ShellCache::ShellCache()
     : ShellCache(*new ShellCachePrivate(this), qApp)
 {
@@ -29,28 +29,28 @@ ShellCache::ShellCache()
 }
 
 //! Virtual destructor; does nothing.
-
+ShellCache::~ShellCache()
+{
+}
 
 //! Returns the global instance of the shell cache, which is created on first call.
-//! \note There must be a constructed instance of `Q*Application` to call this.
 ShellCache *ShellCache::globalInstance() //static
 {
-    if Q_LIKELY(detail::globalInstance) {
+    if (detail::globalInstance) {
         return detail::globalInstance;
     }
-    Q_ASSERT(qApp); //ShellCache requires a QApplication instance
     detail::globalInstance = new ShellCache;
     return detail::globalInstance;
 }
 
-//! Returns if the cache contains the given \arg key.
+//! Returns if the cache contains the given key.
 bool ShellCache::contains(ShellCache::KeyType key) const noexcept
 {
     QE_CD;
     return d->nodes.contains(key);
 }
 
-//! Returns the value for \arg key if the cache contains it, otherwise an empty pointer.
+//! Returns the value for key if the cache contains it, otherwise an empty pointer.
 bool ShellCache::find(const ShellCache::KeyType &key, ShellNodePointer &outPtr) noexcept
 {
     QE_D;
@@ -60,6 +60,7 @@ bool ShellCache::find(const ShellCache::KeyType &key, ShellNodePointer &outPtr) 
     return true;
 }
 
+//! Retrieves the pointer identified by key and returns it. On failure, the return failure is null.
 ShellNodePointer ShellCache::find(const ShellCache::KeyType &key) const noexcept
 {
     QE_CD;
@@ -68,6 +69,7 @@ ShellNodePointer ShellCache::find(const ShellCache::KeyType &key) const noexcept
     return d->nodes.value(key);
 }
 
+//! Attempts to insert node into the cache. Returns false on failure.
 bool ShellCache::insert(ShellNodePointer node)
 {
     QE_D;
@@ -77,23 +79,26 @@ bool ShellCache::insert(ShellNodePointer node)
     return true;
 }
 
+//! Gets the id for unk, and attempts to create a new node. Will return false if the node exists
+//! or cannot be created. outPtr will remain unmodified on failure, or point to the new node if
+//! this function returns true.
 bool ShellCache::insert(IUnknown *unk, ShellNodePointer &outPtr)
 {
     Q_UNIMPLEMENTED();
     return {};
 }
 
-//! Computes and returns the hash key for \arg item.
-ShellCache::KeyType ShellCache::keyFor(IUnknown *item)
+//! Obtains the key for unk by calling `SHGetIDListFromObject`.
+ShellCache::KeyType ShellCache::keyFor(IUnknown *unk)
 {
     IdListPointer id;
-    ::SHGetIDListFromObject(item, id.addressOf());
+    ::SHGetIDListFromObject(unk, id.addressOf());
     if (!id)
         return {};
     return ShellCache::keyFor(id.get());
 }
 
-//! Computes and returns the hash key of \arg id.
+//! Return the key for id by converting it to a QByteArray. This is the fastest method of calling keyFor.
 ShellCache::KeyType ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id)
 {
     //This causes overflow, but it's just a key, so we don't care.
@@ -104,10 +109,7 @@ ShellCache::KeyType ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id)
 ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath)
 {
     IdListPointer id;
-    UnknownPointer<IBindCtx> ctx;
-    if (!::CreateBindCtx(0, ctx.addressOf()))
-        return {};
-
+    auto ctx = shell::createBindContext();
     ::SHParseDisplayName(parsingPath, ctx.get(), id.addressOf(), 0, nullptr);
     if (!id)
         return {};
@@ -115,6 +117,7 @@ ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath)
 
 }
 
+//! Returns the key for a node. Equivalent to calling `pointer->key()`.
 ShellCache::KeyType ShellCache::keyFor(const ShellNodePointer &pointer)
 {
     if (pointer.isNull())
@@ -138,6 +141,7 @@ ShellCache::ShellCache(ShellCachePrivate &dd, QObject *parent)
 
 }
 
+//! Creates a new node from the given id.
 ShellNodePointer ShellCache::createNode(const IdListPointer &id)
 {
     auto key = ShellCache::keyFor(id.get());
@@ -166,11 +170,21 @@ ShellNodePointer ShellCache::createNode(const IdListPointer &id)
         }
     }
     QE_D;
-    auto ret = ShellNodePointer(new ShellNode(item, parentNode, key));
+    auto ret = (new ShellNode(item, parentNode, key))->pointer();
     d->nodes.insert(key, ret);
     if (needInsert)
         parentNode->d.children.append(ret);
     return ret;
+}
+
+//! Completely clears the cache.
+void ShellCache::clear()
+{
+    QE_D;
+    d->nodes.clear();
+    d->libraries.clear();
+    d->drives.clear();
+    d->desktop.reset();
 }
 
 } // namespace windows

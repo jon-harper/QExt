@@ -1,6 +1,6 @@
 
 win32 {
-QT += core gui widgets winextras
+QT += core gui winextras
 
 TARGET = qewin
 TEMPLATE = lib

@@ -19,6 +19,7 @@
 
 #include <QtCore/QVector>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QEnableSharedFromThis>
 #include <qewindows/types.h>
 #include <qewindows/shellnodedata.h>
 
@@ -27,7 +28,7 @@ namespace windows {
 
 class ShellCache;
 
-class QE_WINDOWS_EXPORT ShellNode
+class QE_WINDOWS_EXPORT ShellNode : public QEnableSharedFromThis<ShellNode>
 {
 public:
     using PointerType = QSharedPointer<ShellNode>;
@@ -38,6 +39,8 @@ public:
     ShellNode &operator=(const ShellNode &) = delete;
     ShellNode &operator=(ShellNode &&other)             { swap(std::move(other)); return *this; }
     ~ShellNode() = default;
+
+    PointerType pointer()                               { return sharedFromThis(); }
 
     void swap(ShellNode &&other) noexcept               { std::swap(d, other.d); }
 
@@ -59,7 +62,6 @@ protected:
 
 private:
     struct LocalData {
-        ShellCache *cache = nullptr;
         PointerType parent;
         ShellNodeDataPointer data;
         QByteArray key;

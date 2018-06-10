@@ -1,5 +1,13 @@
 # Changelog
 
+### 2018-06-09
+* Minor doxygen config tweaks
+* Documented a few undocumented function calls
+* qewindows/shell: Enums are properly documented now.
+* Minor doxygen style updates
+* ShellNode now inherits from `QEnableSharedFromThis`.
+* Still working on the linking error.
+
 ### 2018-06-07
 * qewindows/shell: added `createBindContext()`
 * Created test_shellcache.h in the test project.
