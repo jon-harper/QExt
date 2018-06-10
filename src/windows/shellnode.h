@@ -56,9 +56,11 @@ public:
 
     const ShellNodeDataPointer data() const noexcept    { return d.data; }
     QByteArray key() const noexcept                     { return d.key; }
+    ShellItem2Pointer item() const noexcept             { return d.data->item; }
 
 protected:
     ShellNode(ShellItem2Pointer item, PointerType parent, QByteArray key);
+    PointerType createChild(IShellItem *child);
 
 private:
     struct LocalData {
@@ -71,7 +73,7 @@ private:
 
     LocalData d;
 
-    friend class ShellCache;
+    friend class ShellCachePrivate;
 };
 
 //! The preferred pointer type for `ShellNode`s.

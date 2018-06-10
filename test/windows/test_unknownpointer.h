@@ -18,11 +18,11 @@
 #ifndef QE_TEST_UNKNOWNPOINTER_H
 #define QE_TEST_UNKNOWNPOINTER_H
 
+#define STRICT_TYPED_ITEMIDS
 #include <ShlObj.h>
 #include <QVariant>
 #include <qewindows/unknownpointer.h>
 #include "../core/test.h"
-
 
 struct FakeUnknown
 {

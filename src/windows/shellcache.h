@@ -52,11 +52,15 @@ public:
     bool find(const KeyType &key, ShellNodePointer &outPtr) noexcept;
     ShellNodePointer find(const KeyType &key) const noexcept;
 
+    ShellNodePointer desktopNode() const noexcept;
+
 protected:
     ShellCache();
     ShellCache(ShellCachePrivate &dd, QObject *parent);
 
     ShellNodePointer createNode(const IdListPointer &id);
+    ShellNodePointer createNode(ShellItem2Pointer item);
+    ShellNodePointer createNode(const IdListPointer &id, ShellItem2Pointer item);
 
     void clear();
     bool remove(KeyType key);

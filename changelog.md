@@ -1,5 +1,15 @@
 # Changelog
 
+### 2018-06-10
+* Fixed the linking error, FINALLY (missed a `STRICT_TYPED_ITEMIDS`).
+* qewindows/shellcache: implemented `insert()`
+* qewindows/shellcache: moved `createNode()` to `ShellCachePrivate`
+* qewindows/compointer: removed string functions and inlined the code.
+* qewindows/shell: added `knownFolderIdList()` and `knownFolderItem()`.
+* qewindows/shell: added `bindTo()` and `bindToObject()`.
+* added shell_impl.h to help with `qe::windows::shell::bindTo()`.
+* qewindows/shellnode: started work on `enumerate()`.
+
 ### 2018-06-09
 * Minor doxygen config tweaks
 * Documented a few undocumented function calls

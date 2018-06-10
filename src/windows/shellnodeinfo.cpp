@@ -55,7 +55,7 @@ bool ShellNodeInfo::setNode(QString filepath)
     return true;
 }
 
-void ShellNodeInfo::refresh() noexcept
+void ShellNodeInfo::refresh()
 {
     if (!d)
         return;
@@ -80,6 +80,16 @@ QVariant ShellNodeInfo::propertyValue(const PROPERTYKEY &pkey)
         ret = util::fromPROPVARIANT(var);
     PropVariantClear(&var);
     return ret;
+}
+
+ShellItem2Pointer ShellNodeInfo::itemPointer() const
+{
+    return d->item;
+}
+
+IdListPointer ShellNodeInfo::idListPointer() const
+{
+    return d->id;
 }
 
 } // namespace windows

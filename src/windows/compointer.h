@@ -24,36 +24,9 @@
 #include <QtCore/QMetaType>
 #include <qecore/managedpointer.h>
 #include <qewindows/global.h>
+
 namespace qe {
 namespace windows {
-
-//namespace detail {
-
-////! Computes the length of a null-terminted WSTR using `StringCchLengthW`.
-//std::size_t stringLen(wchar_t * str)
-//{
-//    std::size_t len = 0;
-//    ::StringCchLengthW(str, STRSAFE_MAX_CCH, &len);
-//    return len;
-//}
-//
-////! Computes the size in bytes of a WSTR using `StringCbLengthW`.
-//std::size_t stringSize(wchar_t *str)
-//{
-//    std::size_t len = 0;
-//    ::StringCbLengthW(str, STRSAFE_MAX_CCH * sizeof(wchar_t), &len);
-//    return len;
-//}
-
-////! Copies the given str using `StringCchCopyW`.
-//wchar_t *stringCopy(wchar_t *str)
-//{
-//    auto ret = static_cast<wchar_t *>(CoTaskMemAlloc(stringSize(str)));
-//    ::StringCchCopyW(ret, STRSAFE_MAX_CCH, str);
-//    return ret;
-//}
-
-//} // namespace detail
 
 //! Deleter struct for \ref ComPointer using `CoTaskMemFree()`.
 template <class T>

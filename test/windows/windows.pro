@@ -26,9 +26,10 @@ CONFIG(release, debug|release) {
 }
 #debug build
 CONFIG(debug, debug|release) {
-    LIBS += -L$$OUT_PWD/debug/ -lqewin
     LIBS += -L$$OUT_PWD/../core/debug -lqecore
-    LIBS += -L$$OUT_PWD/../../build/windows/debug -lqewin
     LIBS += -L$$OUT_PWD/../../build/core/debug -lqecore
+    LIBS += -L$$OUT_PWD/debug/ -lqewin
+    LIBS += -L$$OUT_PWD/../../build/windows/debug -lqewin
+
 }
 } #win32

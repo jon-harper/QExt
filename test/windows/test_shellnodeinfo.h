@@ -32,9 +32,16 @@ struct shell_node_info_test
 
     static void test_construction()
     {
-        auto val = ShellNodeInfo("C:");
-        qDebug() << "Parsing name: " << val.parsingName();
-        qDebug() << "Display name: " << val.displayName();
+        auto val1 = ShellNodeInfo("C:");
+        qDebug() << "Parsing name: " << val1.parsingName();
+        qDebug() << "Display name: " << val1.displayName();
+
+        auto val2 = ShellNodeInfo("C:\\Windows");
+        qDebug() << "Parsing name: " << val2.parsingName();
+        qDebug() << "Display name: " << val2.displayName();
+
+        auto id = val1.idListPointer();
+        auto item = val1.itemPointer();
     }
 };
 

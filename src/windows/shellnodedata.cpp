@@ -41,7 +41,8 @@ void ShellNodeData::refresh()
         return;
     }
     //Update the item's cached data first
-    item->Update(shell::createBindContext().get());
+    auto ctx = shell::createBindContext();
+    item->Update(ctx.get());
 
     WCharPointer name;
     item->GetDisplayName(SIGDN_NORMALDISPLAY, name.addressOf());

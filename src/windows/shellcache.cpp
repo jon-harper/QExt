@@ -18,14 +18,18 @@ ShellCachePrivate::ShellCachePrivate(ShellCache *qq)
 
 void ShellCachePrivate::init()
 {
-
+    desktop = createNode(shell::idListFromUnknown(shell::desktopItem().asUnknown()));
+    computer = createNode(shell::knownFolderIdList(FOLDERID_ComputerFolder));
+    libraries = createNode(shell::knownFolderIdList(FOLDERID_Libraries));
+    network = createNode(shell::knownFolderIdList(FOLDERID_NetworkFolder));
 }
 
 //! Constructs a new, separate instance of the cache. Requires an instance of `Q*Application`.
 ShellCache::ShellCache()
     : ShellCache(*new ShellCachePrivate(this), qApp)
 {
-
+    QE_D;
+    d->init();
 }
 
 //! Virtual destructor; does nothing.
@@ -69,6 +73,12 @@ ShellNodePointer ShellCache::find(const ShellCache::KeyType &key) const noexcept
     return d->nodes.value(key);
 }
 
+ShellNodePointer ShellCache::desktopNode() const noexcept
+{
+    QE_CD;
+    return d->desktop;
+}
+
 //! Attempts to insert node into the cache. Returns false on failure.
 bool ShellCache::insert(ShellNodePointer node)
 {
@@ -84,12 +94,20 @@ bool ShellCache::insert(ShellNodePointer node)
 //! this function returns true.
 bool ShellCache::insert(IUnknown *unk, ShellNodePointer &outPtr)
 {
-    Q_UNIMPLEMENTED();
-    return {};
+    if (!unk)
+        return false;
+    auto id = shell::idListFromUnknown(unk);
+    if (!id)
+        return false;
+    QE_D;
+    outPtr = d->createNode(id);
+    if (!outPtr)
+        return false;
+    return insert(outPtr);
 }
 
 //! Obtains the key for unk by calling `SHGetIDListFromObject`.
-ShellCache::KeyType ShellCache::keyFor(IUnknown *unk)
+ShellCache::KeyType ShellCache::keyFor(IUnknown *unk) //static
 {
     IdListPointer id;
     ::SHGetIDListFromObject(unk, id.addressOf());
@@ -99,14 +117,14 @@ ShellCache::KeyType ShellCache::keyFor(IUnknown *unk)
 }
 
 //! Return the key for id by converting it to a QByteArray. This is the fastest method of calling keyFor.
-ShellCache::KeyType ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id)
+ShellCache::KeyType ShellCache::keyFor(const ITEMIDLIST_ABSOLUTE *id) //static
 {
     //This causes overflow, but it's just a key, so we don't care.
     return QByteArray(reinterpret_cast<const char *>(id));
 }
 
 //! Calls `SHParseDisplayName()` to obtain the key value.
-ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath)
+ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath) //static
 {
     IdListPointer id;
     auto ctx = shell::createBindContext();
@@ -118,7 +136,7 @@ ShellCache::KeyType ShellCache::keyFor(const wchar_t *parsingPath)
 }
 
 //! Returns the key for a node. Equivalent to calling `pointer->key()`.
-ShellCache::KeyType ShellCache::keyFor(const ShellNodePointer &pointer)
+ShellCache::KeyType ShellCache::keyFor(const ShellNodePointer &pointer) //static
 {
     if (pointer.isNull())
         return {};
@@ -142,13 +160,21 @@ ShellCache::ShellCache(ShellCachePrivate &dd, QObject *parent)
 }
 
 //! Creates a new node from the given id.
-ShellNodePointer ShellCache::createNode(const IdListPointer &id)
+ShellNodePointer ShellCachePrivate::createNode(const IdListPointer &id)
+{
+    auto item = shell::itemFromIdList(id.get());
+    return createNode(id, item);
+}
+
+ShellNodePointer ShellCachePrivate::createNode(ShellItem2Pointer item)
+{
+    auto id = shell::idListFromItem(item);
+    return createNode(id, item);
+}
+
+ShellNodePointer ShellCachePrivate::createNode(const IdListPointer &id, ShellItem2Pointer item)
 {
     auto key = ShellCache::keyFor(id.get());
-    auto item = shell::itemFromIdList(id.get());
-    Q_ASSERT(!key.isNull());
-    Q_ASSERT(item);
-
     auto parentNode = ShellNodePointer();
     bool needInsert = true;
 
@@ -157,22 +183,20 @@ ShellNodePointer ShellCache::createNode(const IdListPointer &id)
     if (parent) {
         auto parentKey = ShellCache::keyFor(parent.asUnknown());
         //check if the cache contains the parent node
-        if (contains(parentKey)) {
-            parentNode = find(parentKey);
+        if (nodes.contains(parentKey)) {
+            parentNode = nodes.value(parentKey);
             //find out if the parent contains the new node as a child
             for (auto &iter : parentNode->d.children) {
                 if (iter->key() == key) {
                     needInsert = false;
                     return iter;
-
                 }
             }
         }
     }
-    QE_D;
-    auto ret = (new ShellNode(item, parentNode, key))->pointer();
-    d->nodes.insert(key, ret);
-    if (needInsert)
+    auto ret = ShellNodePointer(new ShellNode(item, parentNode, key));
+    nodes.insert(key, ret);
+    if (needInsert && parentNode)
         parentNode->d.children.append(ret);
     return ret;
 }
@@ -182,9 +206,11 @@ void ShellCache::clear()
 {
     QE_D;
     d->nodes.clear();
-    d->libraries.clear();
     d->drives.clear();
     d->desktop.reset();
+    d->computer.reset();
+    d->libraries.reset();
+    d->network.reset();
 }
 
 } // namespace windows

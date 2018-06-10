@@ -4,6 +4,7 @@
 #include <QtCore/QtGlobal>
 #include <QtCore/QObject>
 #include <qewindows/types.h>
+#include "shell_impl.h"
 
 namespace qe {
 namespace windows {
@@ -18,6 +19,33 @@ QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
 QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
+QE_WINDOWS_EXPORT IdListPointer knownFolderIdList(const KNOWNFOLDERID &id,
+                                                  KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
+                                                  HANDLE token = nullptr);
+QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
+                                                    KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
+                                                    HANDLE token = nullptr);
+
+//! This function calls `IShellItem::BindToHandler` based on a predefined set of known BHID_ values.
+//! For calls using `BHID_SFObject`, use `bindToObject` instead. For any other situation, you will
+//! have to call `IShellItem::BindToHandler` yourself.
+template <class T>
+UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+{
+    const auto bhid = bindingGuid<T>();
+    UnknownPointer<T> ret;
+    item->BindToHandler(ctx.get(), bhid, IID_PPV_ARGS(ret.addressOf()));
+    return ret;
+}
+
+//! This function calls `IShellItem::BindToHandler` with `BHID_SFObject` as the `rbhid` object.
+template <class T>
+UnknownPointer<T> bindToObject(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+{
+    UnknownPointer<T> ret;
+    item->BindToHandler(ctx.get(), BHID_SFObject, IID_PPV_ARGS(ret.addressOf()));
+    return ret;
+}
 
 //! Flags with information about a node's type and capabilities.
 enum class NodeFlag : quint32 {

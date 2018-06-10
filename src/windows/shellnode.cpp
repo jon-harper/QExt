@@ -40,8 +40,37 @@ void ShellNode::enumerate()
         d.enumerated = true;
         return;
     }
-    Q_UNIMPLEMENTED();
-    return;
+
+    auto items = shell::bindTo<IEnumShellItems>(d.data->item);
+    unsigned long fetched = 0;
+    IShellItem *ptr[16];
+    auto hr = S_OK;
+    while (hr == S_OK) {
+        hr = items->Next(16, &(ptr[0]), &fetched);
+        if (hr != S_OK)
+            break;
+
+        for (auto i = 0u; i < fetched; ++i) {
+            if (ptr[i]) {
+                auto child = createChild(ptr[i]);
+                if (child) {
+                    d.children.append(std::move(child));
+                }
+            }
+        }
+    }
+}
+
+ShellNode::PointerType ShellNode::createChild(IShellItem *child)
+{
+    ShellItem2Pointer item;
+    child->QueryInterface(IID_PPV_ARGS(item.addressOf()));
+    child->Release();
+    auto key = ShellCache::keyFor(item.asUnknown());
+    auto ret = PointerType(new ShellNode(item, pointer(), key));
+    d.children.append(ret);
+    ShellCache::globalInstance()->insert(ret);
+    return ret;
 }
 
 //! \brief Constructs a new instance from a `ShellItemPointer` and its parent node.

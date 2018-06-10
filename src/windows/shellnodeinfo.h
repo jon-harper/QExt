@@ -17,10 +17,12 @@
 #ifndef QE_WINDOWS_SHELLNODEINFO_H
 #define QE_WINDOWS_SHELLNODEINFO_H
 
+#define STRICT_TYPED_ITEMIDS
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <qewindows/global.h>
 #include <qewindows/shellnodedata.h>
+#include <qewindows/types.h>
 
 namespace qe {
 namespace windows {
@@ -49,7 +51,7 @@ public:
 
     //! Updates the cached data in the node.
     //! \warning This may be slow for remote objects.
-    inline void refresh() noexcept;
+    void refresh();
 
     //! Returns a `QFileInfo` representing the node, if one can be constructed.
     QFileInfo fileInfo() const noexcept;
@@ -71,6 +73,9 @@ public:
     bool isFolder() const noexcept { return flags() & shell::NodeFlag::Folder; }
 
     QVariant propertyValue(const PROPERTYKEY &pkey);
+
+    ShellItem2Pointer itemPointer() const;
+    IdListPointer idListPointer() const;
 private:
     ShellNodeDataPointer d;
 };

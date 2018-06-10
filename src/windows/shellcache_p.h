@@ -28,20 +28,23 @@ namespace windows {
 
 class QE_WINDOWS_EXPORT ShellCachePrivate : public PrivateBase
 {
+    QE_DECLARE_PUBLIC(ShellCache)
 public:
     ShellCachePrivate(ShellCache *qq);
     Q_DISABLE_COPY(ShellCachePrivate)
 
     void init();
+    ShellNodePointer createNode(const IdListPointer &id);
+    ShellNodePointer createNode(ShellItem2Pointer item);
+    ShellNodePointer createNode(const IdListPointer &id, ShellItem2Pointer item);
 
     ShellNodePointer desktop;
-    ShellNodeContainer libraries;
-    ShellNodeContainer drives;
+    ShellNodePointer computer;
+    ShellNodePointer libraries;
+    ShellNodePointer network;
+    ShellNodeContainer drives;    
 
     QMap<ShellCache::KeyType, ShellNodePointer> nodes;
-
-private:
-    QE_DECLARE_PUBLIC(ShellCache)
 };
 
 } // namespace windows

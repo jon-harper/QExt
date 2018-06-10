@@ -4,6 +4,7 @@ namespace qe {
 namespace windows {
 namespace shell {
 
+
 //! Retrieves a `ShellItemPointer` for the given absolute id.
 ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id)
 {
@@ -19,8 +20,14 @@ IdListPointer idListFromItem(ShellItem2Pointer item)
 {
     if (!item)
         return nullptr;
+    return idListFromUnknown(item.asUnknown());
+}
+
+//! Returns an IDListPointer, given any IUnknown that is compatible with `SHGetIDListFromObject`.
+IdListPointer idListFromUnknown(IUnknown *unk)
+{
     IdListPointer ret;
-    ::SHGetIDListFromObject(item.asUnknown(), ret.addressOf());
+    ::SHGetIDListFromObject(unk, ret.addressOf());
     return ret;
 }
 
@@ -37,8 +44,7 @@ ShellItem2Pointer desktopItem()
 {
     ShellItem2Pointer ret;
     auto desktopSf = desktopFolder();
-    auto hr = ::SHGetItemFromObject(desktopSf.asUnknown(), IID_IShellItem2, ret.ppVoid());
-    Q_ASSERT(hr == S_OK && ret);
+    ::SHGetItemFromObject(desktopSf.asUnknown(), IID_IShellItem2, ret.ppVoid());
     return ret;
 }
 
@@ -48,6 +54,31 @@ QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id)
     WCharPointer ret;
     ::SHGetPathFromIDListEx(id, ret.get(), 0, GPFIDL_DEFAULT);
     return QString::fromWCharArray(ret.get());
+}
+
+//! Convenience function that creates a new binding context.
+UnknownPointer<IBindCtx> createBindContext()
+{
+    UnknownPointer<IBindCtx> ctx;
+    CreateBindCtx(0, ctx.addressOf());
+    return ctx;
+}
+
+//! Gets the id for a KNOWNFOLDERID. Note that this takes KNOWN_FOLDER_FLAG as an argument,
+//! unlike `SHGetKnownFolderIDList`.
+IdListPointer knownFolderIdList(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
+{
+    IdListPointer ret;
+    ::SHGetKnownFolderIDList(id, static_cast<DWORD>(flags), token, ret.addressOf());
+    return ret;
+}
+
+//! Gets a pointer to the IShellItem2 implementing a given known folder.
+ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
+{
+    ShellItem2Pointer ret;
+    ::SHGetKnownFolderItem(id, flags, token, IID_PPV_ARGS(ret.addressOf()));
+    return ret;
 }
 
 //! Helper function to translate to native format.
@@ -115,22 +146,6 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     if (flags & FILE_ATTRIBUTE_COMPRESSED)  ret |= NodeFlag::Compressed;
     if (flags & FILE_ATTRIBUTE_ENCRYPTED)   ret |= NodeFlag::Encrypted;
     return ret;
-}
-
-//! Returns an IDListPointer, given any IUnknown that is compatible with `SHGetIDListFromObject`.
-IdListPointer idListFromUnknown(IUnknown *unk)
-{
-    IdListPointer ret;
-    ::SHGetIDListFromObject(unk, ret.addressOf());
-    return ret;
-}
-
-//! Convenience function that creates a new binding context.
-UnknownPointer<IBindCtx> createBindContext()
-{
-    UnknownPointer<IBindCtx> ctx;
-    CreateBindCtx(0, ctx.addressOf());
-    return ctx;
 }
 
 } // namespace shell

@@ -37,7 +37,7 @@ struct IdListManager : ComDeleter<ITEMIDLIST_ABSOLUTE>
     }
 };
 
-//! Specialization of \ref qe::UniquePointer for absolute ITEMIDLISTs using \ref ComDeleter.
+//! Specialization of qe::UniquePointer for absolute ITEMIDLISTs using ComDeleter.
 using IdListPointer         = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
 //! Predefined type for `IShellItem` pointers.
 using ShellItemPointer      = UnknownPointer<IShellItem>;

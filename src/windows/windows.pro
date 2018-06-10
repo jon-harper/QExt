@@ -19,7 +19,8 @@ HEADERS += \
     $$PWD/shellcache_p.h \
     $$PWD/shellnode.h \
     $$PWD/shellnodedata.h \
-    $$PWD/shellnodeinfo.h
+    $$PWD/shellnodeinfo.h \
+    $$PWD/shell_impl.h
 
 SOURCES += \
     $$PWD/winutil.cpp \
@@ -31,7 +32,7 @@ SOURCES += \
 
 INCLUDEPATH += "../../Include"
 
-LIBS += -lOle32 -lShell32 -lShlwapi -lOleAut32 -luser32
+LIBS += -lOle32 -lShell32 -lShlwapi
 
 #release build
 CONFIG(release, debug|release) {
