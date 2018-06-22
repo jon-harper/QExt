@@ -1,9 +1,38 @@
 # Changelog
 
+### 2018-06-22
+* Pushing the few updates I've made while working on `shell::IdList`
+* `UnknownPointer` is better documented.
+* qewindows/shell: `desktopFolder()` and `desktopItem()` are now backed by `thread_local`
+variables.
+* qewindows/shell: added `itemParent()` and `idListParent()` functions.
+
+### 2018-06-15 - 21
+* Working on an alternative implementation of IdListPointer that behaves more
+like a trivial, concrete type and less like a pointer.
+* Need to strip out `ShellCache`, etc. and leave `ShellNode`, `ShellNodeData`, and
+`ShellNodeInfo`.
+* Will start this after I have a working test harness for shell::IdList
+
+### 2018-06-13
+* qewindows/shell: added `idListParent()`.
+
+### 2018-06-12
+* qewindows/shellnodebuilder: implemented most of the work for the class.
+* qewindows/shell: added `itemParent()` function.
+* qewindows/shellnode: delegated construction to `ShellNodeBuilder`.
+
+### 2018-06-11
+* qewindows/shellnode: added comparison operators.
+* qewindows/unknownpointer: refactoring and documentation.
+* Working towards a node/cache builder/manager that accepts some arguments
+and constructs a new node.
+* qewindows/shell: hopefully fixing `bindingGuid()`.
+
 ### 2018-06-10
 * Fixed the linking error, FINALLY (missed a `STRICT_TYPED_ITEMIDS`).
-* qewindows/shellcache: implemented `insert()`
-* qewindows/shellcache: moved `createNode()` to `ShellCachePrivate`
+* qewindows/shellcache: implemented `insert()`.
+* qewindows/shellcache: moved `createNode()` to `ShellCachePrivate`.
 * qewindows/compointer: removed string functions and inlined the code.
 * qewindows/shell: added `knownFolderIdList()` and `knownFolderItem()`.
 * qewindows/shell: added `bindTo()` and `bindToObject()`.
@@ -11,10 +40,10 @@
 * qewindows/shellnode: started work on `enumerate()`.
 
 ### 2018-06-09
-* Minor doxygen config tweaks
-* Documented a few undocumented function calls
+* Minor doxygen config tweaks.
+* Documented a few undocumented function calls.
 * qewindows/shell: Enums are properly documented now.
-* Minor doxygen style updates
+* Minor doxygen style updates.
 * ShellNode now inherits from `QEnableSharedFromThis`.
 * Still working on the linking error.
 

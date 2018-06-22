@@ -8,8 +8,6 @@ namespace shell {
 //! Retrieves a `ShellItemPointer` for the given absolute id.
 ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id)
 {
-    if (!id)
-        return nullptr;
     ShellItem2Pointer ret;
     ::SHCreateItemFromIDList(id, IID_PPV_ARGS(ret.addressOf()));
     return ret;
@@ -31,20 +29,33 @@ IdListPointer idListFromUnknown(IUnknown *unk)
     return ret;
 }
 
-//! Returns a pointer to the IShellFolder2 interface for the desktop.
-ShellFolder2Pointer desktopFolder()
+ShellFolder2Pointer get_desktopFolder()
 {
     UnknownPointer<IShellFolder> ret;
     ::SHGetDesktopFolder(ret.addressOf());
     return ret.queryInterface<IShellFolder2>();
 }
 
-//! Retrieves a `ShellItemPointer` for the desktop.
-ShellItem2Pointer desktopItem()
+//! Returns a pointer to the IShellFolder2 interface for the desktop.
+ShellFolder2Pointer desktopFolder()
+{
+    thread_local UnknownPointer<IShellFolder2> ret = get_desktopFolder();
+    return ret;
+}
+
+inline ShellItem2Pointer get_desktopItem()
 {
     ShellItem2Pointer ret;
     auto desktopSf = desktopFolder();
-    ::SHGetItemFromObject(desktopSf.asUnknown(), IID_IShellItem2, ret.ppVoid());
+    ::SHGetItemFromObject(desktopSf.asUnknown(), IID_PPV_ARGS(ret.addressOf()));
+    Q_ASSERT(ret);
+    return ret;
+}
+
+//! Retrieves a `ShellItemPointer` for the desktop.
+ShellItem2Pointer desktopItem()
+{
+    static ShellItem2Pointer ret = get_desktopItem();
     return ret;
 }
 
@@ -146,6 +157,33 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     if (flags & FILE_ATTRIBUTE_COMPRESSED)  ret |= NodeFlag::Compressed;
     if (flags & FILE_ATTRIBUTE_ENCRYPTED)   ret |= NodeFlag::Encrypted;
     return ret;
+}
+
+ShellItem2Pointer itemParent(ShellItem2Pointer item)
+{
+    Q_ASSERT(item);
+    ShellItemPointer parent;
+    item->GetParent(parent.addressOf());
+    if (!parent)
+        return {};
+    return item.queryInterface<IShellItem2>();
+
+}
+
+//! Gets the parent id of an absolute id.
+//! Adapted from: https://github.com/reactos/reactos/blob/master/dll/win32/shell32/CShellItem.cpp
+IdListPointer idListParent(const ITEMIDLIST_ABSOLUTE *id)
+{
+    ITEMIDLIST_ABSOLUTE *parentId = static_cast<ITEMIDLIST_ABSOLUTE *>(ILClone(id));
+    if (!parentId) {
+        return {};
+    }
+    if (ILRemoveLastID(parentId))
+        return {parentId};
+    else {
+        ILFree(parentId);
+        return {};
+    }
 }
 
 } // namespace shell

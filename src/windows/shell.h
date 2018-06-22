@@ -18,6 +18,8 @@ QE_WINDOWS_EXPORT IdListPointer idListFromUnknown(IUnknown *unk);
 QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
 QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
+QE_WINDOWS_EXPORT ShellItem2Pointer itemParent(ShellItem2Pointer item);
+QE_WINDOWS_EXPORT IdListPointer idListParent(const ITEMIDLIST_ABSOLUTE *id);
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
 QE_WINDOWS_EXPORT IdListPointer knownFolderIdList(const KNOWNFOLDERID &id,
                                                   KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
@@ -32,7 +34,7 @@ QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
 template <class T>
 UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
 {
-    const auto bhid = bindingGuid<T>();
+    const GUID bhid = bindingGuid<T>();
     UnknownPointer<T> ret;
     item->BindToHandler(ctx.get(), bhid, IID_PPV_ARGS(ret.addressOf()));
     return ret;

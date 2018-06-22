@@ -27,26 +27,23 @@
 namespace qe {
 namespace windows {
 
-/*!
-    \class UnknownPointer
-    \brief  Smart pointer for managing `IUnknown`-derived interfaces.
- */
+//! Smart pointer for managing `IUnknown`-derived interfaces.
 template <class IUnknownType>
 class UnknownPointer
 {
 public:
-    //! For Boost/Standard Library compatibility.
+    //! [std] Alias to the interface type.
     using element_type = IUnknownType;
-    //! For Boost/Standard Library compatibility.
+    //! [std] Alias for `IUnknownType *`.
     using pointer = std::add_pointer_t<IUnknownType>;
-    //! For Boost/Standard Library compatibility.
+    //! [std] Alias for `const IUnknownType *`.
     using const_pointer = std::add_const_t<pointer>;
-    //! For Boost/Standard Library compatibility.
+    //! [std] Alias for `IUnknownType &`.
     using reference = std::add_lvalue_reference_t<IUnknownType>;
-    //! For Boost/Standard Library compatibility.
+    //! [std] Alias for `const IUnknownType &`.
     using const_reference = std::add_const_t<reference>;
 
-    //! Constructor using CoCreateInstance.
+    //! Constructor using CoCreateInstance. These arguments are passed directly to a call to `CoCreateInstance`.
     explicit UnknownPointer(const IID &clsid, IUnknown *outer = nullptr, DWORD context = CLSCTX_INPROC)
         : d(nullptr)
     {
@@ -63,9 +60,8 @@ public:
     UnknownPointer(const UnknownPointer &rhs)
         : d(rhs.data())
     {
-        if (d) {
+        if (d)
             d->AddRef();
-        }
     }
 
     //! Move constructor. `AddRef()` is not called because ownership of the pointer is taken.
@@ -74,13 +70,13 @@ public:
     {
     }
 
-    //! Destroys the stored pointer and sets it to `nullptr`.
+    //! Destroys the stored pointer and sets it to `nullptr`. This calls `Release()`.
     ~UnknownPointer()
     {
         reset();
     }
 
-    //! Copy assignment operator
+    //! Copy assignment operator. This causes a call to `AddRef()`.
     UnknownPointer &operator=(const UnknownPointer &rhs) noexcept
     {
         UnknownPointer tmp(rhs);
@@ -88,7 +84,7 @@ public:
         return *this;
     }
 
-    //! Move assignment operator
+    //! Move assignment operator. `AddRef()` is not called.
     UnknownPointer &operator=(UnknownPointer &&rhs) noexcept
     {
         d = std::exchange(rhs.d, nullptr);
@@ -107,10 +103,10 @@ public:
         }
     }
 
-    //! [std] Equivalent to \ref take.
+    //! [std] Sets the stored pointer to `nullptr` and returns its old value. Equivalent to take.
     pointer release() noexcept              { return std::exchange(d, nullptr); }
 
-    //! [std] Sets the stored pointer to `nullptr` and returns its old value.
+    //! [Qt] Sets the stored pointer to `nullptr` and returns its old value. Equivalent to release.
     pointer take() noexcept                 { return release(); }
 
     //! [Qt] Returns a copy of the stored pointer. Equivalent to `get`.
@@ -155,10 +151,7 @@ public:
         auto hr = data()->QueryInterface(__uuidof(*ret), ret.ppVoid());
         if (hr == S_OK && ret)
             return ret;
-        else {
-            ret.reset();
-            return ret;
-        }
+        return ret;
     }
 
 private:
@@ -173,10 +166,8 @@ using UnknownBasePointer = UnknownPointer<IUnknown>;
 //! \relates UnknownPointer
 using DispatchPointer = UnknownPointer<IDispatch>;
 
-/*!
-  \brief Returns an \ref UnknownPointer created by forwarding \a args to the \ref UnknownPointer constructor.
-  \relates UnknownPointer
-*/
+//! \brief Returns an \ref UnknownPointer created by forwarding \a args to the \ref UnknownPointer constructor.
+//! \relates UnknownPointer
 template <class T, class... Args>
 UnknownPointer<T> makeUnknown(Args ...args)
 {

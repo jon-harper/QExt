@@ -14,7 +14,7 @@ namespace windows {
 namespace shell {
 namespace {
 
-template <class T>
+template <class Unknown>
 GUID bindingGuid();
 
 template<> GUID bindingGuid<::IStream>()                { return BHID_Stream; }
