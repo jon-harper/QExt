@@ -7,23 +7,28 @@
 namespace qe {
 namespace windows {
 
+//! Constructs an object with the given filepath.
 ShellNodeInfo::ShellNodeInfo(QString filepath)
 {
     setNode(filepath);
 }
 
+//! Copy assignment operator.
 ShellNodeInfo &ShellNodeInfo::operator=(const ShellNodeInfo &other)
 {
     d = other.d;
     return *this;
 }
 
+//! Move assignment operator.
 ShellNodeInfo &ShellNodeInfo::operator=(ShellNodeInfo &&other) noexcept
 {
     swap(other);
     return *this;
 }
 
+//! Sets the node to the given filepath.
+//! \note This function uses `SHCreateItemFromParsingName()`, which is limited to `MAX_PATH` (260) chars.
 bool ShellNodeInfo::setNode(QString filepath)
 {
     wchar_t converted[MAX_PATH] = {'\0'};
@@ -55,6 +60,7 @@ bool ShellNodeInfo::setNode(QString filepath)
     return true;
 }
 
+//! Refresh any cached data. This may be slow for network nodes.
 void ShellNodeInfo::refresh()
 {
     if (!d)
@@ -62,6 +68,7 @@ void ShellNodeInfo::refresh()
     d->refresh();
 }
 
+//! Returns the filesystem path and filename for the object.
 QString ShellNodeInfo::filesystemPathName() const
 {
     if (!d)
@@ -71,6 +78,7 @@ QString ShellNodeInfo::filesystemPathName() const
     return QString::fromWCharArray(ret.get());
 }
 
+//! Retrieves the value associated with pkey, if it exists.
 QVariant ShellNodeInfo::propertyValue(const PROPERTYKEY &pkey)
 {
     QVariant ret;
@@ -82,14 +90,23 @@ QVariant ShellNodeInfo::propertyValue(const PROPERTYKEY &pkey)
     return ret;
 }
 
+//! Returns a pointer to the object's `IShellItem2` interface.
 ShellItem2Pointer ShellNodeInfo::itemPointer() const
 {
     return d->item;
 }
 
+//! Returns the absolute id of the object.
 IdListPointer ShellNodeInfo::idListPointer() const
 {
     return d->id;
+}
+
+QFileInfo ShellNodeInfo::fileInfo() const
+{
+    if (exists())
+        return QFileInfo(filesystemPathName());
+    return {};
 }
 
 } // namespace windows

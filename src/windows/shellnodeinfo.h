@@ -47,14 +47,12 @@ public:
     bool setNode(QString filepath);
     //bool setNode(const QFileInfo &fileinfo);
 
+    //! Returns true if this node exists in the shell namespace.
     bool exists() const noexcept { return d; }
 
     //! Updates the cached data in the node.
     //! \warning This may be slow for remote objects.
     void refresh();
-
-    //! Returns a `QFileInfo` representing the node, if one can be constructed.
-    QFileInfo fileInfo() const noexcept;
 
     //! Returns the formatted display name of the node. An empty QString is returned for invalid nodes.
     QString displayName() const noexcept { return exists() ? d->displayName : QString();}
@@ -69,13 +67,18 @@ public:
     //! Returns the raw flags used to identify aspects of the node
     shell::NodeFlags flags() const noexcept { return exists() ? d->flags : shell::NodeFlag::NoFlags; }
 
+    //! Returns true if this object is *not* on the filesystem.
     bool isVirtual() const noexcept { return !(flags() & shell::NodeFlag::FileSystem); }
+    //! Returns true if this object is a folder and may have children.
     bool isFolder() const noexcept { return flags() & shell::NodeFlag::Folder; }
 
     QVariant propertyValue(const PROPERTYKEY &pkey);
 
     ShellItem2Pointer itemPointer() const;
     IdListPointer idListPointer() const;
+
+    //! Returns a `QFileInfo` representing the node, if one can be constructed.
+    QFileInfo fileInfo() const;
 private:
     ShellNodeDataPointer d;
 };

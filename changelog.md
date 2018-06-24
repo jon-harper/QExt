@@ -1,5 +1,11 @@
 # Changelog
 
+### 2018-06-23
+* Finished unaligned.h, which helps with the `__unaligned` specifier on x86-64 
+Windows platforms.
+* Finished idlist.h and idlist_impl.h, which are part of qewindows/idlist, to
+replace the IdListPointer.
+
 ### 2018-06-22
 * Pushing the few updates I've made while working on `shell::IdList`
 * `UnknownPointer` is better documented.

@@ -13,7 +13,9 @@ SOURCES += \
 HEADERS += \
     $$PWD/test_unknownpointer.h \
     $$PWD/test_shellnodeinfo.h \
-    $$PWD/test_shellcache.h
+    $$PWD/test_shellcache.h \
+    $$PWD/test_typeutil.h \
+    $$PWD/test_shellidlist.h
 
 LIBS += -lOle32 -lShell32 -lShlwapi
 
@@ -30,6 +32,5 @@ CONFIG(debug, debug|release) {
     LIBS += -L$$OUT_PWD/../../build/core/debug -lqecore
     LIBS += -L$$OUT_PWD/debug/ -lqewin
     LIBS += -L$$OUT_PWD/../../build/windows/debug -lqewin
-
 }
 } #win32
