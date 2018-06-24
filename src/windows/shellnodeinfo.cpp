@@ -97,7 +97,7 @@ ShellItem2Pointer ShellNodeInfo::itemPointer() const
 }
 
 //! Returns the absolute id of the object.
-IdListPointer ShellNodeInfo::idListPointer() const
+shell::IdList ShellNodeInfo::idList() const
 {
     return d->id;
 }

@@ -1,16 +1,17 @@
 #include "test_unknownpointer.h"
 #include "test_shellnodeinfo.h"
-#include "test_shellcache.h"
+#include "test_typeutil.h"
+#include "test_shellidlist.h"
 
-#include <QtCore/QCoreApplication>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication(argc, argv);
+//    QCoreApplication(argc, argv);
     CoInitialize(nullptr);
-    unknown_pointer_test::run();
-    shell_node_info_test::run();
-    shell_cache_test::run();
+    test_typeutil::run();
+    test_shellidlist::run();
+    test_unknownpointer::run();
+    test_shellnodeinfo::run();
     CoUninitialize();
     return 0;
 }

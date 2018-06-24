@@ -1,5 +1,19 @@
 # Changelog
 
+### 2018-06-24
+* qewindows/shellnodebuilder: removed
+* qewindows/shellcache: removed
+* qewindows/shellnodedata: added equality operators, removed cruft
+* qewindows/shellnode: added equality operators, removed cruft
+* qewindows/idlist: added quite a bit of functionality from the sandbox and
+updated unit test
+* qewindows/shell: converted to IdList from IdListPointer, added `compareItems()` 
+* qewindows/shellnodeinfo: updated to use IdList
+* qewindows/types: removed IdListPointer, added `#include` for IdList.
+* test.h: added `flag_check()` lambda and `EXPECT_FLAG()` macro for binary
+AND testing strongly typed enums.
+* Lots of documentation, particularly IdList.
+
 ### 2018-06-23
 * Finished unaligned.h, which helps with the `__unaligned` specifier on x86-64 
 Windows platforms.

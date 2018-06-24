@@ -1,7 +1,6 @@
 #include "shellnode.h"
 #include <qewindows/shell.h>
 #include <qewindows/shellnodedata.h>
-#include <qewindows/shellcache.h>
 
 namespace qe {
 namespace windows {
@@ -41,44 +40,63 @@ void ShellNode::enumerate()
         return;
     }
 
+    //auto cache = ShellCache::globalInstance();
     auto items = shell::bindTo<IEnumShellItems>(d.data->item);
-    unsigned long fetched = 0;
-    IShellItem *ptr[16];
+    Q_ASSERT(items);
+    IShellItem *ptr = nullptr;
     auto hr = S_OK;
     while (hr == S_OK) {
-        hr = items->Next(16, &(ptr[0]), &fetched);
-        if (hr != S_OK)
+        hr = items->Next(1, &ptr, nullptr);
+        if (!SUCCEEDED(hr))
             break;
-
-        for (auto i = 0u; i < fetched; ++i) {
-            if (ptr[i]) {
-                auto child = createChild(ptr[i]);
-                if (child) {
-                    d.children.append(std::move(child));
-                }
+//        IShellItem2 *ptr2 = nullptr;
+//        if (!SUCCEEDED(ptr->QueryInterface(IID_PPV_ARGS(&ptr2))))
+//            break;
+        bool found = false;
+        auto iter_end = d.children.cend();
+        auto iter = d.children.cbegin();
+        for(; iter != iter_end; ++iter) {
+            auto node = *iter;
+            if (!shell::compareItems(node->item(), ptr)) {
+                found = true;
+                break;
             }
         }
+        if (!found) {
+            auto child = createChild(ptr);
+            d.children.append(child);
+        }
     }
+}
+
+//! Returns a `QFileInfo` representing the node if one can be constructed. Otherwise, returns a
+//! default-constructed `QFileInfo`.
+QFileInfo ShellNode::fileInfo() const noexcept
+{
+    if (!isValid())
+        return {};
+    Q_UNIMPLEMENTED();
+    return {};
 }
 
 ShellNode::PointerType ShellNode::createChild(IShellItem *child)
 {
     ShellItem2Pointer item;
     child->QueryInterface(IID_PPV_ARGS(item.addressOf()));
-    child->Release();
-    auto key = ShellCache::keyFor(item.asUnknown());
-    auto ret = PointerType(new ShellNode(item, pointer(), key));
-    d.children.append(ret);
-    ShellCache::globalInstance()->insert(ret);
-    return ret;
+    if (!item)
+        return {};
+//    auto ret = ShellNodeBuilder(item).setParent(pointer()).build();
+//    Q_ASSERT(ShellCache::globalInstance()->insert(ret));
+    auto data = ShellNodeData::create(item);
+    auto ret = ShellNode(data, pointer());
+    return ret.pointer();
 }
 
-//! \brief Constructs a new instance from a `ShellItemPointer` and its parent node.
+//! \brief Constructs a new instance from a `ShellNodeDataPointer` and its parent node.
 //! Node that `parent` may be nullptr, indicating this is the desktop (root) node.
-ShellNode::ShellNode(ShellItem2Pointer item, ShellNodePointer parent, QByteArray key)
+ShellNode::ShellNode(ShellNodeDataPointer data, ShellNodePointer parent) /*noexcept*/
 {
-    d.key = key;
-    d.data = ShellNodeData::create(item);
+    d.data = data;
     d.parent = parent;
 }
 

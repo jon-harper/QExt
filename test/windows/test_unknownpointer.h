@@ -41,7 +41,7 @@ Q_DECLARE_METATYPE(qe::windows::UnknownPointer<FakeUnknown>);
 
 using namespace qe::windows;
 
-struct unknown_pointer_test
+struct test_unknownpointer
 {
     static void empty_pointer()
     {

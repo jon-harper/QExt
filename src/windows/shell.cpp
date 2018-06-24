@@ -4,17 +4,16 @@ namespace qe {
 namespace windows {
 namespace shell {
 
-
-//! Retrieves a `ShellItemPointer` for the given absolute id.
-ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id)
+//! Retrieves a `ShellItem2Pointer` for the given absolute id.
+ShellItem2Pointer itemFromIdList(const IdList &id)
 {
     ShellItem2Pointer ret;
-    ::SHCreateItemFromIDList(id, IID_PPV_ARGS(ret.addressOf()));
+    ::SHCreateItemFromIDList(id.castTo<PCIDLIST_ABSOLUTE>(), IID_PPV_ARGS(ret.addressOf()));
     return ret;
 }
 
-//! Retrieves the id list for a given `ShellItemPointer`.
-IdListPointer idListFromItem(ShellItem2Pointer item)
+//! Retrieves the id list for a given ShellItem2Pointer.
+IdList idListFromItem(ShellItem2Pointer item)
 {
     if (!item)
         return nullptr;
@@ -22,10 +21,10 @@ IdListPointer idListFromItem(ShellItem2Pointer item)
 }
 
 //! Returns an IDListPointer, given any IUnknown that is compatible with `SHGetIDListFromObject`.
-IdListPointer idListFromUnknown(IUnknown *unk)
+IdList idListFromUnknown(IUnknown *unk)
 {
-    IdListPointer ret;
-    ::SHGetIDListFromObject(unk, ret.addressOf());
+    IdList ret;
+    ::SHGetIDListFromObject(unk, ret.castAddress<PIDLIST_ABSOLUTE *>());
     return ret;
 }
 
@@ -77,10 +76,10 @@ UnknownPointer<IBindCtx> createBindContext()
 
 //! Gets the id for a KNOWNFOLDERID. Note that this takes KNOWN_FOLDER_FLAG as an argument,
 //! unlike `SHGetKnownFolderIDList`.
-IdListPointer knownFolderIdList(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
+IdList knownFolderIdList(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
 {
-    IdListPointer ret;
-    ::SHGetKnownFolderIDList(id, static_cast<DWORD>(flags), token, ret.addressOf());
+    IdList ret;
+    ::SHGetKnownFolderIDList(id, static_cast<DWORD>(flags), token, ret.castAddress<PIDLIST_ABSOLUTE *>());
     return ret;
 }
 
@@ -170,21 +169,23 @@ ShellItem2Pointer itemParent(ShellItem2Pointer item)
 
 }
 
-//! Gets the parent id of an absolute id.
-//! Adapted from: https://github.com/reactos/reactos/blob/master/dll/win32/shell32/CShellItem.cpp
-IdListPointer idListParent(const ITEMIDLIST_ABSOLUTE *id)
+//! Compares a ShellItem2Pointer to a raw IShellItem pointer.
+//! This function equates a null pointer to less than any valid pointer. When two null pointers are
+//! passed they are equal.
+//! If both pointers are valid, this function calls `IShellItem::Compare` with the
+//! `SICHINT_CANONICAL` flag set.
+int compareItems(ShellItem2Pointer lhs, IShellItem *rhs) noexcept
 {
-    ITEMIDLIST_ABSOLUTE *parentId = static_cast<ITEMIDLIST_ABSOLUTE *>(ILClone(id));
-    if (!parentId) {
-        return {};
-    }
-    if (ILRemoveLastID(parentId))
-        return {parentId};
-    else {
-        ILFree(parentId);
-        return {};
-    }
+    if (!lhs)
+        return rhs ? 1 : 0;
+    if (!rhs)
+        return -1;
+    int result = 0;
+    lhs->Compare(rhs, static_cast<DWORD>(SICHINT_CANONICAL), &result);
+    return result;
 }
+
+
 
 } // namespace shell
 } // namespace windows

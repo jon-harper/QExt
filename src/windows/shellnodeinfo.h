@@ -21,8 +21,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <qewindows/global.h>
-#include <qewindows/shellnodedata.h>
 #include <qewindows/types.h>
+#include <qewindows/shellnodedata.h>
 
 namespace qe {
 namespace windows {
@@ -75,13 +75,14 @@ public:
     QVariant propertyValue(const PROPERTYKEY &pkey);
 
     ShellItem2Pointer itemPointer() const;
-    IdListPointer idListPointer() const;
+    shell::IdList idList() const;
 
     //! Returns a `QFileInfo` representing the node, if one can be constructed.
     QFileInfo fileInfo() const;
 private:
     ShellNodeDataPointer d;
 };
+
 } // namespace windows
 } // namespace qe
 #endif // QE_WINDOWS_SHELLNODEINFO_H

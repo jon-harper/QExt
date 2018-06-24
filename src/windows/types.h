@@ -23,22 +23,11 @@
 #include <qewindows/global.h>
 #include <qewindows/unknownpointer.h>
 #include <qewindows/compointer.h>
+#include <qewindows/idlist.h>
 
 namespace qe {
 namespace windows {
 
-//! \brief Manager struct for ITEMIDLIST_ABSOLUTE.
-//! Uses the standard COM deleter. ILFree is not necessary since Win2k or so.
-struct IdListManager : ComDeleter<ITEMIDLIST_ABSOLUTE>
-{
-    //! Copies the provided pointer using `ILCloneFull()`. May return `nullptr`.
-    static ITEMIDLIST_ABSOLUTE *copy(ITEMIDLIST_ABSOLUTE *ptr) {
-        return ptr ? ILCloneFull(ptr) : nullptr;
-    }
-};
-
-//! Specialization of qe::UniquePointer for absolute ITEMIDLISTs using ComDeleter.
-using IdListPointer         = ManagedPointer<ITEMIDLIST_ABSOLUTE, IdListManager>;
 //! Predefined type for `IShellItem` pointers.
 using ShellItemPointer      = UnknownPointer<IShellItem>;
 //! Predefined type for `IShellItem2` pointers.
@@ -65,8 +54,6 @@ Q_DECLARE_METATYPE(qe::windows::StoragePointer);
 Q_DECLARE_METATYPE(GUID) //Allows returning CLSID values from PROPVARIANTs
 
 #ifndef QEXT_NO_CLUTTER
-using QeShellIdListManager = qe::windows::IdListManager;
-using QeShellIdListPointer = qe::windows::IdListPointer;
 using QeShellItemPointer = qe::windows::ShellItemPointer;
 using QeShellItem2Pointer = qe::windows::ShellItem2Pointer;
 using QeShellFolderPointer = qe::windows::ShellFolderPointer;

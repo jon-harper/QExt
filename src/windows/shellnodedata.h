@@ -17,9 +17,6 @@
 #ifndef QE_WINDOWS_SHELLNODEDATA_H
 #define QE_WINDOWS_SHELLNODEDATA_H
 
-#define STRICT_TYPED_ITEMIDS
-#include <wtypes.h>
-#include <ShlObj.h>
 #include <QtCore/QString>
 #include <QtCore/QDateTime>
 #include <QtCore/QVariant>
@@ -35,18 +32,14 @@ struct QE_WINDOWS_EXPORT ShellNodeData
     using PointerType = QSharedPointer<ShellNodeData>;
     using ContainerType = QVector<PointerType>;
 
-    //pointer_type create(const QString &filepath);
-    //pointer_type create(const QFile &file);
-    //pointer_type create(const QFileInfo &fileinfo);
-    void clear();
-
-    static PointerType create(const IdListPointer &ptr);
+    static PointerType create(const shell::IdList &ptr);
     static PointerType create(ShellItem2Pointer ptr);
 
+    void clear();
     void refresh();
 
     ShellItem2Pointer item;
-    IdListPointer id;
+    shell::IdList id;
 
     bool invalid = true;
 
@@ -66,4 +59,29 @@ using ShellNodeDataContainer = ShellNodeData::ContainerType;
 } // namespace windows
 } // namespace qe
 
+inline bool operator==(const qe::windows::ShellNodeData &left, IShellItem2 *right)
+{
+    if (left.invalid)
+        return right ? true : false;
+    if (!right)
+        return false;
+    int result = 0;
+    left.item->Compare(right, static_cast<DWORD>(SICHINT_CANONICAL), &result);
+    return result;
+}
+
+//inline bool operator==(const qe::windows::ShellNodeDataPointer &left, const qe::windows::ShellNodeDataPointer &right)
+//{
+//    return left == right.data();
+//}
+
+//inline bool operator==(const IShellItem *left, const qe::windows::ShellNodeDataPointer &right)
+//{
+//    return right == left;
+//}
+
+//inline bool operator !=(const qe::windows::ShellNodeDataPointer &left, const qe::windows::ShellNodeDataPointer &right)
+//{
+//    return !(left == right);
+//}
 #endif // QE_WINDOWS_SHELLNODEDATA_H

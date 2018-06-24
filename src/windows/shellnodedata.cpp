@@ -1,16 +1,14 @@
 #include "shellnodedata.h"
 #include <propkey.h>
-#include <shell.h>
-#include <shellcache.h>
 
 namespace qe {
 namespace windows {
 
-ShellNodeDataPointer ShellNodeData::create(const IdListPointer &ptr)
+ShellNodeDataPointer ShellNodeData::create(const shell::IdList &ptr)
 {
     ShellNodeData *ret = new ShellNodeData;
     ret->id = ptr;
-    ret->item = shell::itemFromIdList(ret->id.get());
+    ret->item = shell::itemFromIdList(ret->id);
     if (ret->id && ret->item)
         ret->invalid = false;
     return ShellNodeData::PointerType(ret);

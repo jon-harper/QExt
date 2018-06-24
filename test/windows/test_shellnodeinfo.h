@@ -23,7 +23,7 @@
 
 using namespace qe::windows;
 
-struct shell_node_info_test
+struct test_shellnodeinfo
 {
     static void run()
     {
@@ -40,7 +40,7 @@ struct shell_node_info_test
         qDebug() << "Parsing name: " << val2.parsingName();
         qDebug() << "Display name: " << val2.displayName();
 
-        auto id = val1.idListPointer();
+        auto id = val1.idList();
         auto item = val1.itemPointer();
     }
 };

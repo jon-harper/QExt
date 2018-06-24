@@ -20,13 +20,13 @@
 #include <QtCore/QVector>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QEnableSharedFromThis>
+#include <QtCore/QFileInfo>
 #include <qewindows/types.h>
+#include <qewindows/shell.h>
 #include <qewindows/shellnodedata.h>
 
 namespace qe {
 namespace windows {
-
-class ShellCache;
 
 class QE_WINDOWS_EXPORT ShellNode : public QEnableSharedFromThis<ShellNode>
 {
@@ -55,25 +55,23 @@ public:
     void enumerate();
 
     const ShellNodeDataPointer data() const noexcept    { return d.data; }
-    QByteArray key() const noexcept                     { return d.key; }
     ShellItem2Pointer item() const noexcept             { return d.data->item; }
+    QFileInfo fileInfo() const noexcept;
 
 protected:
     ShellNode(ShellItem2Pointer item, PointerType parent, QByteArray key);
+    ShellNode(ShellNodeDataPointer data, PointerType parent) /*noexcept*/;
     PointerType createChild(IShellItem *child);
 
 private:
     struct LocalData {
         PointerType parent;
         ShellNodeDataPointer data;
-        QByteArray key;
         QVector<PointerType> children;
         bool enumerated = false;
     };
 
     LocalData d;
-
-    friend class ShellCachePrivate;
 };
 
 //! The preferred pointer type for `ShellNode`s.
@@ -86,4 +84,26 @@ using ShellNodeContainer = QVector<ShellNodePointer>;
 } // namespace windows
 } // namespace qe
 
+inline bool operator==(IShellItem *lhs, const qe::windows::ShellNodeDataPointer &rhs) noexcept
+{
+    return qe::windows::shell::compareItems(rhs->item, lhs);
+}
+
+inline bool operator==(IShellItem *lhs, const qe::windows::ShellNodePointer &rhs) noexcept
+{
+    return qe::windows::shell::compareItems(rhs->data()->item, lhs);
+}
+
+//template <class T>
+//inline bool operator!=(const T &lhs, const qe::windows::ShellNode &rhs)
+//{
+//    return !(rhs == lhs);
+//}
+
+//template <class T, class = std::enable_if<std::is_same_v<T, qe::windows::ShellNode>
+//                                       || std::is_same_v<T, qe::windows::ShellNodeData>>>
+//inline bool operator!=(const T &lhs, IShellItem *rhs) noexcept
+//{
+//    return !(rhs == lhs);
+//}
 #endif // QE_WINDOWS_SHELLNODE_H

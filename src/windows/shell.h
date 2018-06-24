@@ -4,6 +4,7 @@
 #include <QtCore/QtGlobal>
 #include <QtCore/QObject>
 #include <qewindows/types.h>
+#include <qewindows/idlist.h>
 #include "shell_impl.h"
 
 namespace qe {
@@ -12,16 +13,22 @@ namespace windows {
 namespace shell {
 Q_NAMESPACE;
 
-QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id);
-QE_WINDOWS_EXPORT IdListPointer idListFromItem(ShellItem2Pointer item);
-QE_WINDOWS_EXPORT IdListPointer idListFromUnknown(IUnknown *unk);
+QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, IShellItem *rhs) noexcept;
+
+//QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id);
+QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id);
+QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item);
+QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk);
+
 QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
 QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
+
 QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
+
 QE_WINDOWS_EXPORT ShellItem2Pointer itemParent(ShellItem2Pointer item);
-QE_WINDOWS_EXPORT IdListPointer idListParent(const ITEMIDLIST_ABSOLUTE *id);
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
-QE_WINDOWS_EXPORT IdListPointer knownFolderIdList(const KNOWNFOLDERID &id,
+
+QE_WINDOWS_EXPORT IdList knownFolderIdList(const KNOWNFOLDERID &id,
                                                   KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
                                                   HANDLE token = nullptr);
 QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
@@ -32,7 +39,7 @@ QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
 //! For calls using `BHID_SFObject`, use `bindToObject` instead. For any other situation, you will
 //! have to call `IShellItem::BindToHandler` yourself.
 template <class T>
-UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+inline UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
 {
     const GUID bhid = bindingGuid<T>();
     UnknownPointer<T> ret;
@@ -42,7 +49,7 @@ UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx =
 
 //! This function calls `IShellItem::BindToHandler` with `BHID_SFObject` as the `rbhid` object.
 template <class T>
-UnknownPointer<T> bindToObject(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+inline UnknownPointer<T> bindToObject(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
 {
     UnknownPointer<T> ret;
     item->BindToHandler(ctx.get(), BHID_SFObject, IID_PPV_ARGS(ret.addressOf()));
@@ -125,7 +132,5 @@ QE_WINDOWS_EXPORT NodeFlags sfgaoFlagsToNodeFlags(SFGAOF flags);
 } // namespace shell
 } // namespace windows
 } // namespace qe
-
-
 
 #endif // QE_WINDOWS_SHELL_H
