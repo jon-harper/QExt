@@ -11,6 +11,7 @@ ShellNodeDataPointer ShellNodeData::create(const shell::IdList &ptr)
     ret->item = shell::itemFromIdList(ret->id);
     if (ret->id && ret->item)
         ret->invalid = false;
+    ret->refresh();
     return ShellNodeData::PointerType(ret);
 }
 
@@ -21,6 +22,7 @@ ShellNodeDataPointer ShellNodeData::create(ShellItem2Pointer ptr)
     ret->id = shell::idListFromItem(ret->item);
     if (ret->id && ret->item)
         ret->invalid = false;
+    ret->refresh();
     return ShellNodeData::PointerType(ret);
 }
 

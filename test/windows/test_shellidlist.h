@@ -1,5 +1,5 @@
-#ifndef TEST_SHELLIDLIST_H
-#define TEST_SHELLIDLIST_H
+#ifndef QE_TEST_SHELLIDLIST_H
+#define QE_TEST_SHELLIDLIST_H
 
 #include "../core/test.h"
 #include <qewindows/idlist.h>
@@ -100,4 +100,4 @@ struct test_shellidlist
     }
 };
 
-#endif // TEST_SHELLIDLIST_H
+#endif // QE_TEST_SHELLIDLIST_H

@@ -1,3 +1,19 @@
+/*  QExt: Extensions to Qt
+ *  Copyright (C) 2016  Jonathan Harper
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef QE_WINDOWS_SHELL_IDLIST_H
 #define QE_WINDOWS_SHELL_IDLIST_H
 
@@ -43,8 +59,8 @@ enum class InferredType {
 //! types.
 //!
 //! IdList is a cross between a smart pointer and a container. It provides `const` access to the
-//! underlying data via IdList::const_iterator, or direct access via the castTo or castAddress
-//! functions. The ITEMIDLIST pointer is copied using ILCLone when an IdList is copied, so each
+//! underlying data via IdList::const_iterator, and direct access via the castTo and castAddress
+//! functions. The `ITEMIDLIST` pointer is copied using `ILCLone` when an IdList is copied, so each
 //! instance is unique if the same pointer is not assigned to two IdLists.
 class IdList
 {
@@ -69,7 +85,7 @@ public:
 
     //! Enables `if(foo)` syntax.
     explicit operator bool() const noexcept         { return m_id; }
-    bool operator!() const noexcept                 { return !m_id; }
+    //bool operator!() const noexcept                 { return !m_id; }
     inline bool isRoot() const noexcept;
 
     void swap(IdList &other) noexcept               { std::swap(m_id, other.m_id); }
@@ -152,11 +168,15 @@ private:
     ITEMIDLIST *m_id;
 };
 
+//! Equality operator for IdList.
+//! \relates IdList
 inline bool operator==(const IdList &lhs, const IdList &rhs)
 {
     return compareIdList(lhs.data(), rhs.data()) == 0;
 }
 
+//! Inequality operator for IdList.
+//! \relates IdList
 inline bool operator!=(const IdList &lhs, const IdList &rhs)
 {
     return !(lhs == rhs);
@@ -165,6 +185,7 @@ inline bool operator!=(const IdList &lhs, const IdList &rhs)
 ////////
 // Implementation below
 
+//! Checks if it is safe for the iterator to advance.
 bool IdList::const_iterator::hasNext() const noexcept
 {
     if (isNull())
@@ -176,6 +197,7 @@ bool IdList::const_iterator::hasNext() const noexcept
     return true;
 }
 
+//! Advances the iterator. Synonymous with operator++.
 IdList::const_iterator &IdList::const_iterator::next()
 {
     if (!p || p->mkid.cb == 0)
@@ -184,6 +206,7 @@ IdList::const_iterator &IdList::const_iterator::next()
     return *this;
 }
 
+//! Constructs an IdList by copying from other.
 IdList::IdList(const IdList &other)
     : m_id(nullptr)
 {
@@ -201,6 +224,7 @@ bool IdList::isRoot() const noexcept
     return false;
 }
 
+//! Frees the currently stored PIDL and resets on id.
 void IdList::reset(ITEMIDLIST *id)
 {
     if (m_id)
@@ -325,5 +349,9 @@ IdList IdList::parent() const
 } // namespace shell
 } // namespace windows
 } // namespace qe
+
+#ifndef QEXT_NO_CLUTTER
+using QeShellIdList = qe::windows::shell::IdList;
+#endif
 
 #endif // QE_WINDOWS_SHELL_IDLIST_H

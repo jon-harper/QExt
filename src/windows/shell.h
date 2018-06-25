@@ -37,22 +37,22 @@ QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
 
 //! This function calls `IShellItem::BindToHandler` based on a predefined set of known BHID_ values.
 //! For calls using `BHID_SFObject`, use `bindToObject` instead. For any other situation, you will
-//! have to call `IShellItem::BindToHandler` yourself.
-template <class T>
-inline UnknownPointer<T> bindTo(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+//! have to call `IShellItem::BindToHandler` directly.
+template <class T, class = std::void_t<decltype(bindingGuid<T>())>>
+inline UnknownPointer<T> bindItem(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
 {
     const GUID bhid = bindingGuid<T>();
     UnknownPointer<T> ret;
-    item->BindToHandler(ctx.get(), bhid, IID_PPV_ARGS(ret.addressOf()));
+    item->BindToHandler(ctx.data(), bhid, IID_PPV_ARGS(ret.addressOf()));
     return ret;
 }
 
 //! This function calls `IShellItem::BindToHandler` with `BHID_SFObject` as the `rbhid` object.
 template <class T>
-inline UnknownPointer<T> bindToObject(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
+inline UnknownPointer<T> bindItemToObject(ShellItem2Pointer &item, UnknownPointer<IBindCtx> ctx = createBindContext())
 {
     UnknownPointer<T> ret;
-    item->BindToHandler(ctx.get(), BHID_SFObject, IID_PPV_ARGS(ret.addressOf()));
+    item->BindToHandler(ctx.data(), BHID_SFObject, IID_PPV_ARGS(ret.addressOf()));
     return ret;
 }
 

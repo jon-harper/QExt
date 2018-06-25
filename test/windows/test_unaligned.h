@@ -1,9 +1,9 @@
-#ifndef QE_TEST_TYPEUTIL_H
-#define QE_TEST_TYPEUTIL_H
+#ifndef QE_TEST_UNALIGNED_H
+#define QE_TEST_UNALIGNED_H
 
 #include <qewindows/unaligned.h>
 
-struct test_typeutil
+struct test_unaligned
 {
     static void run()
     {
@@ -32,4 +32,4 @@ struct test_typeutil
     }
 };
 
-#endif // QE_TEST_TYPEUTIL_H
+#endif // QE_TEST_UNALIGNED_H

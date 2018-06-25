@@ -19,7 +19,6 @@
 
 #include <utility>
 #include <type_traits>
-#define STRICT_TYPED_ITEMIDS
 #include <combaseapi.h>
 #include <QtCore/QMetaType>
 #include <qewindows/global.h>
@@ -47,7 +46,7 @@ public:
     explicit UnknownPointer(const IID &clsid, IUnknown *outer = nullptr, DWORD context = CLSCTX_INPROC)
         : d(nullptr)
     {
-        CoCreateInstance(clsid, outer, context, __uuidof(*this), ppVoid());
+        CoCreateInstance(clsid, outer, context, IID_PPV_ARGS(&d));
     }
 
     //! Default constructor. `AddRef()` is not called because ownership of the pointer is taken.

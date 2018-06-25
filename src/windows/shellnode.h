@@ -28,6 +28,16 @@
 namespace qe {
 namespace windows {
 
+//! Represents a location in the shell namespace.
+//!
+//! A location is typically identified by a PIDL, IShellItem/IShellItem2, IShellFolder/IShellFolder2,
+//! or a parsing name (as an LPCWSTR). The name "node" was chosen explicitly to not resemble any of
+//! the above names, as this class provides a single starting point for access to a location in the
+//! shell namespace. Ideally, one may obtain the same data with significantly less boilerplate.
+//!
+//! \warning This class is *not* thread safe. ShellNode instances may only exist in one thread.
+//! \warning Access to COM interfaces for the Shell namespace cannot be performed from an MTA thread.
+//! You must initialize COM as a Single-Threaded Apartment for the main thread.
 class QE_WINDOWS_EXPORT ShellNode : public QEnableSharedFromThis<ShellNode>
 {
 public:
@@ -40,12 +50,13 @@ public:
     ShellNode &operator=(ShellNode &&other)             { swap(std::move(other)); return *this; }
     ~ShellNode() = default;
 
-    PointerType pointer()                               { return sharedFromThis(); }
-
     void swap(ShellNode &&other) noexcept               { std::swap(d, other.d); }
 
+    PointerType pointer()                               { return sharedFromThis(); }
+    static PointerType rootNode();
+
     bool isValid() const noexcept                       { return d.data; }
-    bool isDesktop() const noexcept                     { return !d.parent; }
+    bool isRoot() const noexcept                        { return !d.parent; }
     bool isEnumerated() const noexcept                  { return d.enumerated; }
 
     PointerType parent() const noexcept                 { return d.parent ? d.parent : nullptr; }
@@ -55,15 +66,22 @@ public:
     void enumerate();
 
     const ShellNodeDataPointer data() const noexcept    { return d.data; }
-    ShellItem2Pointer item() const noexcept             { return d.data->item; }
+    ShellItem2Pointer itemPointer() const noexcept      { return d.data->item; }
+    shell::IdList idList() const noexcept               { return d.data->id;}
     QFileInfo fileInfo() const noexcept;
 
+    template <class T>
+    inline UnknownPointer<T> bindTo(UnknownPointer<IBindCtx> ctx = shell::createBindContext()) const;
+
+    template <class T>
+    inline UnknownPointer<T> bindToObject(UnknownPointer<IBindCtx> ctx = shell::createBindContext()) const;
 protected:
-    ShellNode(ShellItem2Pointer item, PointerType parent, QByteArray key);
     ShellNode(ShellNodeDataPointer data, PointerType parent) /*noexcept*/;
     PointerType createChild(IShellItem *child);
 
 private:
+    static ShellNode * get_rootNode();
+
     struct LocalData {
         PointerType parent;
         ShellNodeDataPointer data;
@@ -73,6 +91,22 @@ private:
 
     LocalData d;
 };
+
+//! This function calls `IShellItem::BindToHandler` based on a predefined set of known BHID_ values.
+//! For calls using `BHID_SFObject`, use `bindToObject` instead. For any other situation, you will
+//! have to call `IShellItem::BindToHandler` directly.
+template<class T>
+UnknownPointer<T> ShellNode::bindTo(UnknownPointer<IBindCtx> ctx) const
+{
+    return shell::bindItem<T>(d.data->item, ctx);
+}
+
+//! This function calls `IShellItem::BindToHandler` with `BHID_SFObject` as the `rbhid` object.
+template<class T>
+UnknownPointer<T> ShellNode::bindToObject(UnknownPointer<IBindCtx> ctx) const
+{
+    return shell::bindItemToObject<T>(d.data->item, ctx);
+}
 
 //! The preferred pointer type for `ShellNode`s.
 //! \relates ShellNode

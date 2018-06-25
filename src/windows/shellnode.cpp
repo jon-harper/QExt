@@ -5,6 +5,23 @@
 namespace qe {
 namespace windows {
 
+//! Helper function that initializes the root node.
+//! \internal
+ShellNode *ShellNode::get_rootNode()
+{
+    auto item = shell::desktopItem();
+    auto node = new ShellNode(ShellNodeData::create(item), nullptr);
+    Q_ASSERT(node);
+    return node;
+}
+
+//! Returns the desktop node.
+ShellNode::PointerType ShellNode::rootNode()
+{
+    static ShellNodePointer rootNode(ShellNode::get_rootNode());
+    return rootNode;
+}
+
 //! Returns whether or not the node has children. This should be considered advisory until the node
 //! is enumerated.
 //! If the node is \em not enumerated and the \ref shell::NodeFlag::MayHaveChildren flag is set,
@@ -41,7 +58,7 @@ void ShellNode::enumerate()
     }
 
     //auto cache = ShellCache::globalInstance();
-    auto items = shell::bindTo<IEnumShellItems>(d.data->item);
+    auto items = shell::bindItem<IEnumShellItems>(d.data->item);
     Q_ASSERT(items);
     IShellItem *ptr = nullptr;
     auto hr = S_OK;
@@ -49,17 +66,16 @@ void ShellNode::enumerate()
         hr = items->Next(1, &ptr, nullptr);
         if (!SUCCEEDED(hr))
             break;
-//        IShellItem2 *ptr2 = nullptr;
-//        if (!SUCCEEDED(ptr->QueryInterface(IID_PPV_ARGS(&ptr2))))
-//            break;
         bool found = false;
-        auto iter_end = d.children.cend();
-        auto iter = d.children.cbegin();
-        for(; iter != iter_end; ++iter) {
-            auto node = *iter;
-            if (!shell::compareItems(node->item(), ptr)) {
-                found = true;
-                break;
+        if (d.children.count()) {
+            auto iter = d.children.cbegin();
+            auto iter_end = d.children.cend();
+            for(; iter != iter_end; ++iter) {
+                auto node = *iter;
+                if (node && !shell::compareItems(node->itemPointer(), ptr)) {
+                    found = true;
+                    break;
+                }
             }
         }
         if (!found) {
@@ -67,6 +83,7 @@ void ShellNode::enumerate()
             d.children.append(child);
         }
     }
+    d.enumerated = true;
 }
 
 //! Returns a `QFileInfo` representing the node if one can be constructed. Otherwise, returns a
@@ -85,11 +102,9 @@ ShellNode::PointerType ShellNode::createChild(IShellItem *child)
     child->QueryInterface(IID_PPV_ARGS(item.addressOf()));
     if (!item)
         return {};
-//    auto ret = ShellNodeBuilder(item).setParent(pointer()).build();
-//    Q_ASSERT(ShellCache::globalInstance()->insert(ret));
     auto data = ShellNodeData::create(item);
-    auto ret = ShellNode(data, pointer());
-    return ret.pointer();
+    auto ret = new ShellNode(data, pointer());
+    return ret->pointer();
 }
 
 //! \brief Constructs a new instance from a `ShellNodeDataPointer` and its parent node.

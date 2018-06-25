@@ -1,9 +1,7 @@
 #ifndef QE_WINDOWS_SHELL_IMPL_H
 #define QE_WINDOWS_SHELL_IMPL_H
 
-#include <utility>
-#define STRICT_TYPED_ITEMIDS
-#include <ShlObj.h>
+#include <ShlObj_core.h>
 
 struct IThumbnailProvider;
 struct IQueryAssociation;
@@ -31,7 +29,7 @@ template<> GUID bindingGuid<::IQueryAssociation>()      { return BHID_Associatio
 template<> GUID bindingGuid<::IEnumAssocHandlers>()     { return BHID_EnumAssocHandlers; }
 template<> GUID bindingGuid<::IFilter>()                { return BHID_Filter; }
 
-} // namespace detail
+} // anonymous namespace
 } // namespace shell
 } // namespace windows
 } // namespace qe
