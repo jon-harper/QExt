@@ -69,6 +69,8 @@ public:
     ShellItem2Pointer itemPointer() const noexcept      { return d.data->item; }
     shell::IdList idList() const noexcept               { return d.data->id;}
     QFileInfo fileInfo() const noexcept;
+    QString parsingName() const noexcept                { return d.data->parsingName; }
+    QString displayName() const noexcept                { return d.data->displayName; }
 
     template <class T>
     inline UnknownPointer<T> bindTo(UnknownPointer<IBindCtx> ctx = shell::createBindContext()) const;

@@ -28,8 +28,10 @@ struct test_shellnode
         EXPECT_TRUE(root->isEnumerated());
         EXPECT_TRUE(root->hasChildren());
 
-        qDebug() << root->data()->parsingName;
-        qDebug() << root->data()->displayName;
+        qDebug() << root->parsingName();
+        qDebug() << root->displayName();
+
+        qDebug() << root->children().first()->displayName();
     }
 
 };

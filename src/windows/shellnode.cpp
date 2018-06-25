@@ -80,7 +80,8 @@ void ShellNode::enumerate()
         }
         if (!found) {
             auto child = createChild(ptr);
-            d.children.append(child);
+            if (child)
+                d.children.append(child);
         }
     }
     d.enumerated = true;
@@ -104,7 +105,7 @@ ShellNode::PointerType ShellNode::createChild(IShellItem *child)
         return {};
     auto data = ShellNodeData::create(item);
     auto ret = new ShellNode(data, pointer());
-    return ret->pointer();
+    return ShellNodePointer(ret);
 }
 
 //! \brief Constructs a new instance from a `ShellNodeDataPointer` and its parent node.
