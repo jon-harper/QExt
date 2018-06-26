@@ -1,15 +1,26 @@
 #include "test_unknownpointer.h"
 #include "test_shellnodeinfo.h"
+#include "test_unaligned.h"
+#include "test_shellidlist.h"
+#include "test_shellnode.h"
 
-int main(int argc, char *argv[])
+#include <QCoreApplication>
+#include <qdebug.h>
+
+int main(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
-
+    QCoreApplication(argc, argv);
     CoInitialize(nullptr);
-
-    unknown_pointer_test::run();
-    shell_node_info_test::run();
+    qDebug() << "Testing unaligned.h";
+    test_unaligned::run();
+    qDebug() << "Testing shell::idList";
+    test_shellidlist::run();
+    qDebug() << "Testing UnknownPointer";
+    test_unknownpointer::run();
+    qDebug() << "Testing ShellNodeInfo";
+    test_shellnodeinfo::run();
+    qDebug() << "Testing ShellNode";
+    test_shellnode::run();
     CoUninitialize();
     return 0;
 }

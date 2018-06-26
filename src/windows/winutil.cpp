@@ -1,6 +1,8 @@
 #include "winutil.h"
+#include <QtCore/QVector>
 #include <QtWinExtras/QtWin>
 #include <qewindows/types.h>
+
 
 namespace qe {
 namespace windows {
