@@ -31,10 +31,10 @@ namespace shell {
 //! \brief An enum for type data computed from the final abID[0] element in an `ITEMIDLIST` array.
 //! \related IdList
 enum class InferredType {
-    Local           = 0x01, //!< The id is part of the local system.
-    Remote          = 0x02, //!< The id is remove and may be slow to access.
-    Filesystem      = 0x04, //!< The id is part of a filesystem (i.e. not virtual).
-    Virtual         = 0x08, //!< The id is *not* part of a filesystem.
+    Local           = 0x01,                 //!< The id is part of the local system.
+    Remote          = 0x02,                 //!< The id is remove and may be slow to access.
+    Filesystem      = 0x04,                 //!< The id is part of a filesystem (i.e. not virtual).
+    Virtual         = 0x08,                 //!< The id is *not* part of a filesystem.
     Drive           = 0x10 | Filesystem,    //!< The node represents a mount point, possibly a remote disk.
     Folder          = 0x20 | Filesystem,    //!< The id is a folder on a filesystem (possibly remote).
     File            = 0x40 | Filesystem,    //!< The id is a file on a filesystem (possibly remote).
@@ -65,13 +65,13 @@ enum class InferredType {
 class IdList
 {
 public:
-    using element_type = ITEMIDLIST *;
-    using pointer = ITEMIDLIST **;
+    using element_type = ITEMIDLIST;
+    using pointer = ITEMIDLIST *;
 
     //! Default constructs an IdList initialized with `nullptr`.
     IdList() noexcept : m_id(nullptr) {}
     //! Constructs an IdList by taking ownership of id.
-    IdList(ITEMIDLIST *id) noexcept : m_id(id) {}
+    IdList(pointer id) noexcept : m_id(id) {}
     inline IdList(const IdList &other);
     //! Move constructs from other.
     IdList(IdList &&other) noexcept : m_id(nullptr) { swap(other); }
@@ -89,10 +89,10 @@ public:
     inline bool isRoot() const noexcept;
 
     void swap(IdList &other) noexcept               { std::swap(m_id, other.m_id); }
-    inline void reset(ITEMIDLIST *id = nullptr);
+    inline void reset(pointer id = nullptr);
 
     //! Returns the stored pointer.
-    ITEMIDLIST * data() const noexcept              { return m_id; }
+    pointer data() const noexcept                   { return m_id; }
     //! Returns a pointer to the stored pointer.
     ITEMIDLIST ** address() noexcept                { return &m_id; }
     inline const ITEMIDLIST *lastId() const noexcept;
@@ -225,7 +225,7 @@ bool IdList::isRoot() const noexcept
 }
 
 //! Frees the currently stored PIDL and resets on id.
-void IdList::reset(ITEMIDLIST *id)
+void IdList::reset(pointer id)
 {
     if (m_id)
         ILFree(aligned_cast<PIDLIST_RELATIVE>(m_id));
@@ -233,7 +233,7 @@ void IdList::reset(ITEMIDLIST *id)
 }
 
 //! Returns a const pointer to the last id in the array.
-//! \note Returns nullptr if the iterator is invalid or the (only) element if this is the root id.
+//! \note Returns nullptr if the (only) element is the root id or if the id is invalid.
 const ITEMIDLIST *IdList::lastId() const noexcept
 {
     auto iter = cbegin();

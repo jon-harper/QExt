@@ -13,9 +13,48 @@ namespace windows {
 namespace shell {
 Q_NAMESPACE;
 
-QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, IShellItem *rhs) noexcept;
+namespace detail {
 
-//QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const ITEMIDLIST_ABSOLUTE *id);
+inline int compareItems(IShellItem *lhs, IShellItem *rhs, SICHINTF flags)
+{
+    if (!lhs)
+        return -1;
+    if (!rhs)
+        return 1;
+    int result = 0;
+    if (SUCCEEDED(lhs->Compare(rhs, flags, &result)))
+        return result;
+    return -1;
+}
+
+
+inline int compareItems(IShellItem2 *&lhs, IShellItem *&rhs, SICHINTF flags)
+{
+    if (!lhs)
+        return -1;
+    if (!rhs)
+        return 1;
+    int result = 0;
+    if (SUCCEEDED(lhs->Compare(rhs, flags, &result)))
+        return result;
+    return -1;
+}
+
+
+inline int compareItems(IShellItem *lhs, IShellItem2 *rhs, SICHINTF flags)
+{
+    return compareItems(rhs, lhs, flags);
+}
+
+}
+
+QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, IShellItem *rhs,
+                                   SICHINTF flags = SICHINT_CANONICAL);
+QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, ShellItem2Pointer &rhs,
+                                   SICHINTF flags = SICHINT_CANONICAL);
+QE_WINDOWS_EXPORT int compareItems(IShellItem *lhs, IShellItem *rhs,
+                                   SICHINTF flags = SICHINT_CANONICAL);
+
 QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id);
 QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item);
 QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk);
@@ -29,8 +68,8 @@ QE_WINDOWS_EXPORT ShellItem2Pointer itemParent(ShellItem2Pointer item);
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
 
 QE_WINDOWS_EXPORT IdList knownFolderIdList(const KNOWNFOLDERID &id,
-                                                  KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
-                                                  HANDLE token = nullptr);
+                                           KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
+                                           HANDLE token = nullptr);
 QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
                                                     KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
                                                     HANDLE token = nullptr);

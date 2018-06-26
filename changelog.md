@@ -1,5 +1,15 @@
 # Changelog
 
+### 2018-06-26
+* qewindows/shellnode: added comparison operators
+* qewindows/shell: working on a proper templated implementation of `compareItems`
+* test/windows/*: some cleanup here, added to test_shellnode for comarison operators
+
+### 2018-06-25
+* qewindows/shellnode: Lots of documentation for ShellNode
+* qewindows/shellnode: Added `childCount()`, `childIndex()` and `childAt()`
+* test/windows/shellnode: updated test harness
+
 ### 2018-06-24
 * qewindows/shellnodebuilder: removed
 * qewindows/shellcache: removed

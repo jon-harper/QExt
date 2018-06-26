@@ -12,6 +12,7 @@ struct test_shellnode
     {
         CoInitialize(nullptr);
         test_shellnode::basic_tests();
+        test_shellnode::test_comparison();
         CoUninitialize();
     }
 
@@ -27,11 +28,37 @@ struct test_shellnode
         root->enumerate();
         EXPECT_TRUE(root->isEnumerated());
         EXPECT_TRUE(root->hasChildren());
+        EXPECT_GT(root->childCount(), 0);
 
-        qDebug() << root->parsingName();
-        qDebug() << root->displayName();
+        auto child = root->children().first();
+        EXPECT_TRUE(child);
+        EXPECT_TRUE(child->isValid());
+        EXPECT_FALSE(child->isRoot());
+        EXPECT_EQ(root->childIndex(child), 0);
 
-        qDebug() << root->children().first()->displayName();
+        qDebug() << child->displayName();
+    }
+
+    static void test_comparison()
+    {
+        using namespace qe::windows;
+        auto root = ShellNode::rootNode();
+        root->enumerate();
+        EXPECT_TRUE(root);
+
+        auto root2 = root;
+        EXPECT_TRUE(root2);
+        EXPECT_EQ(root, root2);
+
+        auto child = root->children().first();
+        EXPECT_TRUE(child);
+
+        EXPECT_NE(root, child);
+    }
+
+    static void test_binding()
+    {
+        Q_UNIMPLEMENTED();
     }
 
 };

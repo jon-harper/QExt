@@ -166,7 +166,6 @@ ShellItem2Pointer itemParent(ShellItem2Pointer item)
     if (!parent)
         return {};
     return item.queryInterface<IShellItem2>();
-
 }
 
 //! Compares a ShellItem2Pointer to a raw IShellItem pointer.
@@ -174,15 +173,32 @@ ShellItem2Pointer itemParent(ShellItem2Pointer item)
 //! passed they are equal.
 //! If both pointers are valid, this function calls `IShellItem::Compare` with the
 //! `SICHINT_CANONICAL` flag set.
-int compareItems(ShellItem2Pointer lhs, IShellItem *rhs) noexcept
+int compareItems(IShellItem *lhs, IShellItem *rhs, SICHINTF flags)
 {
     if (!lhs)
         return rhs ? 1 : 0;
     if (!rhs)
         return -1;
     int result = 0;
+    lhs->Compare(rhs, static_cast<DWORD>(flags), &result);
+    return result;
+}
+
+int compareItems(ShellItem2Pointer lhs, IShellItem *rhs, SICHINTF flags)
+{
+    if (!lhs)
+        return -1;
+    if (!rhs)
+        return -1;
+    int result = 0;
     lhs->Compare(rhs, static_cast<DWORD>(SICHINT_CANONICAL), &result);
     return result;
+}
+
+int compareItems(ShellItem2Pointer lhs, ShellItem2Pointer &rhs, SICHINTF flags)
+{
+    auto right = rhs.queryInterface<IShellItem>();
+    return compareItems(lhs, right.data(), flags);
 }
 
 

@@ -57,12 +57,12 @@ void ShellNode::enumerate()
         return;
     }
 
-    //auto cache = ShellCache::globalInstance();
     auto items = shell::bindItem<IEnumShellItems>(d.data->item);
     Q_ASSERT(items);
     IShellItem *ptr = nullptr;
     auto hr = S_OK;
     while (hr == S_OK) {
+        //iterate over an individual item
         hr = items->Next(1, &ptr, nullptr);
         if (!SUCCEEDED(hr))
             break;
@@ -70,6 +70,7 @@ void ShellNode::enumerate()
         if (d.children.count()) {
             auto iter = d.children.cbegin();
             auto iter_end = d.children.cend();
+            //search and see if this node exists already
             for(; iter != iter_end; ++iter) {
                 auto node = *iter;
                 if (node && !shell::compareItems(node->itemPointer(), ptr)) {

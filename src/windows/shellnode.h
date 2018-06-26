@@ -52,24 +52,39 @@ public:
 
     void swap(ShellNode &&other) noexcept               { std::swap(d, other.d); }
 
+    //! Returns a shared pointer to this node.
     PointerType pointer()                               { return sharedFromThis(); }
     static PointerType rootNode();
 
+    //! Returns true if the node was successfully constructed and has valid data.
     bool isValid() const noexcept                       { return d.data; }
+    //! Returns true if this is the root, i.e. desktop node.
     bool isRoot() const noexcept                        { return !d.parent; }
+    //! Returns true if the children of this node are enumerated.
     bool isEnumerated() const noexcept                  { return d.enumerated; }
 
+    //! Returns a pointer to the parent node, or an invalid pointer if this is the root node.
     PointerType parent() const noexcept                 { return d.parent ? d.parent : nullptr; }
     bool hasChildren() const noexcept;
+    //! Returns the number of known children of this node. Call enumerate to ensure this value is correct.
+    int childCount() const noexcept                     { return d.children.count(); }
+    int childIndex(PointerType node) const noexcept     { return d.children.indexOf(node); }
+    PointerType childAt(int index) const noexcept       { return d.children.at(index); }
     QVector<PointerType> children(); //NOT const, may enumerate
 
     void enumerate();
 
+    //! Returns a `const` pointer to `const` of the stored ShellNodeDataPointer.
     const ShellNodeDataPointer data() const noexcept    { return d.data; }
+    //! Returns a shared pointer to the stored IShellItem2 instance.
     ShellItem2Pointer itemPointer() const noexcept      { return d.data->item; }
+    //! Returns a copy of the stored IdList.
     shell::IdList idList() const noexcept               { return d.data->id;}
+    //! Retrieves a QFileInfo if possible, falling back to a default-constructed instance if not.
     QFileInfo fileInfo() const noexcept;
+    //! Gets the (child) parsing name for the node.
     QString parsingName() const noexcept                { return d.data->parsingName; }
+    //! Gets the display name of the node.
     QString displayName() const noexcept                { return d.data->displayName; }
 
     template <class T>
@@ -77,13 +92,15 @@ public:
 
     template <class T>
     inline UnknownPointer<T> bindToObject(UnknownPointer<IBindCtx> ctx = shell::createBindContext()) const;
+
 protected:
-    ShellNode(ShellNodeDataPointer data, PointerType parent) /*noexcept*/;
+    ShellNode(ShellNodeDataPointer data, PointerType parent);
     PointerType createChild(IShellItem *child);
 
 private:
     static ShellNode * get_rootNode();
 
+    //! \internal
     struct LocalData {
         PointerType parent;
         ShellNodeDataPointer data;
@@ -91,6 +108,7 @@ private:
         bool enumerated = false;
     };
 
+    //! \internal
     LocalData d;
 };
 
@@ -120,20 +138,58 @@ using ShellNodeContainer = QVector<ShellNodePointer>;
 } // namespace windows
 } // namespace qe
 
-inline bool operator==(IShellItem *lhs, const qe::windows::ShellNodeDataPointer &rhs) noexcept
+inline bool operator==(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
-    return qe::windows::shell::compareItems(rhs->item, lhs);
+    if (!lhs.isValid() || !rhs.isValid())
+        return false;
+    return qe::windows::shell::detail::compareItems(lhs.itemPointer().data(),
+                                                    rhs.itemPointer().data(),
+                                                    SICHINT_CANONICAL);
 }
 
-inline bool operator==(IShellItem *lhs, const qe::windows::ShellNodePointer &rhs) noexcept
+inline bool operator!=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
-    return qe::windows::shell::compareItems(rhs->data()->item, lhs);
+    return !(lhs == rhs);
 }
+
+inline bool operator <(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+{
+    if (!lhs.isValid() || !rhs.isValid())
+        return false;
+    return qe::windows::shell::detail::compareItems(lhs.itemPointer().data(),
+                                                    rhs.itemPointer().data(),
+                                                    SICHINT_CANONICAL);
+}
+
+inline bool operator >(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+{
+    return !(lhs < rhs);
+}
+
+inline bool operator <=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+{
+    return !(lhs == rhs) || (lhs < rhs);
+}
+
+inline bool operator >=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+{
+    return !(lhs == rhs) || (rhs < lhs);
+}
+
+//inline bool operator==(IShellItem *lhs, qe::windows::ShellNodeDataPointer &rhs) noexcept
+//{
+//    return qe::windows::shell::compareItems(rhs->item.queryInterface<IShellItem>(), lhs);
+//}
+
+//inline bool operator==(IShellItem *lhs, const qe::windows::ShellNodePointer &rhs) noexcept
+//{
+//    return qe::windows::shell::compareItems(rhs->data()->item.queryInterface<IShellItem>(), lhs);
+//}
 
 //template <class T>
-//inline bool operator!=(const T &lhs, const qe::windows::ShellNode &rhs)
+//inline bool operator==(const T &lhs, const IShellItem *&rhs)
 //{
-//    return !(rhs == lhs);
+//    return rhs == lhs;
 //}
 
 //template <class T, class = std::enable_if<std::is_same_v<T, qe::windows::ShellNode>

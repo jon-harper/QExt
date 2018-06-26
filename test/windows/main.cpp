@@ -4,10 +4,12 @@
 #include "test_shellidlist.h"
 #include "test_shellnode.h"
 
+#include <QCoreApplication>
 #include <qdebug.h>
 
-int main(int, char **)
+int main(int argc, char **argv)
 {
+    QCoreApplication(argc, argv);
     CoInitialize(nullptr);
     qDebug() << "Testing unaligned.h";
     test_unaligned::run();
