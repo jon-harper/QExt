@@ -57,7 +57,7 @@ void ShellNode::enumerate()
         return;
     }
 
-    auto items = shell::bindItem<IEnumShellItems>(d.data->item);
+    auto items = bindTo<IEnumShellItems>();
     Q_ASSERT(items);
     IShellItem *ptr = nullptr;
     auto hr = S_OK;
@@ -98,6 +98,7 @@ QFileInfo ShellNode::fileInfo() const noexcept
     return {};
 }
 
+//! Creates a new child from the given IShellItem instance.
 ShellNode::PointerType ShellNode::createChild(IShellItem *child)
 {
     ShellItem2Pointer item;

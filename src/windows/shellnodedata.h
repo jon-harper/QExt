@@ -27,15 +27,24 @@
 namespace qe {
 namespace windows {
 
+//! This class holds data needed by both ShellNode and ShellNodeInfo. Both classes
+//! carry internal shared pointers to a ShellNodeData object to allow easy
+//! conversion from ShellNode to ShellNodeInfo.
 struct QE_WINDOWS_EXPORT ShellNodeData
 {
+    //! The preferred method of passing ShellNodeData around is a QSharedPointer.
     using PointerType = QSharedPointer<ShellNodeData>;
+    //! The preferred method of storing ShellNodeData in a container is a QVector.
     using ContainerType = QVector<PointerType>;
 
+    //! Creates a new instance from an IdList.
     static PointerType create(const shell::IdList &ptr);
+    //! Creates a new instance from a ShellItem2Pointer.
     static PointerType create(ShellItem2Pointer ptr);
 
+    //! Clears all internally stored data.
     void clear();
+    //! Refreshes any cached data.
     void refresh();
 
     ShellItem2Pointer item;
@@ -53,35 +62,33 @@ struct QE_WINDOWS_EXPORT ShellNodeData
     shell::NodeFlags flags = shell::NodeFlag::NoFlags;
 };
 
+//! Alias for QSharedPointer<ShellNodeData>.
+//! \related ShellNodeData
 using ShellNodeDataPointer = ShellNodeData::PointerType;
+//! Alias for QVector<QSharedPointer<ShellNodeData>>.
+//! \related ShellNodeData
 using ShellNodeDataContainer = ShellNodeData::ContainerType;
+
+
+namespace shell {
+//! Retrieves a pointer to an IShellItem from the given object.
+//! \related qe::windows::ShellNodeData
+inline IShellItem * retrieveItemPointer(ShellNodeData &data)
+{
+    auto ret = data.item;
+    return ret.queryInterface<IShellItem>();
+}
+
+//! Retrieves a pointer to an IShellItem from the given object pointer.
+//! \related qe::windows::ShellNodeData
+inline IShellItem * retrieveItemPointer(ShellNodeDataPointer ptr)
+{
+    return retrieveItemPointer(*ptr);
+}
+
+} // namespace shell
 
 } // namespace windows
 } // namespace qe
 
-inline bool operator==(const qe::windows::ShellNodeData &left, IShellItem2 *right)
-{
-    if (left.invalid)
-        return right ? true : false;
-    if (!right)
-        return false;
-    int result = 0;
-    left.item->Compare(right, static_cast<DWORD>(SICHINT_CANONICAL), &result);
-    return result;
-}
-
-//inline bool operator==(const qe::windows::ShellNodeDataPointer &left, const qe::windows::ShellNodeDataPointer &right)
-//{
-//    return left == right.data();
-//}
-
-//inline bool operator==(const IShellItem *left, const qe::windows::ShellNodeDataPointer &right)
-//{
-//    return right == left;
-//}
-
-//inline bool operator !=(const qe::windows::ShellNodeDataPointer &left, const qe::windows::ShellNodeDataPointer &right)
-//{
-//    return !(left == right);
-//}
 #endif // QE_WINDOWS_SHELLNODEDATA_H

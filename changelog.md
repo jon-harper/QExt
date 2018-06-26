@@ -4,6 +4,8 @@
 * qewindows/shellnode: added comparison operators
 * qewindows/shell: working on a proper templated implementation of `compareItems`
 * test/windows/*: some cleanup here, added to test_shellnode for comarison operators
+* qewindows/shell: added inline getters (`retrieveItemPointer`) in shellnode.h and shellnodedata.h to retrieve IShellItem pointers from both ShellNode and ShellNodeData and their QSharedPointer typedefs.
+* Prettied up the generated doxygen class files.
 
 ### 2018-06-25
 * qewindows/shellnode: Lots of documentation for ShellNode

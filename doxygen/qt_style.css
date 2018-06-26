@@ -829,7 +829,7 @@ div.ingroups a
 div.header
 {
 	margin:  0px;
-    border-bottom: 1px solid #CFCFCF;
+    border-bottom: 0px;
 }
 
 div.headertitle
