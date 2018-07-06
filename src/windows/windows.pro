@@ -34,12 +34,12 @@ INCLUDEPATH += "../../Include"
 
 LIBS += -lOle32 -lShell32 -lShlwapi
 
-#release build
-CONFIG(release, debug|release) {
-    LIBS += -L$$OUT_PWD/../core/release -lqecore
-}
-#debug build
-CONFIG(debug, debug|release) {
-    LIBS += -L$$OUT_PWD/../core/debug -lqecore
-}
+##release build
+#CONFIG(release, debug|release) {
+#    LIBS += -L$$OUT_PWD/../core/release -lqecore
+#}
+##debug build
+#CONFIG(debug, debug|release) {
+#    LIBS += -L$$OUT_PWD/../core/debug -lqecore
+#}
 } #win32

@@ -19,27 +19,26 @@
 #define QE_CORE_DPTR_H
 
 #include "uniquepointer.h"
-
 #include <qecore/global.h>
 
-/* Use this as you would the Q_DECLARE_PUBLIC macro. */
+// Use this as you would the Q_DECLARE_PUBLIC macro.
 #define QE_DECLARE_PUBLIC(Classname) \
-    Classname *qe_q_func() { return static_cast<Classname *>(qe_ptr); } \
-    inline const Classname* qe_q_func() const { return static_cast<const Classname *>(qe_ptr); } \
-    inline const Classname* qe_cq_func() const { return static_cast<const Classname *>(qe_ptr); } \
+    inline Classname *qe_q_func() noexcept { return static_cast<Classname *>(qe_ptr); } \
+    inline const Classname* qe_q_func() const noexcept { return static_cast<const Classname *>(qe_ptr); } \
+    inline const Classname* qe_cq_func() const noexcept { return static_cast<const Classname *>(qe_ptr); } \
     friend class Classname;
 
-/* Use this as you would the Q_DECLARE_PRIVATE macro. */
+// Use this as you would the Q_DECLARE_PRIVATE macro.
 #define QE_DECLARE_PRIVATE(Classname) \
-    inline Classname##Private* qe_d_func() { return reinterpret_cast<Classname##Private *>(qed_ptr.data()); } \
-    inline const Classname##Private* qe_d_func() const { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
-    inline const Classname##Private* qe_cd_func() const { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
+    inline Classname##Private* qe_d_func() noexcept { return reinterpret_cast<Classname##Private *>(qed_ptr.data()); } \
+    inline const Classname##Private* qe_d_func() const noexcept { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
+    inline const Classname##Private* qe_cd_func() const noexcept { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
     friend class Classname##Private;
 
 #define QE_DPTR         auto d = qe_d_func()
-#define QE_CONST_DPTR   const auto d = qe_cd_func()
+#define QE_CONST_DPTR   auto d = qe_cd_func()
 #define QE_QPTR         auto q = qe_q_func()
-#define QE_CONST_QPTR   const auto q = qe_cq_func()
+#define QE_CONST_QPTR   auto q = qe_cq_func()
 
 #define QE_D    QE_DPTR
 #define QE_CD   QE_CONST_DPTR
@@ -62,7 +61,7 @@ namespace qe {
 */
 
 class PublicBase;
-class QE_CORE_EXPORT PrivateBase
+class PrivateBase
 {
 public:
     //! Constructs a new `PrivateBase` instance with \a qq as the back-pointer.
@@ -104,7 +103,7 @@ protected:
 
     You must also use the \ref QE_DECLARE_PUBLIC macro in the private section of your class.
 */
-class QE_CORE_EXPORT PublicBase
+class PublicBase
 {
 public:
     //! The only functional constructor. Note that this takes a \em reference, i.e. it cannot be null.
@@ -113,6 +112,20 @@ public:
 protected:
     UniquePointer<PrivateBase> qed_ptr;
 };
+
+//! Constructs a new object with \a qq as the back pointer (q-ptr).
+PrivateBase::PrivateBase(PublicBase *qq)
+    : qe_ptr(qq)
+{
+}
+
+
+//! Constructs a new object with \a dd as the source for the d-ptr.
+PublicBase::PublicBase(PrivateBase &dd)
+    : qed_ptr(&dd)
+{
+}
+
 
 } // namespace qe
 

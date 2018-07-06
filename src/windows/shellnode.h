@@ -64,7 +64,7 @@ public:
     static PointerType rootNode();
 
     //! Returns true if the node was successfully constructed and has valid data.
-    bool isValid() const noexcept                       { return d.data; }
+    bool isValid() const noexcept                       { return d.cachedData; }
     //! Returns true if this is the root, i.e. desktop node.
     bool isRoot() const noexcept                        { return !d.parent; }
     //! Returns true if the children of this node are enumerated.
@@ -73,7 +73,7 @@ public:
     //! Returns a pointer to the parent node, or an invalid pointer if this is the root node.
     PointerType parent() const noexcept                 { return d.parent ? d.parent : nullptr; }
     bool hasChildren() const noexcept;
-    //! Returns the number of known children of this node. Call enumerate to ensure this value is correct.
+    //! Returns the number of known children of this node. Call enumerate to ensure that this value is correct.
     int childCount() const noexcept                     { return d.children.count(); }
     int childIndex(PointerType node) const noexcept     { return d.children.indexOf(node); }
     PointerType childAt(int index) const noexcept       { return d.children.at(index); }
@@ -82,17 +82,17 @@ public:
     void enumerate();
 
     //! Returns a `const` pointer to `const` of the stored ShellNodeDataPointer.
-    const ShellNodeDataPointer data() const noexcept    { return d.data; }
+    const ShellNodeDataPointer data() const noexcept    { return d.cachedData; }
     //! Returns a shared pointer to the stored IShellItem2 instance.
-    ShellItem2Pointer itemPointer() const noexcept      { return d.data->item; }
+    ShellItem2Pointer itemPointer() const noexcept      { return d.cachedData->item; }
     //! Returns a copy of the stored IdList.
-    shell::IdList idList() const noexcept               { return d.data->id;}
+    shell::IdList idList() const noexcept               { return d.cachedData->id;}
     //! Retrieves a QFileInfo if possible, falling back to a default-constructed instance if not.
     QFileInfo fileInfo() const noexcept;
     //! Gets the (child) parsing name for the node.
-    QString parsingName() const noexcept                { return d.data->parsingName; }
+    QString parsingName() const noexcept                { return d.cachedData->parsingName; }
     //! Gets the display name of the node.
-    QString displayName() const noexcept                { return d.data->displayName; }
+    QString displayName() const noexcept                { return d.cachedData->displayName; }
 
     template <class T>
     inline UnknownPointer<T> bindTo(UnknownPointer<IBindCtx> ctx = shell::createBindContext());
@@ -110,7 +110,8 @@ private:
     //! \internal
     struct LocalData {
         PointerType parent;
-        ShellNodeDataPointer data;
+        ShellItem2Pointer item;
+        ShellNodeDataPointer cachedData;
         QVector<PointerType> children;
         bool enumerated = false;
     };
@@ -147,21 +148,21 @@ using ShellNodeContainer = QVector<ShellNodePointer>;
 template<class T>
 UnknownPointer<T> ShellNode::bindTo(UnknownPointer<IBindCtx> ctx)
 {
-    return shell::bindItem<T>(d.data->item, ctx);
+    return shell::bindItem<T>(d.cachedData->item, ctx);
 }
 
 //! This function calls `IShellItem::BindToHandler` with `BHID_SFObject` as the `rbhid` object.
 template<class T>
 UnknownPointer<T> ShellNode::bindToObject(UnknownPointer<IBindCtx> ctx)
 {
-    return shell::bindItemToObject<T>(d.data->item, ctx);
+    return shell::bindItemToObject<T>(d.cachedData->item, ctx);
 }
 
 namespace shell {
 
 //! Retrieves a pointer to an IShellItem from the given node.
 //! \related qe::windows::ShellNode
-inline IShellItem * retrieveItemPointer(ShellNode &node)
+inline ShellItemPointer itemPointer(ShellNode &node)
 {
     auto ret = node.itemPointer();
     return ret.queryInterface<IShellItem>();
@@ -169,36 +170,35 @@ inline IShellItem * retrieveItemPointer(ShellNode &node)
 
 //! Retrieves a pointer to an IShellItem from the given node pointer.
 //! \related qe::windows::ShellNode
-inline IShellItem * retrieveItemPointer(ShellNodePointer ptr)
+inline ShellItemPointer itemPointer(ShellNodePointer ptr)
 {
-    return retrieveItemPointer(*ptr);
+    return itemPointer(*ptr);
 }
 
 } // namespace shell
-
 } // namespace windows
 } // namespace qe
 
-inline bool operator==(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+inline bool operator ==(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
     if (!lhs.isValid() || !rhs.isValid())
         return false;
-    return qe::windows::shell::detail::compareItems(lhs.itemPointer().data(),
-                                                    rhs.itemPointer().data(),
-                                                    SICHINT_CANONICAL) == 0;
+    return qe::windows::shell::compareItems(lhs.itemPointer().data(),
+                                            rhs.itemPointer().data(),
+                                            SICHINT_CANONICAL) == 0;
 }
 
-inline bool operator==(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator ==(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
     return (lhs.data() == rhs.data());
 }
 
-inline bool operator!=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
+inline bool operator !=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
     return !(lhs == rhs);
 }
 
-inline bool operator!=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator !=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
     return !(lhs.data() == rhs.data());
 }
@@ -207,27 +207,22 @@ inline bool operator <(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
     if (!lhs.isValid() || !rhs.isValid())
         return false;
-    return qe::windows::shell::detail::compareItems(lhs.itemPointer().data(),
-                                                    rhs.itemPointer().data(),
-                                                    SICHINT_CANONICAL);
+    return qe::windows::shell::compareItems(lhs.itemPointer().data(),
+                                            rhs.itemPointer().data(),
+                                            SICHINT_CANONICAL);
 }
 
-inline bool operator<(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator <(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
     return *lhs < *rhs;
 }
-
-//inline bool operator<(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
-//{
-//    return *lhs < *rhs;
-//}
 
 inline bool operator >(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
     return rhs < lhs;
 }
 
-inline bool operator>(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator >(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
     return *rhs < *lhs;
 }
@@ -237,18 +232,18 @@ inline bool operator <=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs
     return !(lhs == rhs) || (lhs < rhs);
 }
 
-inline bool operator<=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator <=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
     return *rhs <= *lhs;
 }
 
 inline bool operator >=(qe::windows::ShellNode &lhs, qe::windows::ShellNode &rhs)
 {
-    return !(lhs == rhs) || (rhs < lhs);
+    return !(lhs < rhs);
 }
 
-inline bool operator>=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
+inline bool operator >=(qe::windows::ShellNodePointer lhs, qe::windows::ShellNodePointer rhs)
 {
-    return (*rhs < *lhs) || (*rhs < *lhs);
+    return !(lhs < rhs);
 }
 #endif // QE_WINDOWS_SHELLNODE_H

@@ -25,7 +25,7 @@ namespace qe {
 //! The default deleter used with \ref qe::UniquePointer.
 //! Unless you are using something other than `new` to construct your data,
 //! this works fine.
-template <typename T>
+template <class T>
 struct DefaultDeleter {
     static void cleanup(T *ptr) {
         if (ptr)
@@ -34,8 +34,8 @@ struct DefaultDeleter {
     }
 };
 
-struct PodDeleter
-{
+//! This deleter calls 'free()` on a `void` pointer.
+struct PodDeleter {
     static void cleanup(void *pointer) {
         if (pointer)
             free(pointer);
@@ -43,17 +43,15 @@ struct PodDeleter
 };
 
 #ifndef QEXT_CORE_NO_QT
-template <typename T>
-struct ObjectDeleterBase
+#include <QtCore/QObject>
+//! This deleter is exclusively for deleting `QObject`s by calling `deleteLater()` on the object.
+struct ObjectDeleter
 {
-    static void cleanup(T *pointer) {
+    static void cleanup(QObject *pointer) {
         if (pointer)
             pointer->deleteLater();
     }
 };
-
-class QObject;
-using ObjectDeleter = ObjectDeleterBase<QObject>;
 #endif //QEXT_CORE_NO_QT
 
 } // namespace qe
@@ -62,7 +60,7 @@ using ObjectDeleter = ObjectDeleterBase<QObject>;
 //! \relates qe::DefaultDeleter
 template <class T>
 using QeDefaultDeleter = qe::DefaultDeleter<T>;
-//! \relates qe::ObjectDeleterBase
+//! \relates qe::ObjectDeleter
 using QeObjectDeleter = qe::ObjectDeleter;
 #endif //QEXT_NO_CLUTTER
 

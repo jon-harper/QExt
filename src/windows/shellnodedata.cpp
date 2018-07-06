@@ -31,6 +31,8 @@ void ShellNodeData::clear()
     invalid = true;
     item.reset();
     id.reset();
+    displayName.clear();
+    parsingName.clear();
     flags = shell::NodeFlag::NoFlags;
 }
 

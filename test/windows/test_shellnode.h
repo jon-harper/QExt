@@ -82,6 +82,9 @@ struct test_shellnode
         const ShellNodeDataPointer data = root->data();
         EXPECT_FALSE(data->invalid);
 
+        auto parent = root->parent();
+        EXPECT_FALSE(parent);
+
         //verify that we can get children and they they are the same, regardless
         //of our method of access.
         auto child = root->childAt(0);
@@ -100,9 +103,11 @@ struct test_shellnode
         if (!root->isEnumerated())
             root->enumerate();
 
+        auto enumItems = root->bindTo<IEnumShellItems>();
+        EXPECT_TRUE(enumItems);
 
-//        auto eid = root->bindToObject<IEnumIDList>();
-//        EXPECT_TRUE(eid);
+        //auto enumIds = root->bindToObject<IEnumIDList>();
+        //EXPECT_TRUE(enumIds);
     }
 
 };

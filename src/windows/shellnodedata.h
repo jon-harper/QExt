@@ -69,25 +69,6 @@ using ShellNodeDataPointer = ShellNodeData::PointerType;
 //! \related ShellNodeData
 using ShellNodeDataContainer = ShellNodeData::ContainerType;
 
-
-namespace shell {
-//! Retrieves a pointer to an IShellItem from the given object.
-//! \related qe::windows::ShellNodeData
-inline IShellItem * retrieveItemPointer(ShellNodeData &data)
-{
-    auto ret = data.item;
-    return ret.queryInterface<IShellItem>();
-}
-
-//! Retrieves a pointer to an IShellItem from the given object pointer.
-//! \related qe::windows::ShellNodeData
-inline IShellItem * retrieveItemPointer(ShellNodeDataPointer ptr)
-{
-    return retrieveItemPointer(*ptr);
-}
-
-} // namespace shell
-
 } // namespace windows
 } // namespace qe
 

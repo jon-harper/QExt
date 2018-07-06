@@ -17,7 +17,7 @@ GUID bindingGuid();
 
 template<> GUID bindingGuid<::IStream>()                { return BHID_Stream; }
 template<> GUID bindingGuid<::IStorage>()               { return BHID_Storage; }
-template<> GUID bindingGuid<::IEnumShellItems>()        { return BHID_StorageEnum; }
+template<> GUID bindingGuid<::IEnumShellItems>()        { return BHID_EnumItems; }
 template<> GUID bindingGuid<::ITransferSource>()        { return BHID_Transfer; }
 template<> GUID bindingGuid<::ITransferDestination>()   { return BHID_Transfer; }
 template<> GUID bindingGuid<::IPropertyStore>()         { return BHID_PropertyStore; }

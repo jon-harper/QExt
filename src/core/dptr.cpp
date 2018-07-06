@@ -1,21 +1,3 @@
-#include "dptr.h"
-
-namespace qe {
-//! Constructs a new object with \a qq as the back pointer (q-ptr).
-QE_CORE_EXPORT PrivateBase::PrivateBase(PublicBase *qq)
-    : qe_ptr(qq)
-{
-}
-
-
-//! Constructs a new object with \a dd as the source for the d-ptr.
-QE_CORE_EXPORT PublicBase::PublicBase(PrivateBase &dd)
-    : qed_ptr(&dd)
-{
-}
-
-} // namespace qe
-
 /*!
     \def QE_DECLARE_PRIVATE(Classname)
     \relates qe::PrivateBase

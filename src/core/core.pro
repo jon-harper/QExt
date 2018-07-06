@@ -1,10 +1,7 @@
 QT += core
 
-TARGET = qecore
 TEMPLATE = lib
-CONFIG += shared C++14
-
-DEFINES += QE_BUILD_CORE
+CONFIG += C++14
 
 HEADERS += \
 	$$PWD/global.h \
