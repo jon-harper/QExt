@@ -4,7 +4,9 @@ QT += core gui winextras
 
 TARGET = qewin
 TEMPLATE = lib
-CONFIG += shared C++14
+CONFIG += shared
+
+QMAKE_CXXFLAGS += /std:c++17
 
 DEFINES += QE_BUILD_WINDOWS
 

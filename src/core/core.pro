@@ -1,7 +1,12 @@
 QT += core
 
 TEMPLATE = lib
-CONFIG += C++14
+CONFIG += C++1z
+#win32 {
+#    QMAKE_CXXFLAGS += /std:c++17
+#} else {
+#    QMAKE_CXXFLAGS += -std=c++17
+#}
 
 HEADERS += \
 	$$PWD/global.h \

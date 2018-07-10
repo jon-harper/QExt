@@ -26,11 +26,22 @@
 
 struct FakeUnknown
 {
-    HRESULT QueryInterface(REFIID riid, void **ppvObject) {
-        (void)riid; (void)ppvObject; return S_FALSE;
+    HRESULT QueryInterface(REFIID riid, void **ppvObject)
+    {
+        (void)riid;
+        (void)ppvObject;
+        return S_FALSE;
     }
-    ULONG AddRef() { count++; return count; }
-    ULONG Release() { count--; return count; }
+    ULONG AddRef()
+    {
+        ++count;
+        return count;
+    }
+    ULONG Release()
+    {
+        --count;
+        return count;
+    }
 
     explicit FakeUnknown(int aVal) : count(1), value(aVal) {}
 
@@ -43,7 +54,7 @@ using namespace qe::windows;
 
 struct test_unknownpointer
 {
-    static void empty_pointer()
+    static void test_empty_pointer()
     {
         // Create an empty (ie. nullptr) UniquePointer
         UnknownPointer<FakeUnknown> xPtr = nullptr;
@@ -82,10 +93,9 @@ struct test_unknownpointer
         EXPECT_TRUE(xPtr);
         EXPECT_NE(nullptr, xPtr.get());
 
-        if (xPtr)
         {
-            EXPECT_EQ(123,  xPtr->value);
-            EXPECT_EQ(1,    xPtr->count);
+            EXPECT_EQ(xPtr->value, 123);
+            EXPECT_EQ(xPtr->count, 1);
 
             // Move the UniquePointer, transferring ownership
             UnknownPointer<FakeUnknown> yPtr(std::move(xPtr));
@@ -94,38 +104,31 @@ struct test_unknownpointer
             EXPECT_NE(xPtr, yPtr);
             EXPECT_FALSE(xPtr);
             EXPECT_TRUE(yPtr);
-            EXPECT_EQ(123,   yPtr->value);
-            EXPECT_EQ(1,     yPtr->count);
-
-            if (yPtr)
-            {
-                //Test move operator
-                UnknownPointer<FakeUnknown> zPtr = std::move(yPtr);
-                yPtr.reset();
-
-                EXPECT_NE(yPtr, zPtr);
-                EXPECT_FALSE(yPtr);
-                EXPECT_TRUE(zPtr);
-                EXPECT_EQ(123,   zPtr->value);
-                EXPECT_EQ(1,     zPtr->count);
-            }
-
-            if (yPtr)
+            EXPECT_EQ(yPtr->value, 123);
+            EXPECT_EQ(yPtr->count, 1);
             {
                 //Test copy operator
                 UnknownPointer<FakeUnknown> zPtr = yPtr;
 
                 EXPECT_EQ(yPtr, zPtr);
-                EXPECT_EQ(123,   zPtr->value);
-                EXPECT_EQ(2,     zPtr->count);
+                EXPECT_EQ(zPtr->value, 123);
+                EXPECT_EQ(zPtr->count, 2);
+            }
+            {
+                //Test move operator
+                UnknownPointer<FakeUnknown> zPtr;
+                zPtr = std::move(yPtr);
+                yPtr.reset();
+
+                EXPECT_NE(yPtr, zPtr);
+                EXPECT_FALSE(yPtr);
+                EXPECT_TRUE(zPtr);
+                EXPECT_EQ(zPtr->value, 123);
+                EXPECT_EQ(zPtr->count, 1);
             }
 
             EXPECT_FALSE(xPtr);
             EXPECT_FALSE(yPtr);
-        }
-        else
-        {
-            assert(false); //"bool cast operator error"
         }
 
         EXPECT_FALSE(xPtr);
@@ -150,7 +153,7 @@ struct test_unknownpointer
 
     static void run()
     {
-        empty_pointer();
+        test_empty_pointer();
         basic_pointer_test();
         test_desktop();
         test_qt();

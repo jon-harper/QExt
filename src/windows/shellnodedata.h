@@ -20,7 +20,7 @@
 #include <QtCore/QString>
 #include <QtCore/QDateTime>
 #include <QtCore/QVariant>
-#include <QtCore/QSharedPointer>
+#include <QtCore/QExplicitlySharedDataPointer>
 #include <QtCore/QVector>
 #include <qewindows/shell.h>
 
@@ -30,10 +30,10 @@ namespace windows {
 //! This class holds data needed by both ShellNode and ShellNodeInfo. Both classes
 //! carry internal shared pointers to a ShellNodeData object to allow easy
 //! conversion from ShellNode to ShellNodeInfo.
-struct QE_WINDOWS_EXPORT ShellNodeData
+struct QE_WINDOWS_EXPORT ShellNodeData : public QSharedData
 {
-    //! The preferred method of passing ShellNodeData around is a QSharedPointer.
-    using PointerType = QSharedPointer<ShellNodeData>;
+    //! The preferred method of passing ShellNodeData around is a `QExplicitlySharedPointer`.
+    using PointerType = QExplicitlySharedDataPointer<ShellNodeData>;
     //! The preferred method of storing ShellNodeData in a container is a QVector.
     using ContainerType = QVector<PointerType>;
 
@@ -44,6 +44,8 @@ struct QE_WINDOWS_EXPORT ShellNodeData
 
     //! Clears all internally stored data.
     void clear();
+    //! Detaches the stored shared data.
+    void detach();
     //! Refreshes any cached data.
     void refresh();
 

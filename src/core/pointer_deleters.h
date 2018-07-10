@@ -20,6 +20,10 @@
 
 #include <cstdlib>
 
+#ifndef QEXT_CORE_NO_QT
+#include <QtCore/QObject>
+#endif
+
 namespace qe {
 
 //! The default deleter used with \ref qe::UniquePointer.
@@ -28,8 +32,7 @@ namespace qe {
 template <class T>
 struct DefaultDeleter {
     static void cleanup(T *ptr) {
-        if (ptr)
-			static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
+        static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
         delete ptr;
     }
 };
@@ -43,8 +46,7 @@ struct PodDeleter {
 };
 
 #ifndef QEXT_CORE_NO_QT
-#include <QtCore/QObject>
-//! This deleter is exclusively for deleting `QObject`s by calling `deleteLater()` on the object.
+//! This deleter is exclusively for scheduling a `QObject` for deletion.
 struct ObjectDeleter
 {
     static void cleanup(QObject *pointer) {
@@ -62,6 +64,8 @@ template <class T>
 using QeDefaultDeleter = qe::DefaultDeleter<T>;
 //! \relates qe::ObjectDeleter
 using QeObjectDeleter = qe::ObjectDeleter;
+//! \relates qe::PodDeleter
+using QePodDeleter = qe::PodDeleter;
 #endif //QEXT_NO_CLUTTER
 
 #endif //QE_CORE_POINTER_DELETERS_H

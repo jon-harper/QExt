@@ -100,6 +100,8 @@ public:
     template <class T>
     inline UnknownPointer<T> bindToObject(UnknownPointer<IBindCtx> ctx = shell::createBindContext());
 
+    void *pVoid() noexcept { return this; }
+
 protected:
     ShellNode(ShellNodeDataPointer data, PointerType parent);
     PointerType createChild(IShellItem *child);

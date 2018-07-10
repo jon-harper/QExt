@@ -5,7 +5,7 @@
 
 auto equal_check = [](auto && lhs, auto && rhs) -> bool
 {
-    return (lhs == rhs) && (rhs == lhs);
+    return (lhs == rhs);
 };
 
 auto not_equal_check = [](auto && lhs, auto && rhs) -> bool

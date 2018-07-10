@@ -1,8 +1,19 @@
 # Changelog
 
+### 2018-07-10
+* Updated the projects to use C++17, which seems to enforce stricter compliance
+with the Standard in MSVC.
+* Fixed an infinite compilation loop in pointer_deleters.h
+* Fixed another infinite loop in test.h
+* Cleaned up some of the test files
+
+### 2018-07-08
+* Added TODO.md with short-term and near-term roadmap.
+
 ### 2018-07-06
 * qewindows/shell: added in comments missing functions; still sketching out the
-full list of free qe::windows::shell functions.
+full list of free `qe::windows::shell` functions.
+* qewindows/shell: added optional HRESULT pointer parameter to most functions.
 
 ### 2018-07-04
 * qewindows/shell: renamed `parsingFilePath()` to `parsingPathName()` and added

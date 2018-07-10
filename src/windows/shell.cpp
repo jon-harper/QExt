@@ -6,10 +6,12 @@ namespace windows {
 namespace shell {
 
 //! \internal
+//! Initializes the `thread_local` variable for desktopFolder.
 ShellFolder2Pointer get_desktopFolder()
 {
     UnknownPointer<IShellFolder> ret;
     ::SHGetDesktopFolder(ret.addressOf());
+    Q_ASSERT(ret);
     return ret.queryInterface<IShellFolder2>();
 }
 
@@ -21,6 +23,7 @@ ShellFolder2Pointer desktopFolder()
 }
 
 //! \internal
+//! Initializes the `thread_local` variable for desktopItem.
 inline ShellItem2Pointer get_desktopItem()
 {
     ShellItem2Pointer ret; // = knownFolderItem(FOLDERID_Desktop, KF_FLAG_DEFAULT, nullptr);
@@ -39,77 +42,111 @@ ShellItem2Pointer desktopItem()
 
 //! Gets the IdList for a `KNOWNFOLDERID`. Note that this takes `KNOWN_FOLDER_FLAG` as an argument,
 //! unlike `SHGetKnownFolderIDList` where it is a `DWORD`.
-IdList knownFolderIdList(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
+IdList knownFolderIdList(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token, HRESULT *result)
 {
     IdList ret;
-    ::SHGetKnownFolderIDList(id, static_cast<DWORD>(flags), token, ret.castAddress<PIDLIST_ABSOLUTE *>());
+    HRESULT hr = ::SHGetKnownFolderIDList(id, static_cast<DWORD>(flags), token, ret.castAddress<PIDLIST_ABSOLUTE *>());
+    if (result) *result = hr;
     return ret;
 }
 
 //! Gets a pointer to the `IShellItem2` implementing a given known folder.
-ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token)
+ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id, KNOWN_FOLDER_FLAG flags, HANDLE token, HRESULT *result)
 {
     ShellItem2Pointer ret;
-    ::SHGetKnownFolderItem(id, flags, token, IID_PPV_ARGS(ret.addressOf()));
+    HRESULT hr = ::SHGetKnownFolderItem(id, flags, token, IID_PPV_ARGS(ret.addressOf()));
+    if (result) *result = hr;
     return ret;
 }
 
 //! Compares two raw IShellItem pointers.
 //! This function equates a null pointer to less than any valid pointer. When two null pointers are
-//! passed they are equal. If both pointers are valid, this function calls `IShellItem::Compare`
+//! passed they unequal. If both pointers are valid, this function calls `IShellItem::Compare`
 //! with the given flags.
-int compareItems(IShellItem *lhs, IShellItem *rhs, SICHINTF flags)
+int compareItems(IShellItem *lhs, IShellItem *rhs, SICHINTF flags, HRESULT *result)
 {
+    if (result && (!lhs || !rhs))
+        *result = E_POINTER;
     if (!lhs)
-        return rhs ? 1 : 0;
+        return 1;
     if (!rhs)
         return -1;
-    int result = 0;
-    lhs->Compare(rhs, static_cast<DWORD>(flags), &result);
-    return result;
+
+    int ret = 0;
+    HRESULT hr = lhs->Compare(rhs, static_cast<DWORD>(flags), &ret);
+    if (result) *result = hr;
+    return ret;
 }
 
 //! Retrieves a `ShellItem2Pointer` for the given IdList.
-ShellItem2Pointer itemFromIdList(const IdList &id)
+ShellItem2Pointer itemFromIdList(const IdList &id, HRESULT *result)
 {
     ShellItem2Pointer ret;
-    ::SHCreateItemFromIDList(id.castTo<PCIDLIST_ABSOLUTE>(), IID_PPV_ARGS(ret.addressOf()));
+    HRESULT hr = ::SHCreateItemFromIDList(id.castTo<PCIDLIST_ABSOLUTE>(), IID_PPV_ARGS(ret.addressOf()));
+    if (result) *result = hr;
     return ret;
 }
 
 //! Retrieves the id list for a given ShellItem2Pointer.
-IdList idListFromItem(ShellItem2Pointer item)
+IdList idListFromItem(ShellItem2Pointer item, HRESULT *result)
 {
-    if (!item)
+    if (!item) {
+        if (result) *result = E_POINTER;
         return nullptr;
-    return idListFromUnknown(item.asUnknown());
+    }
+    return idListFromUnknown(item.asUnknown(), result);
 }
 
 //! Returns an IDListPointer, given any IUnknown that is compatible with `SHGetIDListFromObject`.
-IdList idListFromUnknown(IUnknown *unk)
+IdList idListFromUnknown(IUnknown *unk, HRESULT *result)
 {
     IdList ret;
-    ::SHGetIDListFromObject(unk, ret.castAddress<PIDLIST_ABSOLUTE *>());
+    HRESULT hr = ::SHGetIDListFromObject(unk, ret.castAddress<PIDLIST_ABSOLUTE *>());
+    if (result)
+        *result = hr;
     return ret;
 }
 
 //! Calls `SHGetPathFromIdListEx` to get the parsing path for a given id.
-QString parsingPathName(const IdList &id)
+QString parsingPathName(const IdList &id, HRESULT *result)
 {
     WCharPointer ret;
-    ::SHGetPathFromIDListEx(id.castTo<PCIDLIST_ABSOLUTE>(), ret.get(), 0, GPFIDL_DEFAULT);
+    HRESULT hr = ::SHGetPathFromIDListEx(id.castTo<PCIDLIST_ABSOLUTE>(), ret.get(), 0, GPFIDL_DEFAULT);
+    if (result) *result = hr;
     return QString::fromWCharArray(ret.data());
 }
 
 //! Calls `GetDisplayName` on the item with the `SIGDN_DESKTOPABSOLUTEPARSING` flag set, return
 //! the absolute parsing pathname for the item.
-QString parsingPathName(ShellItem2Pointer item)
+QString parsingPathName(ShellItem2Pointer item, HRESULT *result)
 {
-    if (!item)
+    if (!item) {
+        if (result)
+            *result = E_POINTER;
         return {};
+    }
     WCharPointer ret;
-    item->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, ret.addressOf());
+    HRESULT hr = item->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, ret.addressOf());
+    if (result) *result = hr;
     return QString::fromWCharArray(ret.data());
+}
+
+//! Retrieves the parent of a given ShellItem2Pointer or a default-initialized value if item
+//! is the desktop or null.
+ShellItem2Pointer parent(ShellItem2Pointer item, HRESULT *result)
+{
+    if (!item) {
+        if (result)
+            *result = E_POINTER;
+        return {};
+    }
+    ShellItemPointer parent;
+    HRESULT hr = item->GetParent(parent.addressOf());
+    if (!parent) {
+        if (result) *result = hr;
+        return {};
+    }
+    return item.queryInterface<IShellItem2>();
 }
 
 //! Convenience function that creates a new binding context.
@@ -187,18 +224,6 @@ NodeFlags fileAttributeToNodeFlags(DWORD flags)
     return ret;
 }
 
-//! Retrieves the parent of a given ShellItem2Pointer or a default-initialized value if item
-//! is the desktop or null.
-ShellItem2Pointer parent(ShellItem2Pointer item)
-{
-    if (!item)
-        return {};
-    ShellItemPointer parent;
-    item->GetParent(parent.addressOf());
-    if (!parent)
-        return {};
-    return item.queryInterface<IShellItem2>();
-}
 
 } // namespace shell
 } // namespace windows

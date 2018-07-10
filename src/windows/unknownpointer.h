@@ -26,7 +26,7 @@
 namespace qe {
 namespace windows {
 
-//! Smart pointer for managing `IUnknown`-derived interfaces.
+//! Smart pointer for managing `IUnknown`-derived interfaces, similar in purpose to ATL's `CComPtr`.
 template <class IUnknownType>
 class UnknownPointer
 {
@@ -102,59 +102,59 @@ public:
         }
     }
 
+    //! [std/Qt] Swaps two instances.
+    void swap(UnknownPointer &other) noexcept   { std::swap(d, other.d); }
+
     //! [std] Sets the stored pointer to `nullptr` and returns its old value. Equivalent to take.
-    pointer release() noexcept              { return std::exchange(d, nullptr); }
+    pointer release() noexcept                  { return std::exchange(d, nullptr); }
 
     //! [Qt] Sets the stored pointer to `nullptr` and returns its old value. Equivalent to release.
-    pointer take() noexcept                 { return release(); }
+    pointer take() noexcept                     { return release(); }
 
     //! [Qt] Returns a copy of the stored pointer. Equivalent to `get`.
-    pointer data() const noexcept           { return d; }
+    pointer data() const noexcept               { return d; }
 
     //! [std] Returns a copy of the stored pointer. Equivalent to `data`.
-    pointer get() const noexcept            { return d; }
+    pointer get() const noexcept                { return d; }
 
     //! Returns a pointer-to-pointer of `T`, that is, the address of the stored pointer.
-    pointer * addressOf() noexcept          { return &d; }
+    pointer * addressOf() noexcept              { return &d; }
 
     //! Returns true if the stored pointer is not null. Allows `if (ptr)` to work.
-    explicit operator bool() const noexcept { return d; }
+    explicit operator bool() const noexcept     { return d; }
 
-    //! Returns true if the stored pointer is `nullptr`.
-    bool operator!() const noexcept         { return !d; }
+//    //! Returns true if the stored pointer is `nullptr`.
+//    bool operator!() const noexcept         { return !d; }
 
     //! Dereferences the stored pointer.
-    reference operator*() const noexcept    { return *d; }
+    reference operator*() const noexcept        { return *d; }
 
-    //! Returns the stored pointer, allowing pointer-to-member semantics.
-    pointer operator->() const noexcept     { return d; }
+    //! Allows pointer-to-member semantics on the stored pointer.
+    pointer operator->() const noexcept         { return d; }
 
-    //! Returns if the stored pointer is null or not.
-    bool isNull() const noexcept            { return !d; }
-
-    //! Swaps two instances.
-    void swap(UnknownPointer &other) noexcept { std::swap(d, other.d); }
-
-    //! Returns the address of the stored pointer, cast as pointer-to-pointer-to-void.
-    void ** ppVoid() noexcept               { return reinterpret_cast<void **>(addressOf()); }
+    //! [Qt] Returns if the stored pointer is `nullptr`.
+    bool isNull() const noexcept                { return !d; }
 
     //! Returns the data as a pointer-to-void.
-    void * pVoid() const noexcept           { return static_cast<void *>(d); }
+    void * asVoid() const noexcept              { return static_cast<void *>(d); }
 
-    IUnknown *asUnknown() const noexcept    { return reinterpret_cast<IUnknown *>(d); }
+    IUnknown *asUnknown() const noexcept        { return reinterpret_cast<IUnknown *>(d); }
+
+    //! Returns the address of the stored pointer, cast as pointer-to-pointer-to-void.
+    void ** addressAsVoid() noexcept            { return reinterpret_cast<void **>(&d); }
 
     template <class Other>
-    UnknownPointer<Other> queryInterface()
+    UnknownPointer<Other> queryInterface() noexcept
     {
+        if (!d)
+            return {};
         UnknownPointer<Other> ret;
-        auto hr = data()->QueryInterface(__uuidof(*ret), ret.ppVoid());
-        if (hr == S_OK && ret)
-            return ret;
+        d->QueryInterface(IID_PPV_ARGS(ret.addressOf()));
         return ret;
     }
 
 private:
-    pointer d;
+    IUnknownType *d;
 };
 
 //! Alias of UnknownPointer for IUnknown
@@ -164,14 +164,6 @@ using UnknownBasePointer = UnknownPointer<IUnknown>;
 //! Alias of UnknownPointer for IDispatch
 //! \relates UnknownPointer
 using DispatchPointer = UnknownPointer<IDispatch>;
-
-//! \brief Returns an \ref UnknownPointer created by forwarding \a args to the \ref UnknownPointer constructor.
-//! \relates UnknownPointer
-template <class T, class... Args>
-UnknownPointer<T> makeUnknown(Args ...args)
-{
-    return UnknownPointer<T>(std::forward<Args>(args)...);
-}
 
 } //namespace windows
 } //namespace qe

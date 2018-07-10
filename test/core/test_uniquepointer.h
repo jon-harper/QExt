@@ -30,8 +30,6 @@
 #include <qecore/uniquepointer.h>
 #include "test.h"
 
-using namespace qe;
-
 struct Struct1
 {
     explicit Struct1(int aVal)
@@ -96,15 +94,16 @@ struct unique_pointer_test
     static void run()
     {
         empty_pointer_test();
-        basic_pointer_test();
+        /*basic_pointer_test();
         reset_pointer_test();
         compare_pointer_test();
         swap_pointer_test();
-        std_container_test();
+        std_container_test();*/
     }
 
     static void empty_pointer_test()
     {
+        using namespace qe;
         // Default construction
         UniquePointer<Struct2> xPtr;
 
@@ -119,6 +118,7 @@ struct unique_pointer_test
 
     static void basic_pointer_test()
     {
+        using namespace qe;
         {
             // Initialization with a pointer
             UniquePointer<Struct2> xPtr(new Struct2(123));
@@ -141,7 +141,7 @@ struct unique_pointer_test
                 xPtr->decr();
 
                 // Move construct, transferring ownership
-                UniquePointer<Struct2> yPtr(std::move(xPtr));
+                UniquePointer<Struct2> yPtr{std::move(xPtr)};
                 xPtr.reset();
 
                 EXPECT_NE(xPtr, yPtr);
@@ -180,6 +180,7 @@ struct unique_pointer_test
 
     static void reset_pointer_test()
     {
+        using namespace qe;
         // Create an empty (ie. nullptr) UniquePointer
         UniquePointer<Struct2> xPtr;
 
@@ -219,6 +220,7 @@ struct unique_pointer_test
 
     static void compare_pointer_test()
     {
+        using namespace qe;
         // Create a UniquePointer
         UniquePointer<Struct2> xPtr(new Struct2(123));
 
@@ -245,6 +247,7 @@ struct unique_pointer_test
 
     static void swap_pointer_test()
     {
+        using namespace qe;
         // Create a UniquePointer
         UniquePointer<Struct2> xPtr(new Struct2(123));
 
@@ -269,7 +272,7 @@ struct unique_pointer_test
 
     static void std_container_test()
     {
-        // Create a shared_ptr
+        using namespace qe;
         UniquePointer<Struct2> xPtr(new Struct2(123));
 
         EXPECT_TRUE(xPtr);
@@ -280,13 +283,13 @@ struct unique_pointer_test
         {
             std::vector<UniquePointer<Struct2> > PtrList;
 
-            // Move-it inside a container, transferring ownership
+            // Move it inside a container, transferring ownership
             PtrList.push_back(std::move(xPtr));
 
             EXPECT_FALSE(xPtr);
-            EXPECT_TRUE( PtrList.back());
-            EXPECT_EQ(pX,PtrList.back().get());
-            EXPECT_EQ(1, Struct1::instances);
+            EXPECT_TRUE(PtrList.back());
+            EXPECT_EQ(PtrList.back().get(), pX);
+            EXPECT_EQ(Struct1::instances, 1);
 
         } // Destructor of the vector releases the last pointer thus destroying the object
 

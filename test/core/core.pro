@@ -3,7 +3,7 @@ QT -= gui
 
 TARGET = core_test
 TEMPLATE = app
-CONFIG += console C++14
+CONFIG += console c++1z
 
 INCLUDEPATH += ../../Include
 

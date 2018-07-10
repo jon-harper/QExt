@@ -45,40 +45,40 @@ QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
 QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
 QE_WINDOWS_EXPORT IdList knownFolderIdList(const KNOWNFOLDERID &id,
                                            KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
-                                           HANDLE token = nullptr);
+                                           HANDLE token = nullptr,
+                                           HRESULT *result = nullptr);
 QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
                                                     KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
-                                                    HANDLE token = nullptr);
+                                                    HANDLE token = nullptr,
+                                                    HRESULT *result = nullptr);
 
 //equality
 QE_WINDOWS_EXPORT int compareItems(IShellItem *lhs, IShellItem *rhs,
-                                   SICHINTF flags = SICHINT_CANONICAL);
+                                   SICHINTF flags = SICHINT_CANONICAL,
+                                   HRESULT *result = nullptr);
 //QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, ShellItem2Pointer rhs,
-//                                   SICHINTF flags = SICHINT_CANONICAL);
-
-/////
-// Shell Property Getters
-//
+//                                   SICHINTF flags = SICHINT_CANONICAL,
+//                                   HRESULT *result = nullptr);
 
 //IShellItem2 Getters
-QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id);
-//QE_WINDOWS_EXPORT ShellItem2Pointer itemFromParsingName(QString name);
+QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT ShellItem2Pointer itemFromParsingName(QString name, HRESULT *result = nullptr);
 
 //IdList
-QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item);
-QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk);
-//QE_WINDOWS_EXPORT IdList idListFromParsingname(QString parsingName);
+QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item, HRESULT *result = nullptr);
+QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT IdList idListFromParsingname(QString parsingName, HRESULT *result = nullptr);
 
 //Parsing Name
-QE_WINDOWS_EXPORT QString parsingPathName(const IdList &id);
-QE_WINDOWS_EXPORT QString parsingPathName(ShellItem2Pointer item);
-//QE_WINDOWS_EXPORT QString parsingPath(const IdList &id);
-//QE_WINDOWS_EXPORT QString parsingPath(ShellItem2Pointer item);
-//QE_WINDOWS_EXPORT QString parsingName(const IdList &id);
-//QE_WINDOWS_EXPORT QString parsingName(ShellItem2Pointer item);
+QE_WINDOWS_EXPORT QString parsingPathName(const IdList &id, HRESULT *result = nullptr);
+QE_WINDOWS_EXPORT QString parsingPathName(ShellItem2Pointer item, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingPath(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingPath(ShellItem2Pointer item, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingName(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingName(ShellItem2Pointer item, HRESULT *result = nullptr);
 
 //Parent
-QE_WINDOWS_EXPORT ShellItem2Pointer parent(ShellItem2Pointer item);
+QE_WINDOWS_EXPORT ShellItem2Pointer parent(ShellItem2Pointer item, HRESULT *result = nullptr);
 //QE_WINDOWS_EXPORT IdList parent(const IdList &id);
 
 QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
