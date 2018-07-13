@@ -132,7 +132,7 @@ struct managed_pointer_test
                 xPtr->decr();
 
                 // Move construct, transferring ownership
-                pointer yPtr(std::move(xPtr));
+                pointer yPtr{std::move(xPtr)};
                 xPtr.reset();
 
                 EXPECT_NE(xPtr, yPtr);

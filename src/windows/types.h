@@ -17,7 +17,6 @@
 #ifndef QE_WINDOWS_TYPES_H
 #define QE_WINDOWS_TYPES_H
 
-#define STRICT_TYPED_ITEMIDS
 #include <ShlObj.h>
 #include <QMetaType>
 #include <qewindows/global.h>

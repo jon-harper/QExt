@@ -29,7 +29,6 @@ namespace shell {
 #include "idlist_impl.h"
 
 //! \brief An enum for type data computed from the final abID[0] element in an `ITEMIDLIST` array.
-//! \related IdList
 enum class InferredType {
     Local           = 0x01,                 //!< The id is part of the local system.
     Remote          = 0x02,                 //!< The id is remove and may be slow to access.
@@ -49,7 +48,7 @@ enum class InferredType {
     RemoteFolder    = Remote | Folder,      //!< The id is a remote or offline folder on the filesystem.
     RemoteDrive     = Remote | Drive,       //!< The id is a mounted network drive.
     RemoteFilesystem= Remote | Filesystem,  //!< The id is part of the filesystem, but the type is unknown.
-    RemoteVirtual   = Remote | Virtual,     //!< The id is virtual and enumerating it may be slow (its children are remote).
+    RemoteVirtual   = Remote | Virtual,     //!< The id is virtual and enumerating it may be slow (e.g. a remote machine).
 
     Unknown         = 0xF0, //!< The type of the id cannot be inferred.
     Invalid         = 0xFF  //!< The id is invalid.
@@ -85,9 +84,9 @@ public:
 
     //! Enables `if(foo)` syntax.
     explicit operator bool() const noexcept         { return m_id; }
-    //bool operator!() const noexcept                 { return !m_id; }
     inline bool isRoot() const noexcept;
 
+    //! Swaps with other.
     void swap(IdList &other) noexcept               { std::swap(m_id, other.m_id); }
     inline void reset(pointer id = nullptr);
 

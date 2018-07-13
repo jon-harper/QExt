@@ -19,6 +19,7 @@
 #define QE_CORE_UNIQUEPOINTER_H
 
 #include <utility>
+#include <type_traits>
 #include "type_util.h"
 #include "pointer_deleters.h"
 
@@ -46,11 +47,11 @@ class UniquePointer
 {
 public:
     using element_type = T;
-    using pointer = std::add_pointer_t<T>;
-    using const_pointer = std::add_const_t<pointer>;
-    using reference = std::add_lvalue_reference_t<T>;
-    using const_reference = std::add_const_t<reference>;
-    //! This is the cleanup object alias. See \ref qe::DefaultDeleter for an example.
+    using pointer = ::std::add_pointer_t<T>;
+    using const_pointer = ::std::add_const_t<pointer>;
+    using reference = ::std::add_lvalue_reference_t<T>;
+    using const_reference = ::std::add_const_t<reference>;
+    //! This is the cleanup object alias. See qe::DefaultDeleter for an example.
     using deleter_type = Cleanup;
 
     //! Default constructor accepting a (possibly null) pointer.
@@ -58,7 +59,7 @@ public:
     //! Move constructor for UniquePointers managing the same types.
     UniquePointer(UniquePointer && other) noexcept : d(other.release()) { }
 
-    template<class U, class CleanupU, class = std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
+    template<class U, class CleanupU, class = ::std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
     UniquePointer(UniquePointer<U, CleanupU> && other) noexcept
         : d(static_cast<pointer>(other.release()))
     {
@@ -67,14 +68,14 @@ public:
     //! Move assignment operator.
     UniquePointer &operator=(UniquePointer &&other)
     {
-        d = std::exchange(other.d, nullptr);
+        d = ::std::exchange(other.d, nullptr);
         return *this;
     }
 
-    template<class U, class CleanupU, class = std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
+    template<class U, class CleanupU, class = ::std::enable_if_t<is_pointer_static_castable<U*,pointer>::value>>
     UniquePointer &operator=(UniquePointer<U, CleanupU> &&other) noexcept
     {
-        d = std::exchange(static_cast<pointer>(other.d), nullptr);
+        d = ::std::exchange(static_cast<pointer>(other.d), nullptr);
         return *this;
     }
 
@@ -93,7 +94,7 @@ public:
     //! Equivalent to \ref take.
     pointer release() noexcept
     {
-        return std::exchange(d, nullptr);
+        return ::std::exchange(d, nullptr);
     }
 
     //! [Qt] Sets the stored pointer to `nullptr` and returns its old value.
@@ -106,7 +107,7 @@ public:
     {
         if (d == other)
             return;
-        deleter_type::cleanup(std::exchange(d, other));
+        deleter_type::cleanup(::std::exchange(d, other));
     }
 
     //! [Qt] Returns the stored pointer. Equivalent to `get`.
@@ -146,7 +147,7 @@ private:
 template <class T, class... Args>
 UniquePointer<T> makeUnique(Args && ...args)
 {
-    return new T(std::forward<Args>(args)...);
+    return new T(::std::forward<Args>(args)...);
 }
 
 //! Constructs an instance of `UniquePointer<T>` using braced construction for `T`
@@ -155,7 +156,7 @@ UniquePointer<T> makeUnique(Args && ...args)
 template <class T, class... Args>
 UniquePointer<T> makeUniqueBraced(Args && ...args)
 {
-    return new T{std::forward<Args>(args)...};
+    return new T{::std::forward<Args>(args)...};
 }
 
 } //namespace qe

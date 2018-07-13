@@ -20,22 +20,25 @@
 
 #include <cstdlib>
 
+#ifndef QEXT_CORE_NO_QT
+#include <QtCore/QObject>
+#endif
+
 namespace qe {
 
 //! The default deleter used with \ref qe::UniquePointer.
 //! Unless you are using something other than `new` to construct your data,
 //! this works fine.
-template <typename T>
+template <class T>
 struct DefaultDeleter {
     static void cleanup(T *ptr) {
-        if (ptr)
-			static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
+        static_assert (sizeof (T) > 0, "DefaultDeleter requires a complete type on cleanup.");
         delete ptr;
     }
 };
 
-struct PodDeleter
-{
+//! This deleter calls 'free()` on a `void` pointer.
+struct PodDeleter {
     static void cleanup(void *pointer) {
         if (pointer)
             free(pointer);
@@ -43,17 +46,14 @@ struct PodDeleter
 };
 
 #ifndef QEXT_CORE_NO_QT
-template <typename T>
-struct ObjectDeleterBase
+//! This deleter is exclusively for scheduling a `QObject` for deletion.
+struct ObjectDeleter
 {
-    static void cleanup(T *pointer) {
+    static void cleanup(QObject *pointer) {
         if (pointer)
             pointer->deleteLater();
     }
 };
-
-class QObject;
-using ObjectDeleter = ObjectDeleterBase<QObject>;
 #endif //QEXT_CORE_NO_QT
 
 } // namespace qe
@@ -62,8 +62,10 @@ using ObjectDeleter = ObjectDeleterBase<QObject>;
 //! \relates qe::DefaultDeleter
 template <class T>
 using QeDefaultDeleter = qe::DefaultDeleter<T>;
-//! \relates qe::ObjectDeleterBase
+//! \relates qe::ObjectDeleter
 using QeObjectDeleter = qe::ObjectDeleter;
+//! \relates qe::PodDeleter
+using QePodDeleter = qe::PodDeleter;
 #endif //QEXT_NO_CLUTTER
 
 #endif //QE_CORE_POINTER_DELETERS_H

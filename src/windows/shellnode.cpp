@@ -18,7 +18,7 @@ ShellNode *ShellNode::get_rootNode()
 //! Returns the desktop node.
 ShellNode::PointerType ShellNode::rootNode()
 {
-    static ShellNodePointer rootNode(ShellNode::get_rootNode());
+    thread_local ShellNodePointer rootNode(ShellNode::get_rootNode());
     return rootNode;
 }
 
@@ -32,11 +32,12 @@ bool ShellNode::hasChildren() const noexcept
     if (!isValid())
         return false;
     if (!isEnumerated())
-        return d.data->flags & shell::NodeFlag::MayHaveChildren;
+        return d.cachedData->flags & shell::NodeFlag::MayHaveChildren;
     return !d.children.isEmpty();
 }
 
 //! Gets a copy of the enumerated children of the node.
+//! \note This function is not `const` and is potentially expensive, as it may call `enumerate()`.
 QVector<ShellNodePointer> ShellNode::children()
 {
     if (!isValid())
@@ -52,12 +53,12 @@ void ShellNode::enumerate()
 {
     if (!isValid())
         return;
-    if (!(d.data->flags & shell::NodeFlag::MayHaveChildren)) {
+    if (!(d.cachedData->flags & shell::NodeFlag::MayHaveChildren)) {
         d.enumerated = true;
         return;
     }
 
-    auto items = shell::bindItem<IEnumShellItems>(d.data->item);
+    auto items = bindTo<IEnumShellItems>();
     Q_ASSERT(items);
     IShellItem *ptr = nullptr;
     auto hr = S_OK;
@@ -73,13 +74,13 @@ void ShellNode::enumerate()
             //search and see if this node exists already
             for(; iter != iter_end; ++iter) {
                 auto node = *iter;
-                if (node && !shell::compareItems(node->itemPointer(), ptr)) {
+                if (node && !shell::compareItems(node->itemPointer().data(), ptr)) {
                     found = true;
                     break;
                 }
             }
         }
-        if (!found) {
+        if (!found && ptr) {
             auto child = createChild(ptr);
             if (child)
                 d.children.append(child);
@@ -98,6 +99,7 @@ QFileInfo ShellNode::fileInfo() const noexcept
     return {};
 }
 
+//! Creates a new child from the given IShellItem instance.
 ShellNode::PointerType ShellNode::createChild(IShellItem *child)
 {
     ShellItem2Pointer item;
@@ -113,7 +115,7 @@ ShellNode::PointerType ShellNode::createChild(IShellItem *child)
 //! Node that `parent` may be nullptr, indicating this is the desktop (root) node.
 ShellNode::ShellNode(ShellNodeDataPointer data, ShellNodePointer parent) /*noexcept*/
 {
-    d.data = data;
+    d.cachedData = data;
     d.parent = parent;
 }
 

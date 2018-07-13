@@ -23,29 +23,21 @@
 #ifndef QE_CORE_GLOBAL_H
 #define QE_CORE_GLOBAL_H
 
-#if defined(QE_BUILD_CORE)
-#  define QE_CORE_EXPORT __declspec(dllexport)
-#else
-#  define QE_CORE_EXPORT __declspec(dllimport)
-#endif
-
-//#if defined(QE_BUILD_WIDGETS)
-//#  define QE_WIDGETS_EXPORT __declspec(dllexport)
-//#else
-//#  define QE_WIDGETS_EXPORT __declspec(dllimport)
-//#endif
-
 /*!
-    \brief Defines a class as static.
+    \brief Defines a class as static (it cannot be constructed, copied, or moved).
 
     Static classes may not have non-static member functions and cannot be instantiated.
-    A static class is often useful as a drop-in replacement for namespaces with
-    QMetaObject support. Use in conjunction with the Q_GADGET macro to use Q_ENUM, Q_FLAG, etc.
+    A static class inheriting from `QObject` is  useful as a drop-in replacement for namespaces with
+    QMetaObject support. A lighter-weight solution is to use the Q_GADGET macro
+    to use Q_ENUM, Q_FLAG, etc.
   */
 #define QE_STATIC_CLASS(Classname) \
-        Classname () = delete; \
-        Classname (const Classname &) = delete; \
-        Classname ( Classname && ) = delete; \
+        Classname() = delete; \
+        Classname(const Classname &) = delete; \
+        Classname(Classname &&) = delete; \
+        ~Classname() = delete; \
+        operator=(const Classname &) = delete; \
+        operator=(Classname &&) = delete;
 
 //! \brief Shorthand for QStringLiteral.
 #define QStrLit QStringLiteral

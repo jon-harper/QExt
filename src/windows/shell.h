@@ -10,69 +10,78 @@
 namespace qe {
 namespace windows {
 
+//! \namespace qe::windows::shell
+//!
+//! \brief The shell namespace contains functions, enumerations, and classes that interact with the Windows
+//! Desktop Shell.
+//!
+//! The most basic type defined in this namespace is the IdList, a wrapper around an `ITEMIDLIST`
+//! pointer (a `pidl`). Like a pidl, an IdList identifies a location in the shell namespace. In
+//! QExt, however, an IdList is *always* absolute (relative to the desktop), but has accessor functions
+//! to grab the child ID. There is also IdList::const_iterator, a convenient method of comparing two
+//! separate pidls. IdLists have the advantage of not storing an interface pointer, and can thus be
+//! freely copied and sent between threads.
+//!
+//! ShellItem2Pointer is a wrapper around an IShellItem2 interface. Together with IdList, this forms
+//! the basis of a Node, the interface for interacting with a specific location in the namespace.
+//! ShellItem2Pointer (and any Windows Desktop Shell interface) cannot be marshalled, and thus cannot
+//! pass between threads. Since a Node stores a ShellItem2Pointer, *it cannot be passed between threads*.
+//!
+//! Much of the *data* that a Node instance caches can be passed between threads, specifically for
+//! this reason. NodeData is a class that stores an IdList and any cached data for a Node. Worker
+//! threads can be sent an IdList, construct the appropriate interface from it, gather what data they
+//! need and store it in a NodeData instance. Once the processing is done, that NodeData can then
+//! be returned.
+//!
+//! NodeInfo is the Shell namespace equivalent of `QFileInfo`. It acts like `QFileInfo` with the
+//! addition of information specific to a Node, such as the GUID identifying its type, whether it is
+//! virtual or not, etc. NodeInfo is also backed by NodeData.
+
 namespace shell {
 Q_NAMESPACE;
 
-namespace detail {
-
-inline int compareItems(IShellItem *lhs, IShellItem *rhs, SICHINTF flags)
-{
-    if (!lhs)
-        return -1;
-    if (!rhs)
-        return 1;
-    int result = 0;
-    if (SUCCEEDED(lhs->Compare(rhs, flags, &result)))
-        return result;
-    return -1;
-}
-
-
-inline int compareItems(IShellItem2 *&lhs, IShellItem *&rhs, SICHINTF flags)
-{
-    if (!lhs)
-        return -1;
-    if (!rhs)
-        return 1;
-    int result = 0;
-    if (SUCCEEDED(lhs->Compare(rhs, flags, &result)))
-        return result;
-    return -1;
-}
-
-
-inline int compareItems(IShellItem *lhs, IShellItem2 *rhs, SICHINTF flags)
-{
-    return compareItems(rhs, lhs, flags);
-}
-
-}
-
-QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, IShellItem *rhs,
-                                   SICHINTF flags = SICHINT_CANONICAL);
-QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, ShellItem2Pointer &rhs,
-                                   SICHINTF flags = SICHINT_CANONICAL);
-QE_WINDOWS_EXPORT int compareItems(IShellItem *lhs, IShellItem *rhs,
-                                   SICHINTF flags = SICHINT_CANONICAL);
-
-QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id);
-QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item);
-QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk);
-
+//Instance Getters
 QE_WINDOWS_EXPORT ShellFolder2Pointer desktopFolder();
 QE_WINDOWS_EXPORT ShellItem2Pointer desktopItem();
-
-QE_WINDOWS_EXPORT QString parsingFilePath(const ITEMIDLIST_ABSOLUTE *id);
-
-QE_WINDOWS_EXPORT ShellItem2Pointer itemParent(ShellItem2Pointer item);
-QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
-
 QE_WINDOWS_EXPORT IdList knownFolderIdList(const KNOWNFOLDERID &id,
                                            KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
-                                           HANDLE token = nullptr);
+                                           HANDLE token = nullptr,
+                                           HRESULT *result = nullptr);
 QE_WINDOWS_EXPORT ShellItem2Pointer knownFolderItem(const KNOWNFOLDERID &id,
                                                     KNOWN_FOLDER_FLAG flags = KF_FLAG_NO_ALIAS,
-                                                    HANDLE token = nullptr);
+                                                    HANDLE token = nullptr,
+                                                    HRESULT *result = nullptr);
+
+//equality
+QE_WINDOWS_EXPORT int compareItems(IShellItem *lhs, IShellItem *rhs,
+                                   SICHINTF flags = SICHINT_CANONICAL,
+                                   HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT int compareItems(ShellItem2Pointer lhs, ShellItem2Pointer rhs,
+//                                   SICHINTF flags = SICHINT_CANONICAL,
+//                                   HRESULT *result = nullptr);
+
+//IShellItem2 Getters
+QE_WINDOWS_EXPORT ShellItem2Pointer itemFromIdList(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT ShellItem2Pointer itemFromParsingName(QString name, HRESULT *result = nullptr);
+
+//IdList
+QE_WINDOWS_EXPORT IdList idListFromItem(ShellItem2Pointer item, HRESULT *result = nullptr);
+QE_WINDOWS_EXPORT IdList idListFromUnknown(IUnknown *unk, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT IdList idListFromParsingname(QString parsingName, HRESULT *result = nullptr);
+
+//Parsing Name
+QE_WINDOWS_EXPORT QString parsingPathName(const IdList &id, HRESULT *result = nullptr);
+QE_WINDOWS_EXPORT QString parsingPathName(ShellItem2Pointer item, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingPath(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingPath(ShellItem2Pointer item, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingName(const IdList &id, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT QString parsingName(ShellItem2Pointer item, HRESULT *result = nullptr);
+
+//Parent
+QE_WINDOWS_EXPORT ShellItem2Pointer parent(ShellItem2Pointer item, HRESULT *result = nullptr);
+//QE_WINDOWS_EXPORT IdList parent(const IdList &id);
+
+QE_WINDOWS_EXPORT UnknownPointer<IBindCtx> createBindContext();
 
 //! This function calls `IShellItem::BindToHandler` based on a predefined set of known BHID_ values.
 //! For calls using `BHID_SFObject`, use `bindToObject` instead. For any other situation, you will
