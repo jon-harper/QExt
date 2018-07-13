@@ -35,24 +35,24 @@ struct Struct1
     explicit Struct1(int aVal)
         : value(aVal)
     {
-        instances++;
+        ++instances;
     }
 
     Struct1(const Struct1 &other)
     {
-        instances++;
+        ++instances;
         value = other.value;
     }
     Struct1(Struct1 &&) = default;
 
     ~Struct1()
     {
-        instances--;
+        --instances;
     }
 
     Struct1 &operator =(const Struct1 &other)
     {
-        instances++;
+        ++instances;
         value = other.value;
         return *this;
     }
@@ -60,12 +60,12 @@ struct Struct1
 
     void incr()
     {
-        value++;
+        ++value;
     }
 
     void decr()
     {
-        value--;
+        --value;
     }
 
     int value = 0;
@@ -94,11 +94,11 @@ struct unique_pointer_test
     static void run()
     {
         empty_pointer_test();
-        /*basic_pointer_test();
+        basic_pointer_test();
         reset_pointer_test();
         compare_pointer_test();
         swap_pointer_test();
-        std_container_test();*/
+        std_container_test();
     }
 
     static void empty_pointer_test()
