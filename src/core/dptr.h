@@ -114,14 +114,14 @@ protected:
 };
 
 //! Constructs a new object with \a qq as the back pointer (q-ptr).
-PrivateBase::PrivateBase(PublicBase *qq)
+inline PrivateBase::PrivateBase(PublicBase *qq)
     : qe_ptr(qq)
 {
 }
 
 
 //! Constructs a new object with \a dd as the source for the d-ptr.
-PublicBase::PublicBase(PrivateBase &dd)
+inline PublicBase::PublicBase(PrivateBase &dd)
     : qed_ptr(&dd)
 {
 }
