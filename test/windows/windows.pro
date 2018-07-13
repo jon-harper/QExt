@@ -21,12 +21,12 @@ LIBS += -lOle32 -lShell32 -lShlwapi
 
 #release build
 CONFIG(release, debug|release) {
-    LIBS += -L$$OUT_PWD/release -lqewin
-    LIBS += -L$$OUT_PWD/../../build/windows/release -lqewin
+    LIBS += -L$$OUT_PWD/release -lqext
+    LIBS += -L$$OUT_PWD/../../build/release -lqext
 }
 #debug build
 CONFIG(debug, debug|release) {
     LIBS += -L$$OUT_PWD/debug/ -lqewin
-    LIBS += -L$$OUT_PWD/../../build/windows/debug -lqewin
+    LIBS += -L$$OUT_PWD/../../build/debug -lqext
 }
 } #win32

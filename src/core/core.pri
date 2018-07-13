@@ -1,6 +1,6 @@
+
 QT += core
 
-TEMPLATE = lib
 CONFIG += c++1z
 
 HEADERS += \
@@ -15,5 +15,3 @@ HEADERS += \
 SOURCES += \
     $$PWD/dptr.cpp \
 	$$PWD/debugutil.cpp
-
-INCLUDEPATH += "../../Include"

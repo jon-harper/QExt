@@ -1,5 +1,10 @@
 # Changelog
 
+### 2018-07-13
+* Merged shell branch back into master.
+* QExt can now be included directly into your projects! src/qext_files.pri will
+import the files for QExt into your .pro, so it's not necessary to build a dll.
+
 ### 2018-07-10
 * Updated the projects to use C++17, which seems to enforce stricter compliance
 with the Standard in MSVC.
