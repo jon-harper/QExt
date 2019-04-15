@@ -75,7 +75,7 @@ template <class T>
 using isCastablePtrPtr = isCastablePtr<std::remove_pointer_t<T>>;
 
 template <class T>
-const T * constPointerFromOffset(T * const &ptr, const USHORT distance)
+const T * constPointerFromOffset(T * const &ptr, const USHORT distance) noexcept
 {
     if (!ptr)
         return nullptr;
@@ -84,18 +84,18 @@ const T * constPointerFromOffset(T * const &ptr, const USHORT distance)
     return reinterpret_cast<const T *>(temp);
 }
 
-template <class T>
-T * pointerFromOffset(T *&ptr, const USHORT distance)
-{
-    if (!ptr)
-        return nullptr;
-    auto temp = reinterpret_cast<unsigned char *>(ptr);
-    temp += distance;
-    return reinterpret_cast<T *>(temp);
-}
+//template <class T>
+//T * pointerFromOffset(T *&ptr, const USHORT distance) noexcept
+//{
+//    if (!ptr)
+//        return nullptr;
+//    auto temp = reinterpret_cast<unsigned char *>(ptr);
+//    temp += distance;
+//    return reinterpret_cast<T *>(temp);
+//}
 
 //results are undefined if left or right is nullptr
-int compareId(const ITEMIDLIST *left, const ITEMIDLIST *right)
+int compareId(const ITEMIDLIST *left, const ITEMIDLIST *right) noexcept
 {
     //check for the terminator/root node
     if (left->mkid.cb == 0) {
@@ -127,7 +127,7 @@ int compareId(const ITEMIDLIST *left, const ITEMIDLIST *right)
 }
 
 //results are undefined if left or right is nullptr.
-int compareIdList(const ITEMIDLIST *left, const ITEMIDLIST *right)
+int compareIdList(const ITEMIDLIST *left, const ITEMIDLIST *right) noexcept
 {
     //check for the root node
     if (!left->mkid.cb) {

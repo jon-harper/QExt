@@ -1,7 +1,4 @@
 # QExt
-##
-NOTE: This project is currently inactive, as I'm working more with the standard library and sticking with Qt for UI work. Some work here may be re-used later in another project that will be actively maintained.
-
 ## Purpose
 QExt is an add-on library for Qt developers with no other dependancies. The aims of QExt in a nutshell are:
  - Ease C++14/C++17 use with Qt
