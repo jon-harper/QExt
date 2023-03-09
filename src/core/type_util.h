@@ -23,19 +23,22 @@
 
 namespace qe {
 
-//! Tests if `Derived` inherits from `Base` and a virtual destructor is available.
+//! Tests if \a Derived inherits from \a Base and a virtual destructor is available.
 template <class Base, class Derived>
 struct is_derived_pointer_safely_castable
         : ::std::bool_constant<::std::is_base_of<Base, Derived>() && ::std::has_virtual_destructor<Base>()>
 {
 };
 
+
+//! \cond
 template <class From, class To, class = void>
 struct is_pointer_static_castable : std::false_type
 {
 };
+//! \endcond
 
-//! Evaluates to true if \arg From will `static_cast` \arg To without returning `nullptr`.
+//! Evaluates to true if \a From will `static_cast` to \a To without returning `nullptr`.
 template <class From, class To>
 struct is_pointer_static_castable<From, To,
                            ::std::void_t<decltype(static_cast<To>(::std::declval<From>()))>>

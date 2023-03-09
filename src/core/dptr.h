@@ -21,38 +21,39 @@
 #include "uniquepointer.h"
 #include <qecore/global.h>
 
-// Use this as you would the Q_DECLARE_PUBLIC macro.
+//! Use this as you would the Q_DECLARE_PUBLIC macro.
 #define QE_DECLARE_PUBLIC(Classname) \
     inline Classname *qe_q_func() noexcept { return static_cast<Classname *>(qe_ptr); } \
     inline const Classname* qe_q_func() const noexcept { return static_cast<const Classname *>(qe_ptr); } \
     inline const Classname* qe_cq_func() const noexcept { return static_cast<const Classname *>(qe_ptr); } \
     friend class Classname;
 
-// Use this as you would the Q_DECLARE_PRIVATE macro.
+//! Use this as you would the Q_DECLARE_PRIVATE macro.
 #define QE_DECLARE_PRIVATE(Classname) \
     inline Classname##Private* qe_d_func() noexcept { return reinterpret_cast<Classname##Private *>(qed_ptr.data()); } \
     inline const Classname##Private* qe_d_func() const noexcept { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
     inline const Classname##Private* qe_cd_func() const noexcept { return reinterpret_cast<const Classname##Private *>(qed_ptr.data()); } \
     friend class Classname##Private;
 
-#define QE_DPTR         auto d = qe_d_func()
-#define QE_CONST_DPTR   auto d = qe_cd_func()
-#define QE_QPTR         auto q = qe_q_func()
-#define QE_CONST_QPTR   auto q = qe_cq_func()
+#define QE_DPTR         auto d = qe_d_func()  //! Retrieves the d-ptr for a non-`const` object.
+#define QE_CONST_DPTR   auto d = qe_cd_func() //! Retrieves a `const` d-ptr; used in `const` functions.
+#define QE_QPTR         auto q = qe_q_func()  //! Used in a PrivateBase-derived class to retrieve the back-pointer.
+#define QE_CONST_QPTR   auto q = qe_cq_func() //! Used in a PrivateBase-derived class in a `const` member function to retrieve the back-pointer.
 
-#define QE_D    QE_DPTR
-#define QE_CD   QE_CONST_DPTR
-#define QE_Q    QE_QPTR
-#define QE_CQ   QE_CONST_QPTR
+#define QE_D    QE_DPTR         //! Qt-style shorthand for QE_DPTR.
+#define QE_CD   QE_CONST_DPTR   //! Qt-style shorthand for QE_CONST_DPTR.
+#define QE_Q    QE_QPTR         //! Qt-style shorthand for QE_QPTR.
+#define QE_CQ   QE_CONST_QPTR   //! Qt-style shorthand for QE_CONST_QPTR.
 
+//! \cond
 #ifndef QEXT_CORE_NO_QT
 #include <qglobal.h>
-#define Q_DPTR          auto d = d_func()
+#define Q_DPTR          auto d = d_func() 
 #define Q_CONST_DPTR    const auto d = d_func()
 #define Q_QPTR          auto q = q_func()
 #define Q_CONST_QPTR    const auto q = q_func()
 #endif
-
+//! \endcond
 namespace qe {
 
 /*!
