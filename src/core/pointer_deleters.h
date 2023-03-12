@@ -26,9 +26,7 @@
 
 namespace qe {
 
-//! The default deleter used with \ref qe::UniquePointer.
-//! Unless you are using something other than `new` to construct your data,
-//! this works fine.
+//! This is calls `delete()` on the pointer and is the default deleter used with qe::UniquePointer.
 template <class T>
 struct DefaultDeleter {
     static void cleanup(T *ptr) {
@@ -37,7 +35,7 @@ struct DefaultDeleter {
     }
 };
 
-//! This deleter calls 'free()` on a `void` pointer.
+//! This deleter calls 'free()` on from a malloc'd pointer.
 struct PodDeleter {
     static void cleanup(void *pointer) {
         if (pointer)
