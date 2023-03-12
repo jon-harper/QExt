@@ -432,3 +432,4 @@ docs/html/*
 
 ### Local code sandbox
 sandbox/*
+doxygen/Doxyfile.bak

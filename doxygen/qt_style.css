@@ -1,3 +1,7 @@
+body {
+	min-height: 1vh;
+}
+
 body, table, div, p, dl {
     font-family: 'Open Sans', sans-serif;
     font-size: 13px;
