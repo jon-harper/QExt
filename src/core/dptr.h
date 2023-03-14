@@ -63,7 +63,9 @@ namespace qe {
 
 /*!
     \class PrivateBase
-    \brief The PrivateBase class.
+    \brief The PrivateBase enables a class to behave as a d-ptr data class.
+
+    Classes that are accessible as a d-ptr should inherit from this class to enable macro-based access.
 */
 
 class PublicBase;

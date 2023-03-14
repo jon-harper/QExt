@@ -40,7 +40,7 @@
     \relates qe::PrivateBase
     \brief This macro retrieves the q-ptr.
 
-    This macro does *not* require the class name be declared when used. This compares
+    This macro does not require the class name be declared when used. This compares
     favorably against `Q_Q`:
 
         void MyClassPrivate::someFunc()
@@ -57,7 +57,7 @@
     \relates qe::PrivateBase
     \brief This macro retrieves the q-ptr as a `const` pointer.
 
-    This macro does *not* require the class name be declared when used. This compares
+    This macro does not require the class name be declared when used. This compares
     favorably against Q_Q:
 
         void MyClassPrivate::someFunc() const
@@ -75,7 +75,7 @@
 \brief This macro retrieves the d-ptr for a class deriving from qe::PublicBase
 *or* a native Qt private d-ptr.
 
-This macro does *not* require the class name be declared when used. This compares
+This macro does not require the class name be declared when used. This compares
 favorably against `Q_D`:
 
     void MyClass::someFunc()
@@ -95,7 +95,7 @@ Use QE_CONST_DPTR when you need a d-ptr for a `const` function.
 \brief This macro retrieves the a `const` d-ptr for a class deriving from qe::PublicBase
 *or* a native Qt private d-ptr.
 
-This macro does *not* require the class name be declared when used. This compares
+This macro does not require the class name be declared when used. This compares
 favorably against `Q_D`:
 
     void MyClassPrivate::someFunc() const
