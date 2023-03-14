@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*!
+ \headerfile debugutil.h <qecore/debugutil.h>
+ \brief Provides simple helper classes for debugging purposes.
+*/
+
 #ifndef QE_CORE_DEBUGUTIL_H
 #define QE_CORE_DEBUGUTIL_H
 

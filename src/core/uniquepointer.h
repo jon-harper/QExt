@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*!
+ \headerfile uniquepointer.h <qecore/uniquepointer.h>
+ \brief Provides a moveable version of Qt's `QScopedPointer`.
+*/
+
 #ifndef QE_CORE_UNIQUEPOINTER_H
 #define QE_CORE_UNIQUEPOINTER_H
 

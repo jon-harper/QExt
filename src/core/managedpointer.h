@@ -14,6 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/*!
+ \headerfile managedpointer.h <qecore/managedpointer.h>
+ \brief Defines the base classes for managed pointers and deleters.
+*/
+
 #ifndef QE_CORE_MANAGEDPOINTER_H
 #define QE_CORE_MANAGEDPOINTER_H
 

@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*!
+ \headerfile typeutil.h <qecore/typeutil.h>
+ \brief Contains free utility functions for working with types.
+*/
+
 #ifndef QE_CORE_TYPE_UTIL_H
 #define QE_CORE_TYPE_UTIL_H
 

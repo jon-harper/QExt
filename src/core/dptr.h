@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*!
+ \headerfile dptr.h <qecore/dptr.h>
+ \brief Defines macros and base classes for d-ptr access.
+*/
+
 #ifndef QE_CORE_DPTR_H
 #define QE_CORE_DPTR_H
 
